@@ -34,17 +34,20 @@ const errorMiddleware = (err, req, res, next) => {
   }
 
   // Zod Validation Errors
-  if (err.name === "ZodError") {
-    return res.status(400).json({
-      success: false,
-      message: "Validation failed.",
-      data: null,
-      error: err.errors.map((e) => ({
-        field: e.path.join("."),
-        message: e.message,
-      })),
-    });
-  }
+  // Zod Validation Errors
+if (err.name === "ZodError") {
+  const issues = err.issues || err.errors || [];
+
+  return res.status(400).json({
+    success: false,
+    message: "Validation failed.",
+    data: null,
+    error: issues.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+    })),
+  });
+}
 
   // Unknown Errors
   return res.status(500).json({

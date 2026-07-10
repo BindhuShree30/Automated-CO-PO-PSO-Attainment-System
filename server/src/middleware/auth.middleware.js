@@ -13,7 +13,7 @@ import { verifyAccessToken } from "../shared/helpers/jwt.helper.js";
 
 const authMiddleware = (req, res, next) => {
   try {
-    // Authorization Header
+    // Get Authorization header
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
@@ -31,7 +31,12 @@ const authMiddleware = (req, res, next) => {
       );
     }
 
+    // Extract token
     const token = parts[1];
+
+    // Debug logs (temporary)
+    console.log("Authorization Header:", authHeader);
+    console.log("Token:", token);
 
     // Verify JWT
     const decoded = verifyAccessToken(token);

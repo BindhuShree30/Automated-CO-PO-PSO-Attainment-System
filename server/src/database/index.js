@@ -6,23 +6,31 @@
  */
 
 import sequelize from "./connection.js";
+
+// Import ALL models
 import User from "./models/User.js";
+import Department from "./models/Department.js";
 
 const connectDatabase = async () => {
   try {
     // Test database connection
-   await sequelize.authenticate();
+    await sequelize.authenticate();
     console.log("✅ Database connected successfully.");
 
     // Create/update tables (TEMPORARY FOR DEVELOPMENT)
-   await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: true });
     console.log("✅ Database synchronized successfully.");
 
   } catch (error) {
     console.error("❌ Failed to connect to database.");
-    console.error(error.message);
+    console.error(error);
     process.exit(1);
   }
 };
 
-export { sequelize, User, connectDatabase };
+export {
+  sequelize,
+  User,
+  Department,
+  connectDatabase,
+};
