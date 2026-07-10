@@ -10,7 +10,7 @@ import authRoutes from "../modules/auth/auth.routes.js";
 import departmentRoutes from "../modules/department/department.routes.js";
 import programRoutes from "../modules/program/program.routes.js";
 import courseRoutes from "../modules/course/course.routes.js"; // <-- Add this
-
+import facultyRoutes from "../modules/faculty/faculty.routes.js";
 const router = Router();
 
 /**
@@ -43,6 +43,7 @@ router.use("/programs", programRoutes);
 /**
  * Course Routes
  */
-router.use("/courses", courseRoutes); // <-- Add this
-
+router.use("/courses", courseRoutes);
+ // <-- Add this
+router.use("/faculties", facultyRoutes);
 export default router;

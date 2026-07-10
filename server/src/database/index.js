@@ -12,7 +12,7 @@ import User from "./models/User.js";
 import Department from "./models/Department.js";
 import Program from "./models/Program.js";
 import Course from "./models/Course.js"; // <-- Add this
-
+import Faculty from "./models/Faculty.js";
 const connectDatabase = async () => {
   try {
     // Test database connection
@@ -35,6 +35,7 @@ export {
   User,
   Department,
   Program,
-  Course, // <-- Add this
+  Course,
+  Faculty,
   connectDatabase,
 };
