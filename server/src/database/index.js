@@ -11,6 +11,7 @@ import sequelize from "./connection.js";
 import User from "./models/User.js";
 import Department from "./models/Department.js";
 import Program from "./models/Program.js";
+import Course from "./models/Course.js"; // <-- Add this
 
 const connectDatabase = async () => {
   try {
@@ -34,5 +35,6 @@ export {
   User,
   Department,
   Program,
+  Course, // <-- Add this
   connectDatabase,
 };

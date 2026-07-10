@@ -8,7 +8,8 @@ import { Router } from "express";
 
 import authRoutes from "../modules/auth/auth.routes.js";
 import departmentRoutes from "../modules/department/department.routes.js";
-import programRoutes from "../modules/program/program.routes.js"; // <-- Add this
+import programRoutes from "../modules/program/program.routes.js";
+import courseRoutes from "../modules/course/course.routes.js"; // <-- Add this
 
 const router = Router();
 
@@ -38,5 +39,10 @@ router.use("/departments", departmentRoutes);
  * Program Routes
  */
 router.use("/programs", programRoutes);
+
+/**
+ * Course Routes
+ */
+router.use("/courses", courseRoutes); // <-- Add this
 
 export default router;
