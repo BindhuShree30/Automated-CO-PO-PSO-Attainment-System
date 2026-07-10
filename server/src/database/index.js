@@ -10,6 +10,7 @@ import sequelize from "./connection.js";
 // Import ALL models
 import User from "./models/User.js";
 import Department from "./models/Department.js";
+import Program from "./models/Program.js";
 
 const connectDatabase = async () => {
   try {
@@ -32,5 +33,6 @@ export {
   sequelize,
   User,
   Department,
+  Program,
   connectDatabase,
 };
