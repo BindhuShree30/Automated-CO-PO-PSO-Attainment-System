@@ -13,6 +13,7 @@ import env from "../../config/env.config.js";
 import authRepository from "./auth.repository.js";
 import ROLES from "../../shared/constants/roles.js";
 import ApiError from "../../shared/errors/ApiError.js";
+
 /**
  * Register a new user
  */
@@ -48,51 +49,61 @@ const registerUser = async (userData) => {
     createdAt: user.createdAt,
   };
 };
+
 /**
  * Login User
  */
 const loginUser = async ({ email, password }) => {
-    // Find user
-    const user = await authRepository.findUserByEmail(email);
-  
-    if (!user) {
-      throw new ApiError(401, "Invalid email or password");
+  // Find user
+  const user = await authRepository.findUserByEmail(email);
+
+  if (!user) {
+    console.log("❌ User not found:", email);
+    throw new ApiError(401, "Invalid email or password");
+  }
+
+  console.log("==================================");
+  console.log("📧 Email Entered :", email);
+  console.log("🔑 Password Entered :", password);
+  console.log("🗄️ Stored Hash :", user.password);
+
+  // Compare password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  console.log("✅ Password Match :", isPasswordValid);
+  console.log("==================================");
+
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid email or password");
+  }
+
+  // Generate JWT
+  const token = jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+    env.jwt.secret,
+    {
+      expiresIn: env.jwt.expiresIn,
     }
-  
-    // Compare password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-  
-    if (!isPasswordValid) {
-      throw new ApiError(401, "Invalid email or password");
-    }
-    
-  
-    // Generate JWT
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      },
-      env.jwt.secret,
-      {
-        expiresIn: env.jwt.expiresIn,
-      }
-    );
-  
-    return {
-      token,
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-        status: user.status,
-      },
-    };
+  );
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+    },
   };
-  /**
+};
+
+/**
  * Get Current Logged-in User
  */
 const getCurrentUser = async (userId) => {

@@ -1,0 +1,64 @@
+/* ==========================================
+   PRINT STYLES
+========================================== */
+
+.print-only {
+    display: none;
+  }
+  
+  .screen-only {
+    display: block;
+  }
+  
+  @media print {
+  
+    nav,
+    aside,
+    .no-print,
+    .btn,
+    .form-select {
+      display: none !important;
+    }
+  
+    body {
+      background: #fff !important;
+    }
+  
+    .card {
+      border: none !important;
+      box-shadow: none !important;
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+  
+    table,
+    th,
+    td {
+      border: 1px solid #000 !important;
+    }
+  
+    th {
+      background: #e9ecef !important;
+      color: #000 !important;
+    }
+  
+    .screen-only {
+      display: none !important;
+    }
+  
+    .print-only {
+      display: block !important;
+      font-weight: bold;
+      text-align: center;
+    }
+  
+    select {
+      border: none !important;
+      appearance: none;
+      background: transparent;
+    }
+  }

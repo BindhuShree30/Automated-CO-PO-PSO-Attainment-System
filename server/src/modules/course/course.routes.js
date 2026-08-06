@@ -1,6 +1,14 @@
+/**
+ * ------------------------------------------------------------------
+ * Course Routes
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ */
+
 import { Router } from "express";
 
 import courseController from "./course.controller.js";
+
 import authMiddleware from "../../middleware/auth.middleware.js";
 import roleMiddleware from "../../middleware/role.middleware.js";
 import validate from "../../middleware/validate.middleware.js";
@@ -10,6 +18,7 @@ import ROLES from "../../shared/constants/roles.js";
 import {
   createCourseSchema,
   updateCourseSchema,
+  courseIdSchema,
 } from "./course.schema.js";
 
 const router = Router();
@@ -40,6 +49,7 @@ router.get(
 router.get(
   "/:id",
   authMiddleware,
+  validate(courseIdSchema),
   courseController.getCourseById
 );
 
@@ -61,6 +71,7 @@ router.delete(
   "/:id",
   authMiddleware,
   roleMiddleware(ROLES.ADMIN),
+  validate(courseIdSchema),
   courseController.deleteCourse
 );
 

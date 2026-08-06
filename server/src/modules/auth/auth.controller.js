@@ -6,7 +6,7 @@ import { successResponse } from "../../shared/helpers/apiResponse.js";
  * Register User
  */
 const register = asyncHandler(async (req, res) => {
-  const user = await authService.registerUser(req.validatedData);
+  const user = await authService.registerUser(req.validatedData.body);
 
   return successResponse(
     res,
@@ -20,7 +20,7 @@ const register = asyncHandler(async (req, res) => {
  * Login User
  */
 const login = asyncHandler(async (req, res) => {
-  const result = await authService.loginUser(req.validatedData);
+  const result = await authService.loginUser(req.validatedData.body);
 
   return successResponse(
     res,
@@ -31,7 +31,7 @@ const login = asyncHandler(async (req, res) => {
 });
 
 /**
- * Get Logged-in User
+ * Current User
  */
 const me = asyncHandler(async (req, res) => {
   const user = await authService.getCurrentUser(req.user.id);
@@ -39,8 +39,7 @@ const me = asyncHandler(async (req, res) => {
   return successResponse(
     res,
     "User profile fetched successfully.",
-    user,
-    200
+    user
   );
 });
 

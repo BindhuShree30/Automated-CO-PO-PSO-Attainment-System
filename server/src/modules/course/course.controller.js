@@ -1,6 +1,7 @@
 /**
  * ------------------------------------------------------------------
  * Course Controller
+ * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
  */
 
@@ -12,7 +13,9 @@ import { successResponse } from "../../shared/helpers/apiResponse.js";
  * Create Course
  */
 const createCourse = asyncHandler(async (req, res) => {
-  const course = await courseService.createCourse(req.validatedData);
+  const course = await courseService.createCourse(
+    req.validatedData.body
+  );
 
   return successResponse(
     res,
@@ -40,7 +43,9 @@ const getCourses = asyncHandler(async (req, res) => {
  * Get Course By ID
  */
 const getCourseById = asyncHandler(async (req, res) => {
-  const course = await courseService.getCourseById(req.params.id);
+  const course = await courseService.getCourseById(
+    req.validatedData.params.id
+  );
 
   return successResponse(
     res,
@@ -55,8 +60,8 @@ const getCourseById = asyncHandler(async (req, res) => {
  */
 const updateCourse = asyncHandler(async (req, res) => {
   const course = await courseService.updateCourse(
-    req.params.id,
-    req.validatedData
+    req.validatedData.params.id,
+    req.validatedData.body
   );
 
   return successResponse(
@@ -71,7 +76,9 @@ const updateCourse = asyncHandler(async (req, res) => {
  * Delete Course
  */
 const deleteCourse = asyncHandler(async (req, res) => {
-  await courseService.deleteCourse(req.params.id);
+  await courseService.deleteCourse(
+    req.validatedData.params.id
+  );
 
   return successResponse(
     res,

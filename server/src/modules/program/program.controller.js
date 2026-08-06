@@ -1,6 +1,7 @@
 /**
  * ------------------------------------------------------------------
  * Program Controller
+ * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
  */
 
@@ -12,7 +13,9 @@ import { successResponse } from "../../shared/helpers/apiResponse.js";
  * Create Program
  */
 const createProgram = asyncHandler(async (req, res) => {
-  const program = await programService.createProgram(req.validatedData);
+  const program = await programService.createProgram(
+    req.validatedData.body
+  );
 
   return successResponse(
     res,
@@ -31,7 +34,8 @@ const getPrograms = asyncHandler(async (req, res) => {
   return successResponse(
     res,
     "Programs fetched successfully.",
-    programs
+    programs,
+    200
   );
 });
 
@@ -39,12 +43,15 @@ const getPrograms = asyncHandler(async (req, res) => {
  * Get Program By ID
  */
 const getProgramById = asyncHandler(async (req, res) => {
-  const program = await programService.getProgramById(req.params.id);
+  const program = await programService.getProgramById(
+    req.validatedData.params.id
+  );
 
   return successResponse(
     res,
     "Program fetched successfully.",
-    program
+    program,
+    200
   );
 });
 
@@ -53,14 +60,15 @@ const getProgramById = asyncHandler(async (req, res) => {
  */
 const updateProgram = asyncHandler(async (req, res) => {
   const program = await programService.updateProgram(
-    req.params.id,
-    req.validatedData
+    req.validatedData.params.id,
+    req.validatedData.body
   );
 
   return successResponse(
     res,
     "Program updated successfully.",
-    program
+    program,
+    200
   );
 });
 
@@ -68,12 +76,15 @@ const updateProgram = asyncHandler(async (req, res) => {
  * Delete Program
  */
 const deleteProgram = asyncHandler(async (req, res) => {
-  await programService.deleteProgram(req.params.id);
+  await programService.deleteProgram(
+    req.validatedData.params.id
+  );
 
   return successResponse(
     res,
     "Program deleted successfully.",
-    null
+    null,
+    200
   );
 });
 

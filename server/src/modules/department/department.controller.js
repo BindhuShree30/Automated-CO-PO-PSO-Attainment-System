@@ -12,7 +12,9 @@ import { successResponse } from "../../shared/helpers/apiResponse.js";
  * Create Department
  */
 const createDepartment = asyncHandler(async (req, res) => {
-  const department = await departmentService.createDepartment(req.validatedData);
+  const department = await departmentService.createDepartment(
+    req.body
+  );
 
   return successResponse(
     res,
@@ -39,7 +41,9 @@ const getDepartments = asyncHandler(async (req, res) => {
  * Get Department By ID
  */
 const getDepartmentById = asyncHandler(async (req, res) => {
-  const department = await departmentService.getDepartmentById(req.params.id);
+  const department = await departmentService.getDepartmentById(
+    req.params.id
+  );
 
   return successResponse(
     res,
@@ -54,7 +58,7 @@ const getDepartmentById = asyncHandler(async (req, res) => {
 const updateDepartment = asyncHandler(async (req, res) => {
   const department = await departmentService.updateDepartment(
     req.params.id,
-    req.validatedData
+    req.body
   );
 
   return successResponse(
@@ -68,7 +72,9 @@ const updateDepartment = asyncHandler(async (req, res) => {
  * Delete Department
  */
 const deleteDepartment = asyncHandler(async (req, res) => {
-  await departmentService.deleteDepartment(req.params.id);
+  await departmentService.deleteDepartment(
+    req.params.id
+  );
 
   return successResponse(
     res,

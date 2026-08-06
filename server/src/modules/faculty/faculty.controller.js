@@ -1,6 +1,7 @@
 /**
  * ------------------------------------------------------------------
  * Faculty Controller
+ * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
  */
 
@@ -12,7 +13,9 @@ import { successResponse } from "../../shared/helpers/apiResponse.js";
  * Create Faculty
  */
 const createFaculty = asyncHandler(async (req, res) => {
-  const faculty = await facultyService.createFaculty(req.validatedData);
+  const faculty = await facultyService.createFaculty(
+    req.validatedData.body
+  );
 
   return successResponse(
     res,
@@ -40,7 +43,9 @@ const getFaculties = asyncHandler(async (req, res) => {
  * Get Faculty By ID
  */
 const getFacultyById = asyncHandler(async (req, res) => {
-  const faculty = await facultyService.getFacultyById(req.params.id);
+  const faculty = await facultyService.getFacultyById(
+    req.validatedData.params.id
+  );
 
   return successResponse(
     res,
@@ -55,8 +60,8 @@ const getFacultyById = asyncHandler(async (req, res) => {
  */
 const updateFaculty = asyncHandler(async (req, res) => {
   const faculty = await facultyService.updateFaculty(
-    req.params.id,
-    req.validatedData
+    req.validatedData.params.id,
+    req.validatedData.body
   );
 
   return successResponse(
@@ -71,7 +76,9 @@ const updateFaculty = asyncHandler(async (req, res) => {
  * Delete Faculty
  */
 const deleteFaculty = asyncHandler(async (req, res) => {
-  await facultyService.deleteFaculty(req.params.id);
+  await facultyService.deleteFaculty(
+    req.validatedData.params.id
+  );
 
   return successResponse(
     res,

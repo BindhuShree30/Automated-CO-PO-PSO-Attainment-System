@@ -1,76 +1,106 @@
 /**
  * ------------------------------------------------------------------
  * Program Repository
+ * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
- * Handles all database operations related to programs.
+ * Handles Program database operations.
  * ------------------------------------------------------------------
  */
 
 import Program from "../../database/models/Program.js";
+import Department from "../../database/models/Department.js";
 
 /**
- * Create Program
+ * Common Program associations
  */
-const createProgram = async (programData) => {
-  return await Program.create(programData);
-};
+const programIncludes = [
+  {
+    model: Department,
+    as: "department",
+    attributes: [
+      "id",
+      "name",
+      "code",
+    ],
+  },
+];
 
-/**
- * Find all Programs
- */
-const findAllPrograms = async () => {
-  return await Program.findAll();
-};
-
-/**
- * Find Program by ID
- */
-const findProgramById = async (id) => {
-  return await Program.findByPk(id);
-};
-
-/**
- * Find Program by Code
- */
-const findProgramByCode = async (code) => {
-  return await Program.findOne({
-    where: { code },
-  });
-};
-
-/**
- * Update Program
- */
-const updateProgram = async (id, programData) => {
-  const program = await findProgramById(id);
-
-  if (!program) {
-    return null;
+class ProgramRepository {
+  /**
+   * Create Program
+   */
+  async createProgram(programData) {
+    return Program.create(programData);
   }
 
-  return await program.update(programData);
-};
-
-/**
- * Delete Program
- */
-const deleteProgram = async (id) => {
-  const program = await findProgramById(id);
-
-  if (!program) {
-    return null;
+  /**
+   * Find Program By ID
+   */
+  async findProgramById(id) {
+    return Program.findByPk(id, {
+      include: programIncludes,
+    });
   }
 
-  await program.destroy();
+  /**
+   * Generic Alias
+   */
+  async findById(id) {
+    return this.findProgramById(id);
+  }
 
-  return true;
-};
+  /**
+   * Find Program By Code
+   */
+  async findProgramByCode(code) {
+    return Program.findOne({
+      where: {
+        code,
+      },
+    });
+  }
 
-export default {
-  createProgram,
-  findAllPrograms,
-  findProgramById,
-  findProgramByCode,
-  updateProgram,
-  deleteProgram,
-};
+  /**
+   * Get All Programs
+   */
+  async findAllPrograms() {
+    return Program.findAll({
+      include: programIncludes,
+      order: [["createdAt", "DESC"]],
+    });
+  }
+
+  /**
+   * Update Program
+   */
+  async updateProgram(id, programData) {
+    const program =
+      await this.findProgramById(id);
+
+    if (!program) {
+      return null;
+    }
+
+    await program.update(programData);
+
+    return this.findProgramById(id);
+  }
+
+  /**
+   * Delete Program
+   */
+  async deleteProgram(id) {
+    const program =
+      await this.findProgramById(id);
+
+    if (!program) {
+      return null;
+    }
+
+    await program.destroy();
+
+    return true;
+  }
+}
+
+export default new ProgramRepository();

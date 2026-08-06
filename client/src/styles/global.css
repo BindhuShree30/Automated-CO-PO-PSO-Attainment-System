@@ -1,0 +1,177 @@
+/* ===========================================
+   Global Styles
+   =========================================== */
+
+   @import url("./variables.css");
+
+   *,
+   *::before,
+   *::after {
+     margin: 0;
+     padding: 0;
+     box-sizing: border-box;
+   }
+   
+   html {
+     scroll-behavior: smooth;
+   }
+   
+   body {
+     font-family: var(--font-family);
+     font-size: var(--fs-md);
+     font-weight: var(--fw-normal);
+     background: var(--background);
+     color: var(--text-primary);
+     line-height: 1.6;
+     overflow-x: hidden;
+   }
+   
+   /* Typography */
+   
+   h1,
+   h2,
+   h3,
+   h4,
+   h5,
+   h6 {
+     margin-bottom: 0.75rem;
+     font-weight: var(--fw-bold);
+     color: var(--text-primary);
+   }
+   
+   p {
+     margin-bottom: 1rem;
+     color: var(--text-secondary);
+   }
+   
+   a {
+     color: inherit;
+     text-decoration: none;
+     transition: var(--transition);
+   }
+   
+   ul,
+   ol {
+     list-style: none;
+     padding: 0;
+   }
+   
+   /* Images */
+   
+   img {
+     max-width: 100%;
+     display: block;
+   }
+   
+   /* Buttons */
+   
+   .btn {
+     border-radius: var(--radius-md);
+     transition: var(--transition);
+     font-weight: var(--fw-medium);
+   }
+   
+   .btn-primary {
+     background: var(--primary);
+     border-color: var(--primary);
+   }
+   
+   .btn-primary:hover {
+     background: var(--primary-dark);
+     border-color: var(--primary-dark);
+   }
+   
+   /* Form Controls */
+   
+   .form-control,
+   .form-select {
+     border-radius: var(--radius-md);
+     border: 1px solid var(--border-color);
+     padding: 0.7rem 0.9rem;
+     transition: var(--transition);
+   }
+   
+   .form-control:focus,
+   .form-select:focus {
+     border-color: var(--primary-light);
+     box-shadow: 0 0 0 0.15rem rgba(37, 99, 235, 0.15);
+   }
+   
+   /* Cards */
+   
+   .card {
+     border: none;
+     border-radius: var(--radius-lg);
+     box-shadow: var(--shadow-sm);
+     transition: var(--transition);
+   }
+   
+   .card:hover {
+     box-shadow: var(--shadow-md);
+   }
+   
+   /* Tables */
+   
+   .table {
+     border-radius: var(--radius-md);
+     overflow: hidden;
+   }
+   
+   .table thead {
+     background: var(--primary);
+     color: white;
+   }
+   
+   .table thead th {
+     border: none;
+   }
+   
+   .table tbody tr:hover {
+     background: rgba(37, 99, 235, 0.05);
+   }
+   
+   /* Scrollbar */
+   
+   ::-webkit-scrollbar {
+     width: 8px;
+     height: 8px;
+   }
+   
+   ::-webkit-scrollbar-thumb {
+     background: var(--primary-light);
+     border-radius: 10px;
+   }
+   
+   ::-webkit-scrollbar-track {
+     background: #edf2f7;
+   }
+   
+   /* Utility Classes */
+   
+   .shadow-sm {
+     box-shadow: var(--shadow-sm);
+   }
+   
+   .shadow-md {
+     box-shadow: var(--shadow-md);
+   }
+   
+   .shadow-lg {
+     box-shadow: var(--shadow-lg);
+   }
+   
+   .rounded-lg {
+     border-radius: var(--radius-lg);
+   }
+   
+   .text-muted {
+     color: var(--text-secondary) !important;
+   }
+   
+   .bg-surface {
+     background: var(--surface);
+   }
+   
+   .cursor-pointer {
+     cursor: pointer;
+   }

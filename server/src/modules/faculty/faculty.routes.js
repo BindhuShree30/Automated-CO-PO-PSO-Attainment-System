@@ -1,12 +1,14 @@
 /**
  * ------------------------------------------------------------------
  * Faculty Routes
+ * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
  */
 
 import { Router } from "express";
 
 import facultyController from "./faculty.controller.js";
+
 import authMiddleware from "../../middleware/auth.middleware.js";
 import roleMiddleware from "../../middleware/role.middleware.js";
 import validate from "../../middleware/validate.middleware.js";
@@ -16,6 +18,7 @@ import ROLES from "../../shared/constants/roles.js";
 import {
   createFacultySchema,
   updateFacultySchema,
+  facultyIdSchema,
 } from "./faculty.schema.js";
 
 const router = Router();
@@ -46,6 +49,7 @@ router.get(
 router.get(
   "/:id",
   authMiddleware,
+  validate(facultyIdSchema),
   facultyController.getFacultyById
 );
 
@@ -67,6 +71,7 @@ router.delete(
   "/:id",
   authMiddleware,
   roleMiddleware(ROLES.ADMIN),
+  validate(facultyIdSchema),
   facultyController.deleteFaculty
 );
 

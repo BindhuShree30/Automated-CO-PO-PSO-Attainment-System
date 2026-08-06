@@ -4,6 +4,7 @@ import helmet from "helmet";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
+
 import env from "./config/env.config.js";
 import routes from "./routes/index.js";
 import errorMiddleware from "./middleware/error.middleware.js";
@@ -32,8 +33,24 @@ app.use(
   })
 );
 
-// All API Routes
+/* ===========================
+   DEBUG LOGGER (ADD THIS)
+=========================== */
+app.use((req, res, next) => {
+  console.log("==================================");
+  console.log("METHOD :", req.method);
+  console.log("URL    :", req.originalUrl);
+  console.log("PARAMS :", req.params);
+  console.log("BODY   :", req.body);
+  console.log("==================================");
+  next();
+});
+
+/* ===========================
+   API ROUTES
+=========================== */
 app.use("/api/v1", routes);
+
 // Global Error Middleware
 app.use(errorMiddleware);
 

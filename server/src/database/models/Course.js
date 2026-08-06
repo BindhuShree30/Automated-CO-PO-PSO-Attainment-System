@@ -6,7 +6,7 @@
 
 import { DataTypes } from "sequelize";
 import sequelize from "../connection.js";
-
+import Program from "./Program.js";
 const Course = sequelize.define(
   "Course",
   {
@@ -40,6 +40,7 @@ const Course = sequelize.define(
     programId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: "program_id",
     },
 
     status: {
@@ -52,5 +53,6 @@ const Course = sequelize.define(
     timestamps: true,
   }
 );
+
 
 export default Course;

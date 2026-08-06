@@ -1,0 +1,91 @@
+/* ===========================================
+   OBE Insight Design System
+   =========================================== */
+
+   :root {
+
+    /* ===== Brand Colors ===== */
+  
+    --primary: #1E3A8A;
+    --primary-light: #2563EB;
+    --primary-dark: #1E40AF;
+  
+    --secondary: #0F172A;
+  
+    /* ===== Status Colors ===== */
+  
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --info: #0EA5E9;
+  
+    /* ===== Background ===== */
+  
+    --background: #F8FAFC;
+    --surface: #FFFFFF;
+    --sidebar-bg: #0F172A;
+    --navbar-bg: #FFFFFF;
+  
+    /* ===== Text ===== */
+  
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --text-light: #FFFFFF;
+  
+    /* ===== Border ===== */
+  
+    --border-color: #E2E8F0;
+  
+    /* ===== Shadow ===== */
+  
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+    --shadow-md: 0 6px 20px rgba(0,0,0,0.08);
+    --shadow-lg: 0 10px 35px rgba(0,0,0,0.12);
+  
+    /* ===== Radius ===== */
+  
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+  
+    /* ===== Sidebar ===== */
+  
+    --sidebar-width: 270px;
+    --navbar-height: 70px;
+  
+    /* ===== Fonts ===== */
+  
+    --font-family:
+        "Inter",
+        "Segoe UI",
+        sans-serif;
+  
+    /* ===== Font Sizes ===== */
+  
+    --fs-xs: 12px;
+    --fs-sm: 14px;
+    --fs-md: 16px;
+    --fs-lg: 20px;
+    --fs-xl: 28px;
+    --fs-2xl: 36px;
+  
+    /* ===== Font Weight ===== */
+  
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+  
+    /* ===== Spacing ===== */
+  
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+  
+    /* ===== Animation ===== */
+  
+    --transition: 0.3s ease-in-out;
+  
+  }

@@ -19,10 +19,13 @@ const createCourse = async (courseData) => {
     await programRepository.findProgramById(programId);
 
   if (!program) {
-    throw new ApiError(404, "Program not found");
+    throw new ApiError(
+      404,
+      "Program not found"
+    );
   }
 
-  // Check duplicate code
+  // Check duplicate course code
   const existingCourse =
     await courseRepository.findCourseByCode(code);
 
@@ -33,7 +36,9 @@ const createCourse = async (courseData) => {
     );
   }
 
-  return await courseRepository.createCourse(courseData);
+  return await courseRepository.createCourse(
+    courseData
+  );
 };
 
 /**
@@ -51,7 +56,10 @@ const getCourseById = async (id) => {
     await courseRepository.findCourseById(id);
 
   if (!course) {
-    throw new ApiError(404, "Course not found");
+    throw new ApiError(
+      404,
+      "Course not found"
+    );
   }
 
   return course;
@@ -65,12 +73,33 @@ const updateCourse = async (id, data) => {
     await courseRepository.findCourseById(id);
 
   if (!course) {
-    throw new ApiError(404, "Course not found");
+    throw new ApiError(
+      404,
+      "Course not found"
+    );
   }
 
+  // Validate Program
+  if (data.programId) {
+    const program =
+      await programRepository.findProgramById(
+        data.programId
+      );
+
+    if (!program) {
+      throw new ApiError(
+        404,
+        "Program not found"
+      );
+    }
+  }
+
+  // Validate duplicate course code
   if (data.code) {
     const existing =
-      await courseRepository.findCourseByCode(data.code);
+      await courseRepository.findCourseByCode(
+        data.code
+      );
 
     if (
       existing &&
@@ -97,10 +126,15 @@ const deleteCourse = async (id) => {
     await courseRepository.findCourseById(id);
 
   if (!course) {
-    throw new ApiError(404, "Course not found");
+    throw new ApiError(
+      404,
+      "Course not found"
+    );
   }
 
   await courseRepository.deleteCourse(course);
+
+  return true;
 };
 
 export default {

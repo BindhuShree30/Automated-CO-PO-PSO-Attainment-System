@@ -33,6 +33,11 @@ const Program = sequelize.define(
       allowNull: false,
       defaultValue: 4,
     },
+    departmentId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      field: "department_id",
+    },
 
     status: {
       type: DataTypes.BOOLEAN,
@@ -46,12 +51,15 @@ const Program = sequelize.define(
 );
 
 // Relationships
+// Relationships
 Department.hasMany(Program, {
   foreignKey: "departmentId",
+  as: "programs",
 });
 
 Program.belongsTo(Department, {
   foreignKey: "departmentId",
+  as: "department",
 });
 
 export default Program;
