@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Eye, EyeSlash, MortarboardFill } from "react-bootstrap-icons";
-import { useNavigate } from "react-router-dom";
+import {
+  Eye,
+  EyeSlash,
+  MortarboardFill,
+} from "react-bootstrap-icons";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 import toast from "react-hot-toast";
 
 import { useAuth } from "../../context/AuthContext";
@@ -10,43 +17,63 @@ function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] =
+    useState(false);
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      selectedRole: "",
+      email: "",
+      password: "",
+    },
+  });
 
+  /**
+   * ---------------------------------------------------------
+   * Login
+   * ---------------------------------------------------------
+   */
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
 
-      const user = await login(data);
+      const user = await login({
+        email: data.email,
+        password: data.password,
+        selectedRole: data.selectedRole,
+      });
 
-      toast.success(`Welcome ${user.firstName}!`);
+      toast.success(
+        `Welcome ${user.firstName}!`
+      );
 
       switch (user.role) {
-        case "ADMIN":
-          navigate("/admin/dashboard");
+        case "HOD":
+          navigate("/hod/dashboard");
           break;
 
         case "FACULTY":
           navigate("/faculty/dashboard");
           break;
 
-        case "STUDENT":
-          navigate("/student/dashboard");
-          break;
-
         default:
-          navigate("/");
+          toast.error(
+            "Unauthorized role."
+          );
+          navigate("/login");
+          break;
       }
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
-          "Invalid email or password."
+          "Invalid email, password, or role."
       );
     } finally {
       setIsSubmitting(false);
@@ -56,7 +83,9 @@ function Login() {
   return (
     <div
       className="container-fluid vh-100 d-flex align-items-center justify-content-center"
-      style={{ background: "var(--background)" }}
+      style={{
+        background: "var(--background)",
+      }}
     >
       <div
         className="card shadow-lg p-4"
@@ -65,10 +94,16 @@ function Login() {
           borderRadius: "18px",
         }}
       >
+
+        {/* ==================================================
+            HEADER
+        ================================================== */}
+
         <div className="text-center mb-4">
+
           <MortarboardFill
             size={55}
-            color="#1E3A8A"
+            className="text-primary"
           />
 
           <h2 className="mt-3 fw-bold">
@@ -79,21 +114,83 @@ function Login() {
             Automated CO–PO–PSO Attainment &
             Curriculum Gap Analysis System
           </p>
+
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        {/* ==================================================
+            LOGIN FORM
+        ================================================== */}
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+        >
+
+          {/* ==================================================
+              ROLE
+          ================================================== */}
 
           <div className="mb-3">
-            <label className="form-label">
+
+            <label
+              htmlFor="selectedRole"
+              className="form-label"
+            >
+              Login As
+            </label>
+
+            <select
+              id="selectedRole"
+              className="form-select"
+              {...register("selectedRole", {
+                required:
+                  "Please select your role",
+              })}
+            >
+
+              <option value="">
+                Select Role
+              </option>
+
+              <option value="HOD">
+                HOD
+              </option>
+
+              <option value="FACULTY">
+                Faculty
+              </option>
+
+            </select>
+
+            {errors.selectedRole && (
+              <small className="text-danger">
+                {errors.selectedRole.message}
+              </small>
+            )}
+
+          </div>
+
+          {/* ==================================================
+              EMAIL
+          ================================================== */}
+
+          <div className="mb-3">
+
+            <label
+              htmlFor="email"
+              className="form-label"
+            >
               Email
             </label>
 
             <input
+              id="email"
               type="email"
               className="form-control"
               placeholder="Enter your email"
+              autoComplete="email"
               {...register("email", {
-                required: "Email is required",
+                required:
+                  "Email is required",
               })}
             />
 
@@ -102,24 +199,37 @@ function Login() {
                 {errors.email.message}
               </small>
             )}
+
           </div>
+
+          {/* ==================================================
+              PASSWORD
+          ================================================== */}
 
           <div className="mb-4">
 
-            <label className="form-label">
+            <label
+              htmlFor="password"
+              className="form-label"
+            >
               Password
             </label>
 
             <div className="input-group">
 
               <input
+                id="password"
                 type={
-                  showPassword ? "text" : "password"
+                  showPassword
+                    ? "text"
+                    : "password"
                 }
                 className="form-control"
                 placeholder="Enter your password"
+                autoComplete="current-password"
                 {...register("password", {
-                  required: "Password is required",
+                  required:
+                    "Password is required",
                 })}
               />
 
@@ -127,7 +237,15 @@ function Login() {
                 type="button"
                 className="btn btn-outline-secondary"
                 onClick={() =>
-                  setShowPassword(!showPassword)
+                  setShowPassword(
+                    (previous) =>
+                      !previous
+                  )
+                }
+                aria-label={
+                  showPassword
+                    ? "Hide password"
+                    : "Show password"
                 }
               >
                 {showPassword ? (
@@ -147,7 +265,12 @@ function Login() {
 
           </div>
 
+          {/* ==================================================
+              LOGIN BUTTON
+          ================================================== */}
+
           <button
+            type="submit"
             className="btn btn-primary w-100"
             disabled={isSubmitting}
           >
@@ -155,6 +278,25 @@ function Login() {
               ? "Signing In..."
               : "Login"}
           </button>
+
+          {/* ==================================================
+              REGISTER
+          ================================================== */}
+
+          <div className="text-center mt-3">
+
+            <span className="text-muted">
+              Don't have an account?{" "}
+            </span>
+
+            <Link
+              to="/register"
+              className="fw-semibold text-decoration-none"
+            >
+              Register
+            </Link>
+
+          </div>
 
         </form>
       </div>

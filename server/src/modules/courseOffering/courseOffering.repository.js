@@ -10,200 +10,158 @@ import Course from "../../database/models/Course.js";
 import Batch from "../../database/models/Batch.js";
 import Semester from "../../database/models/Semester.js";
 import Faculty from "../../database/models/Faculty.js";
-import Program from "../../database/models/Program.js";
-import AcademicYear from "../../database/models/AcademicYear.js";
 
-class CourseOfferingRepository {
-  /**
-   * Create Course Offering
-   */
-  async create(data) {
-    return CourseOffering.create(data);
-  }
-
-  /**
-   * Get All Course Offerings
-   */
-  async findAll() {
-    return CourseOffering.findAll({
-      include: [
-        {
-          model: Course,
-          as: "course",
-        },
-        {
-          model: Batch,
-          as: "batch",
-          attributes: [
-            "id",
-            "name",
-            "startYear",
-            "endYear",
-            "programId",
-          ],
-          include: [
-            {
-              model: Program,
-              as: "program",
-              attributes: [
-                "id",
-                "name",
-                "code",
-                "duration",
-              ],
-            },
-          ],
-        },
-        {
-          model: Semester,
-          as: "semester",
-          attributes: [
-            "id",
-            "semesterNumber",
-            "term",
-            "academicYearId",
-            "isCurrent",
-            "status",
-          ],
-          include: [
-            {
-              model: AcademicYear,
-              as: "academicYear",
-              attributes: [
-                "id",
-                "name",
-                "startYear",
-                "endYear",
-                "isCurrent",
-              ],
-            },
-          ],
-        },
-        {
-          model: Faculty,
-          as: "faculty",
-        },
-      ],
-      order: [
-        ["createdAt", "DESC"],
-      ],
-    });
-  }
-
-  /**
-   * Get Course Offering By ID
-   */
-  async findById(id) {
-    return CourseOffering.findByPk(id, {
-      include: [
-        {
-          model: Course,
-          as: "course",
-        },
-        {
-          model: Batch,
-          as: "batch",
-          attributes: [
-            "id",
-            "name",
-            "startYear",
-            "endYear",
-            "programId",
-          ],
-          include: [
-            {
-              model: Program,
-              as: "program",
-              attributes: [
-                "id",
-                "name",
-                "code",
-                "duration",
-              ],
-            },
-          ],
-        },
-        {
-          model: Semester,
-          as: "semester",
-          attributes: [
-            "id",
-            "semesterNumber",
-            "term",
-            "academicYearId",
-            "isCurrent",
-            "status",
-          ],
-          include: [
-            {
-              model: AcademicYear,
-              as: "academicYear",
-              attributes: [
-                "id",
-                "name",
-                "startYear",
-                "endYear",
-                "isCurrent",
-              ],
-            },
-          ],
-        },
-        {
-          model: Faculty,
-          as: "faculty",
-        },
-      ],
-    });
-  }
-
-  /**
-   * Find Duplicate Course Offering
-   */
-  async findDuplicate(
-    courseId,
-    batchId,
-    semesterId,
-    section
-  ) {
-    return CourseOffering.findOne({
-      where: {
-        courseId,
-        batchId,
-        semesterId,
-        section,
+/**
+ * ------------------------------------------------------------------
+ * Get All Course Offerings
+ * ------------------------------------------------------------------
+ */
+const findAllCourseOfferings = async () => {
+  return await CourseOffering.findAll({
+    include: [
+      {
+        model: Course,
+        as: "course",
       },
-    });
-  }
+      {
+        model: Batch,
+        as: "batch",
+      },
+      {
+        model: Semester,
+        as: "semester",
+      },
+      {
+        model: Faculty,
+        as: "faculty",
+      },
+    ],
+    order: [["createdAt", "DESC"]],
+  });
+};
 
-  /**
-   * Update Course Offering
-   */
-  async update(id, data) {
-    const courseOffering =
-      await CourseOffering.findByPk(id);
+/**
+ * ------------------------------------------------------------------
+ * Get Course Offering By ID
+ * ------------------------------------------------------------------
+ */
+const findCourseOfferingById = async (id) => {
+  return await CourseOffering.findByPk(id, {
+    include: [
+      {
+        model: Course,
+        as: "course",
+      },
+      {
+        model: Batch,
+        as: "batch",
+      },
+      {
+        model: Semester,
+        as: "semester",
+      },
+      {
+        model: Faculty,
+        as: "faculty",
+      },
+    ],
+  });
+};
 
-    if (!courseOffering) {
-      return null;
-    }
+/**
+ * ------------------------------------------------------------------
+ * Find Course
+ * ------------------------------------------------------------------
+ */
+const findCourseById = async (courseId) => {
+  return await Course.findByPk(courseId);
+};
 
-    return courseOffering.update(data);
-  }
+/**
+ * ------------------------------------------------------------------
+ * Find Batch
+ * ------------------------------------------------------------------
+ */
+const findBatchById = async (batchId) => {
+  return await Batch.findByPk(batchId);
+};
 
-  /**
-   * Delete Course Offering
-   */
-  async delete(id) {
-    const courseOffering =
-      await CourseOffering.findByPk(id);
+/**
+ * ------------------------------------------------------------------
+ * Find Semester
+ * ------------------------------------------------------------------
+ */
+const findSemesterById = async (semesterId) => {
+  return await Semester.findByPk(semesterId);
+};
 
-    if (!courseOffering) {
-      return null;
-    }
+/**
+ * ------------------------------------------------------------------
+ * IMPORTANT:
+ *
+ * Find Faculty From `faculties` Table
+ *
+ * DO NOT use User.findByPk()
+ *
+ * course_offerings.faculty_id references:
+ *
+ * faculties.id
+ * ------------------------------------------------------------------
+ */
+const findFacultyById = async (facultyId) => {
+  return await Faculty.findByPk(facultyId);
+};
 
-    await courseOffering.destroy();
+/**
+ * ------------------------------------------------------------------
+ * Create Course Offering
+ * ------------------------------------------------------------------
+ */
+const createCourseOffering = async (data, options = {}) => {
+  return await CourseOffering.create(
+    data,
+    options
+  );
+};
 
-    return true;
-  }
-}
+/**
+ * ------------------------------------------------------------------
+ * Update Course Offering
+ * ------------------------------------------------------------------
+ */
+const updateCourseOffering = async (
+  courseOffering,
+  data,
+  options = {}
+) => {
+  return await courseOffering.update(
+    data,
+    options
+  );
+};
 
-export default new CourseOfferingRepository();
+/**
+ * ------------------------------------------------------------------
+ * Delete Course Offering
+ * ------------------------------------------------------------------
+ */
+const deleteCourseOffering = async (
+  courseOffering,
+  options = {}
+) => {
+  return await courseOffering.destroy(
+    options
+  );
+};
+
+export default {
+  findAllCourseOfferings,
+  findCourseOfferingById,
+  findCourseById,
+  findBatchById,
+  findSemesterById,
+  findFacultyById,
+  createCourseOffering,
+  updateCourseOffering,
+  deleteCourseOffering,
+};

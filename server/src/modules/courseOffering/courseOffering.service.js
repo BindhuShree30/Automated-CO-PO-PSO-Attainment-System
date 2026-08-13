@@ -3,92 +3,241 @@
  * Course Offering Service
  * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
- * Handles Course Offering business logic.
- * ------------------------------------------------------------------
  */
 
-import CourseOfferingRepository from "./courseOffering.repository.js";
+import sequelize from "../../database/connection.js";
 
-import Course from "../../database/models/Course.js";
-import Batch from "../../database/models/Batch.js";
-import Semester from "../../database/models/Semester.js";
-import Faculty from "../../database/models/Faculty.js";
+import courseOfferingRepository from "./courseOffering.repository.js";
 
 import ApiError from "../../shared/errors/ApiError.js";
 
-class CourseOfferingService {
-  /**
-   * Normalize Section
-   */
-  normalizeSection(section) {
-    if (section === undefined || section === null) {
-      return null;
-    }
+/**
+ * ------------------------------------------------------------------
+ * Get All Course Offerings
+ * ------------------------------------------------------------------
+ */
+const getAllCourseOfferings = async () => {
+  return await courseOfferingRepository
+    .findAllCourseOfferings();
+};
 
-    const normalizedSection = section
-      .trim()
-      .toUpperCase();
+/**
+ * ------------------------------------------------------------------
+ * Get Course Offering By ID
+ * ------------------------------------------------------------------
+ */
+const getCourseOfferingById = async (id) => {
+  const courseOffering =
+    await courseOfferingRepository
+      .findCourseOfferingById(id);
 
-    return normalizedSection || null;
+  if (!courseOffering) {
+    throw new ApiError(
+      404,
+      "Course offering not found."
+    );
   }
 
+  return courseOffering;
+};
+
+/**
+ * ------------------------------------------------------------------
+ * Create Course Offering
+ * ------------------------------------------------------------------
+ *
+ * facultyId MUST be:
+ *
+ * faculties.id
+ *
+ * NOT:
+ *
+ * users.id
+ * ------------------------------------------------------------------
+ */
+const createCourseOffering = async ({
+  courseId,
+  batchId,
+  semesterId,
+  facultyId,
+  section,
+}) => {
   /**
+   * --------------------------------------------------------------
    * Validate Course
+   * --------------------------------------------------------------
    */
-  async validateCourse(courseId) {
-    const course = await Course.findByPk(courseId);
+  const course =
+    await courseOfferingRepository
+      .findCourseById(courseId);
 
-    if (!course) {
-      throw new ApiError(
-        404,
-        "Course not found."
-      );
-    }
-
-    return course;
+  if (!course) {
+    throw new ApiError(
+      404,
+      "Course not found."
+    );
   }
 
   /**
+   * --------------------------------------------------------------
    * Validate Batch
+   * --------------------------------------------------------------
    */
-  async validateBatch(batchId) {
-    const batch = await Batch.findByPk(batchId);
+  const batch =
+    await courseOfferingRepository
+      .findBatchById(batchId);
 
-    if (!batch) {
-      throw new ApiError(
-        404,
-        "Batch not found."
-      );
-    }
-
-    return batch;
+  if (!batch) {
+    throw new ApiError(
+      404,
+      "Batch not found."
+    );
   }
 
   /**
+   * --------------------------------------------------------------
    * Validate Semester
+   * --------------------------------------------------------------
    */
-  async validateSemester(semesterId) {
-    const semester = await Semester.findByPk(
-      semesterId
+  const semester =
+    await courseOfferingRepository
+      .findSemesterById(semesterId);
+
+  if (!semester) {
+    throw new ApiError(
+      404,
+      "Semester not found."
     );
-
-    if (!semester) {
-      throw new ApiError(
-        404,
-        "Semester not found."
-      );
-    }
-
-    return semester;
   }
 
   /**
-   * Validate Faculty
+   * --------------------------------------------------------------
+   * IMPORTANT FACULTY VALIDATION
+   * --------------------------------------------------------------
+   *
+   * This searches the `faculties` table.
+   *
+   * The selected faculty ID from React must therefore
+   * be faculties.id.
    */
-  async validateFaculty(facultyId) {
-    const faculty = await Faculty.findByPk(
-      facultyId
+  const faculty =
+    await courseOfferingRepository
+      .findFacultyById(facultyId);
+
+  if (!faculty) {
+    throw new ApiError(
+      404,
+      "Faculty not found."
     );
+  }
+
+  /**
+   * --------------------------------------------------------------
+   * Faculty Must Be Active
+   * --------------------------------------------------------------
+   */
+  if (!faculty.status) {
+    throw new ApiError(
+      403,
+      "Faculty is not approved or active."
+    );
+  }
+
+  /**
+   * --------------------------------------------------------------
+   * Prevent Duplicate Course Offering
+   * --------------------------------------------------------------
+   */
+  const existingOfferings =
+    await courseOfferingRepository
+      .findAllCourseOfferings();
+
+  const duplicate =
+    existingOfferings.find(
+      (offering) =>
+        offering.courseId === courseId &&
+        offering.batchId === batchId &&
+        offering.semesterId === semesterId &&
+        (offering.section || null) ===
+          (section || null)
+    );
+
+  if (duplicate) {
+    throw new ApiError(
+      409,
+      "This course offering already exists."
+    );
+  }
+
+  /**
+   * --------------------------------------------------------------
+   * Create Course Offering
+   * --------------------------------------------------------------
+   */
+  const transaction =
+    await sequelize.transaction();
+
+  try {
+    const courseOffering =
+      await courseOfferingRepository
+        .createCourseOffering(
+          {
+            courseId,
+            batchId,
+            semesterId,
+            facultyId,
+            section:
+              section?.trim() || null,
+            status: true,
+          },
+          {
+            transaction,
+          }
+        );
+
+    await transaction.commit();
+
+    return await courseOfferingRepository
+      .findCourseOfferingById(
+        courseOffering.id
+      );
+  } catch (error) {
+    await transaction.rollback();
+
+    throw error;
+  }
+};
+
+/**
+ * ------------------------------------------------------------------
+ * Update Course Offering
+ * ------------------------------------------------------------------
+ */
+const updateCourseOffering = async (
+  id,
+  data
+) => {
+  const courseOffering =
+    await courseOfferingRepository
+      .findCourseOfferingById(id);
+
+  if (!courseOffering) {
+    throw new ApiError(
+      404,
+      "Course offering not found."
+    );
+  }
+
+  /**
+   * If faculty is being changed,
+   * validate faculties.id.
+   */
+  if (data.facultyId) {
+    const faculty =
+      await courseOfferingRepository
+        .findFacultyById(
+          data.facultyId
+        );
 
     if (!faculty) {
       throw new ApiError(
@@ -97,214 +246,58 @@ class CourseOfferingService {
       );
     }
 
-    return faculty;
-  }
-
-  /**
-   * Validate Course Offering Relationships
-   */
-  validateRelationships(
-    course,
-    batch,
-    semester
-  ) {
-    /**
-     * Semester must belong to selected Batch
-     */
-    if (semester.batchId !== batch.id) {
+    if (!faculty.status) {
       throw new ApiError(
-        400,
-        "Semester does not belong to the selected Batch."
-      );
-    }
-
-    /**
-     * Course must belong to the same Program
-     * as the selected Batch
-     */
-    if (course.programId !== batch.programId) {
-      throw new ApiError(
-        400,
-        "Course and Batch must belong to the same Program."
+        403,
+        "Faculty is not approved or active."
       );
     }
   }
 
-  /**
-   * Create Course Offering
-   */
-  async createCourseOffering(data) {
-    const {
-      courseId,
-      batchId,
-      semesterId,
-      facultyId,
-    } = data;
-
-    const course = await this.validateCourse(
-      courseId
+  await courseOfferingRepository
+    .updateCourseOffering(
+      courseOffering,
+      data
     );
 
-    const batch = await this.validateBatch(
-      batchId
+  return await courseOfferingRepository
+    .findCourseOfferingById(id);
+};
+
+/**
+ * ------------------------------------------------------------------
+ * Delete Course Offering
+ * ------------------------------------------------------------------
+ */
+const deleteCourseOffering = async (
+  id
+) => {
+  const courseOffering =
+    await courseOfferingRepository
+      .findCourseOfferingById(id);
+
+  if (!courseOffering) {
+    throw new ApiError(
+      404,
+      "Course offering not found."
     );
-
-    const semester =
-      await this.validateSemester(semesterId);
-
-    await this.validateFaculty(facultyId);
-
-    this.validateRelationships(
-      course,
-      batch,
-      semester
-    );
-
-    const section = this.normalizeSection(
-      data.section
-    );
-
-    const existingCourseOffering =
-      await CourseOfferingRepository.findDuplicate(
-        courseId,
-        batchId,
-        semesterId,
-        section
-      );
-
-    if (existingCourseOffering) {
-      throw new ApiError(
-        409,
-        "Course Offering already exists for this Course, Batch, Semester and Section."
-      );
-    }
-
-    return CourseOfferingRepository.create({
-      ...data,
-      section,
-    });
   }
 
-  /**
-   * Get All Course Offerings
-   */
-  async getAllCourseOfferings() {
-    return CourseOfferingRepository.findAll();
-  }
-
-  /**
-   * Get Course Offering By ID
-   */
-  async getCourseOfferingById(id) {
-    const courseOffering =
-      await CourseOfferingRepository.findById(id);
-
-    if (!courseOffering) {
-      throw new ApiError(
-        404,
-        "Course Offering not found."
-      );
-    }
-
-    return courseOffering;
-  }
-
-  /**
-   * Update Course Offering
-   */
-  async updateCourseOffering(id, data) {
-    const courseOffering =
-      await CourseOfferingRepository.findById(id);
-
-    if (!courseOffering) {
-      throw new ApiError(
-        404,
-        "Course Offering not found."
-      );
-    }
-
-    const courseId =
-      data.courseId ?? courseOffering.courseId;
-
-    const batchId =
-      data.batchId ?? courseOffering.batchId;
-
-    const semesterId =
-      data.semesterId ??
-      courseOffering.semesterId;
-
-    const facultyId =
-      data.facultyId ??
-      courseOffering.facultyId;
-
-    const course = await this.validateCourse(
-      courseId
+  await courseOfferingRepository
+    .deleteCourseOffering(
+      courseOffering
     );
 
-    const batch = await this.validateBatch(
-      batchId
-    );
+  return {
+    id,
+    deleted: true,
+  };
+};
 
-    const semester =
-      await this.validateSemester(semesterId);
-
-    await this.validateFaculty(facultyId);
-
-    this.validateRelationships(
-      course,
-      batch,
-      semester
-    );
-
-    const section =
-      data.section !== undefined
-        ? this.normalizeSection(data.section)
-        : courseOffering.section;
-
-    const existingCourseOffering =
-      await CourseOfferingRepository.findDuplicate(
-        courseId,
-        batchId,
-        semesterId,
-        section
-      );
-
-    if (
-      existingCourseOffering &&
-      existingCourseOffering.id !== id
-    ) {
-      throw new ApiError(
-        409,
-        "Course Offering already exists for this Course, Batch, Semester and Section."
-      );
-    }
-
-    return CourseOfferingRepository.update(id, {
-      ...data,
-      courseId,
-      batchId,
-      semesterId,
-      facultyId,
-      section,
-    });
-  }
-
-  /**
-   * Delete Course Offering
-   */
-  async deleteCourseOffering(id) {
-    const deleted =
-      await CourseOfferingRepository.delete(id);
-
-    if (!deleted) {
-      throw new ApiError(
-        404,
-        "Course Offering not found."
-      );
-    }
-
-    return true;
-  }
-}
-
-export default new CourseOfferingService();
+export default {
+  getAllCourseOfferings,
+  getCourseOfferingById,
+  createCourseOffering,
+  updateCourseOffering,
+  deleteCourseOffering,
+};

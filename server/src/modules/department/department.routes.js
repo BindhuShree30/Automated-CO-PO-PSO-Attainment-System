@@ -1,6 +1,7 @@
 /**
  * ------------------------------------------------------------------
  * Department Routes
+ * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
  */
 
@@ -21,7 +22,11 @@ import {
 const router = Router();
 
 /**
+ * ------------------------------------------------------------------
  * Create Department
+ * ------------------------------------------------------------------
+ *
+ * ADMIN only.
  */
 router.post(
   "/",
@@ -32,16 +37,30 @@ router.post(
 );
 
 /**
+ * ------------------------------------------------------------------
  * Get All Departments
+ * ------------------------------------------------------------------
+ *
+ * PUBLIC
+ *
+ * Required by:
+ * - Faculty Registration
+ * - Course/Academic forms
+ *
+ * No authentication required because a new faculty
+ * user does not have an access token yet.
  */
 router.get(
   "/",
-  authMiddleware,
   departmentController.getDepartments
 );
 
 /**
+ * ------------------------------------------------------------------
  * Get Department By ID
+ * ------------------------------------------------------------------
+ *
+ * Authenticated users only.
  */
 router.get(
   "/:id",
@@ -50,7 +69,11 @@ router.get(
 );
 
 /**
+ * ------------------------------------------------------------------
  * Update Department
+ * ------------------------------------------------------------------
+ *
+ * ADMIN only.
  */
 router.put(
   "/:id",
@@ -61,7 +84,11 @@ router.put(
 );
 
 /**
+ * ------------------------------------------------------------------
  * Delete Department
+ * ------------------------------------------------------------------
+ *
+ * ADMIN only.
  */
 router.delete(
   "/:id",

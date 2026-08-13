@@ -1,38 +1,57 @@
 /**
  * ------------------------------------------------------------------
  * Course Service
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ *
+ * Business logic for Course Management.
+ *
+ * Program is intentionally ignored at application level.
+ * Existing program_id remains in the database only for compatibility.
+ *
  * ------------------------------------------------------------------
  */
 
 import courseRepository from "./course.repository.js";
-import programRepository from "../program/program.repository.js";
+import departmentRepository from "../department/department.repository.js";
 import ApiError from "../../shared/errors/ApiError.js";
 
 /**
+ * ------------------------------------------------------------------
  * Create Course
+ * ------------------------------------------------------------------
  */
 const createCourse = async (courseData) => {
-  const { code, programId } = courseData;
+  const {
+    code,
+    departmentId,
+  } = courseData;
 
-  // Check Program
-  const program =
-    await programRepository.findProgramById(programId);
+  /**
+   * Validate Department
+   */
+  const department =
+    await departmentRepository.findDepartmentById(
+      departmentId
+    );
 
-  if (!program) {
+  if (!department) {
     throw new ApiError(
       404,
-      "Program not found"
+      "Department not found."
     );
   }
 
-  // Check duplicate course code
+  /**
+   * Validate duplicate course code
+   */
   const existingCourse =
     await courseRepository.findCourseByCode(code);
 
   if (existingCourse) {
     throw new ApiError(
       409,
-      "Course code already exists"
+      "Course code already exists."
     );
   }
 
@@ -42,14 +61,18 @@ const createCourse = async (courseData) => {
 };
 
 /**
+ * ------------------------------------------------------------------
  * Get All Courses
+ * ------------------------------------------------------------------
  */
 const getCourses = async () => {
   return await courseRepository.findAllCourses();
 };
 
 /**
+ * ------------------------------------------------------------------
  * Get Course By ID
+ * ------------------------------------------------------------------
  */
 const getCourseById = async (id) => {
   const course =
@@ -58,7 +81,7 @@ const getCourseById = async (id) => {
   if (!course) {
     throw new ApiError(
       404,
-      "Course not found"
+      "Course not found."
     );
   }
 
@@ -66,7 +89,9 @@ const getCourseById = async (id) => {
 };
 
 /**
+ * ------------------------------------------------------------------
  * Update Course
+ * ------------------------------------------------------------------
  */
 const updateCourse = async (id, data) => {
   const course =
@@ -75,39 +100,43 @@ const updateCourse = async (id, data) => {
   if (!course) {
     throw new ApiError(
       404,
-      "Course not found"
+      "Course not found."
     );
   }
 
-  // Validate Program
-  if (data.programId) {
-    const program =
-      await programRepository.findProgramById(
-        data.programId
+  /**
+   * Validate Department
+   */
+  if (data.departmentId) {
+    const department =
+      await departmentRepository.findDepartmentById(
+        data.departmentId
       );
 
-    if (!program) {
+    if (!department) {
       throw new ApiError(
         404,
-        "Program not found"
+        "Department not found."
       );
     }
   }
 
-  // Validate duplicate course code
+  /**
+   * Validate duplicate course code
+   */
   if (data.code) {
-    const existing =
+    const existingCourse =
       await courseRepository.findCourseByCode(
         data.code
       );
 
     if (
-      existing &&
-      existing.id !== course.id
+      existingCourse &&
+      existingCourse.id !== course.id
     ) {
       throw new ApiError(
         409,
-        "Course code already exists"
+        "Course code already exists."
       );
     }
   }
@@ -119,7 +148,9 @@ const updateCourse = async (id, data) => {
 };
 
 /**
+ * ------------------------------------------------------------------
  * Delete Course
+ * ------------------------------------------------------------------
  */
 const deleteCourse = async (id) => {
   const course =
@@ -128,7 +159,7 @@ const deleteCourse = async (id) => {
   if (!course) {
     throw new ApiError(
       404,
-      "Course not found"
+      "Course not found."
     );
   }
 
@@ -137,6 +168,11 @@ const deleteCourse = async (id) => {
   return true;
 };
 
+/**
+ * ------------------------------------------------------------------
+ * Export
+ * ------------------------------------------------------------------
+ */
 export default {
   createCourse,
   getCourses,

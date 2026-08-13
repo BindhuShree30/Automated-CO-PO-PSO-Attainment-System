@@ -3,70 +3,111 @@
  * Course Offering Routes
  * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
+ *
+ * Handles Course Offering API routes.
+ *
+ * Base URL:
+ *
+ * /api/v1/course-offerings
+ *
+ * Course Offering connects:
+ *
+ * Course
+ * Batch
+ * Semester
+ * Faculty
+ * Section
+ * ------------------------------------------------------------------
  */
 
 import { Router } from "express";
 
-import CourseOfferingController from "./courseOffering.controller.js";
+import courseOfferingController from "./courseOffering.controller.js";
 
-import validate from "../../middleware/validate.middleware.js";
-import authenticate from "../../middleware/auth.middleware.js";
+import authMiddleware from "../../middleware/auth.middleware.js";
+import roleMiddleware from "../../middleware/role.middleware.js";
 
-import {
-  createCourseOfferingSchema,
-  updateCourseOfferingSchema,
-  courseOfferingIdSchema,
-} from "./courseOffering.schema.js";
+import ROLES from "../../shared/constants/roles.js";
 
 const router = Router();
 
 /**
+ * ------------------------------------------------------------------
  * Create Course Offering
+ * ------------------------------------------------------------------
+ *
+ * POST /api/v1/course-offerings
+ *
+ * Only HOD can create Course Offerings.
+ * ------------------------------------------------------------------
  */
 router.post(
   "/",
-  authenticate,
-  validate(createCourseOfferingSchema),
-  CourseOfferingController.createCourseOffering
+  authMiddleware,
+  roleMiddleware(ROLES.HOD),
+  courseOfferingController.createCourseOffering
 );
 
 /**
+ * ------------------------------------------------------------------
  * Get All Course Offerings
+ * ------------------------------------------------------------------
+ *
+ * GET /api/v1/course-offerings
+ * ------------------------------------------------------------------
  */
 router.get(
   "/",
-  authenticate,
-  CourseOfferingController.getAllCourseOfferings
+  authMiddleware,
+  courseOfferingController.getAllCourseOfferings
 );
 
 /**
+ * ------------------------------------------------------------------
  * Get Course Offering By ID
+ * ------------------------------------------------------------------
+ *
+ * GET /api/v1/course-offerings/:id
+ * ------------------------------------------------------------------
  */
 router.get(
   "/:id",
-  authenticate,
-  validate(courseOfferingIdSchema),
-  CourseOfferingController.getCourseOfferingById
+  authMiddleware,
+  courseOfferingController.getCourseOfferingById
 );
 
 /**
+ * ------------------------------------------------------------------
  * Update Course Offering
+ * ------------------------------------------------------------------
+ *
+ * PUT /api/v1/course-offerings/:id
+ *
+ * Only HOD can update Course Offerings.
+ * ------------------------------------------------------------------
  */
 router.put(
   "/:id",
-  authenticate,
-  validate(updateCourseOfferingSchema),
-  CourseOfferingController.updateCourseOffering
+  authMiddleware,
+  roleMiddleware(ROLES.HOD),
+  courseOfferingController.updateCourseOffering
 );
 
 /**
+ * ------------------------------------------------------------------
  * Delete Course Offering
+ * ------------------------------------------------------------------
+ *
+ * DELETE /api/v1/course-offerings/:id
+ *
+ * Only HOD can delete Course Offerings.
+ * ------------------------------------------------------------------
  */
 router.delete(
   "/:id",
-  authenticate,
-  validate(courseOfferingIdSchema),
-  CourseOfferingController.deleteCourseOffering
+  authMiddleware,
+  roleMiddleware(ROLES.HOD),
+  courseOfferingController.deleteCourseOffering
 );
 
 export default router;

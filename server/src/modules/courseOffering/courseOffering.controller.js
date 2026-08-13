@@ -3,115 +3,142 @@
  * Course Offering Controller
  * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
- * Handles Course Offering HTTP requests and responses.
+ *
+ * Handles HTTP requests related to Course Offerings.
  * ------------------------------------------------------------------
  */
 
-import CourseOfferingService from "./courseOffering.service.js";
+import courseOfferingService from "./courseOffering.service.js";
 
-class CourseOfferingController {
-  /**
-   * Create Course Offering
-   */
-  async createCourseOffering(req, res, next) {
-    try {
-      const courseOffering =
-        await CourseOfferingService.createCourseOffering(
-          req.validatedData.body
-        );
+import asyncHandler from "../../shared/helpers/asyncHandler.js";
 
-      return res.status(201).json({
-        success: true,
-        message: "Course Offering created successfully.",
-        data: courseOffering,
-        error: null,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+import {
+  successResponse,
+} from "../../shared/helpers/apiResponse.js";
 
-  /**
-   * Get All Course Offerings
-   */
-  async getAllCourseOfferings(req, res, next) {
-    try {
-      const courseOfferings =
-        await CourseOfferingService.getAllCourseOfferings();
-
-      return res.status(200).json({
-        success: true,
-        message: "Course Offerings fetched successfully.",
-        data: courseOfferings,
-        error: null,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Get Course Offering By ID
-   */
-  async getCourseOfferingById(req, res, next) {
-    try {
-      const courseOffering =
-        await CourseOfferingService.getCourseOfferingById(
-          req.validatedData.params.id
-        );
-
-      return res.status(200).json({
-        success: true,
-        message: "Course Offering fetched successfully.",
-        data: courseOffering,
-        error: null,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Update Course Offering
-   */
-  async updateCourseOffering(req, res, next) {
-    try {
-      const courseOffering =
-        await CourseOfferingService.updateCourseOffering(
-          req.validatedData.params.id,
-          req.validatedData.body
-        );
-
-      return res.status(200).json({
-        success: true,
-        message: "Course Offering updated successfully.",
-        data: courseOffering,
-        error: null,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Delete Course Offering
-   */
-  async deleteCourseOffering(req, res, next) {
-    try {
-      await CourseOfferingService.deleteCourseOffering(
-        req.validatedData.params.id
+/**
+ * ------------------------------------------------------------------
+ * Create Course Offering
+ * ------------------------------------------------------------------
+ *
+ * POST /api/v1/course-offerings
+ * ------------------------------------------------------------------
+ */
+const createCourseOffering = asyncHandler(
+  async (req, res) => {
+    const courseOffering =
+      await courseOfferingService.createCourseOffering(
+        req.body
       );
 
-      return res.status(200).json({
-        success: true,
-        message: "Course Offering deleted successfully.",
-        data: null,
-        error: null,
-      });
-    } catch (error) {
-      next(error);
-    }
+    return successResponse(
+      res,
+      "Course Offering created successfully.",
+      courseOffering,
+      201
+    );
   }
-}
+);
 
-export default new CourseOfferingController();
+/**
+ * ------------------------------------------------------------------
+ * Get All Course Offerings
+ * ------------------------------------------------------------------
+ *
+ * GET /api/v1/course-offerings
+ * ------------------------------------------------------------------
+ */
+const getAllCourseOfferings = asyncHandler(
+  async (req, res) => {
+    const courseOfferings =
+      await courseOfferingService.getAllCourseOfferings();
+
+    return successResponse(
+      res,
+      "Course Offerings fetched successfully.",
+      courseOfferings
+    );
+  }
+);
+
+/**
+ * ------------------------------------------------------------------
+ * Get Course Offering By ID
+ * ------------------------------------------------------------------
+ *
+ * GET /api/v1/course-offerings/:id
+ * ------------------------------------------------------------------
+ */
+const getCourseOfferingById = asyncHandler(
+  async (req, res) => {
+    const courseOffering =
+      await courseOfferingService.getCourseOfferingById(
+        req.params.id
+      );
+
+    return successResponse(
+      res,
+      "Course Offering fetched successfully.",
+      courseOffering
+    );
+  }
+);
+
+/**
+ * ------------------------------------------------------------------
+ * Update Course Offering
+ * ------------------------------------------------------------------
+ *
+ * PUT /api/v1/course-offerings/:id
+ * ------------------------------------------------------------------
+ */
+const updateCourseOffering = asyncHandler(
+  async (req, res) => {
+    const courseOffering =
+      await courseOfferingService.updateCourseOffering(
+        req.params.id,
+        req.body
+      );
+
+    return successResponse(
+      res,
+      "Course Offering updated successfully.",
+      courseOffering
+    );
+  }
+);
+
+/**
+ * ------------------------------------------------------------------
+ * Delete Course Offering
+ * ------------------------------------------------------------------
+ *
+ * DELETE /api/v1/course-offerings/:id
+ * ------------------------------------------------------------------
+ */
+const deleteCourseOffering = asyncHandler(
+  async (req, res) => {
+    await courseOfferingService.deleteCourseOffering(
+      req.params.id
+    );
+
+    return successResponse(
+      res,
+      "Course Offering deleted successfully.",
+      null
+    );
+  }
+);
+
+/**
+ * ------------------------------------------------------------------
+ * Export
+ * ------------------------------------------------------------------
+ */
+export default {
+  createCourseOffering,
+  getAllCourseOfferings,
+  getCourseOfferingById,
+  updateCourseOffering,
+  deleteCourseOffering,
+};

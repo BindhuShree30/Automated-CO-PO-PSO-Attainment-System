@@ -1,16 +1,22 @@
 /**
- * ------------------------------------------------------------------
+ * ---------------------------------------------------------
  * User Model
  * Project : Automated CO–PO–PSO Attainment Analysis System
- * ------------------------------------------------------------------
- * This model stores all authenticated users.
- * Roles:
- * - SUPER_ADMIN
- * - ADMIN
+ * ---------------------------------------------------------
+ *
+ * Stores authenticated application users.
+ *
+ * Current Roles:
  * - HOD
  * - FACULTY
- * - STUDENT
- * ------------------------------------------------------------------
+ *
+ * Students are academic records and do not have
+ * application login accounts.
+ *
+ * Faculty registration starts with PENDING status.
+ * HOD approval changes the status to APPROVED.
+ * HOD rejection changes the status to REJECTED.
+ * ---------------------------------------------------------
  */
 
 import { DataTypes } from "sequelize";
@@ -70,9 +76,13 @@ const User = sequelize.define(
     
 
     status: {
-      type: DataTypes.BOOLEAN,
+      type: DataTypes.ENUM(
+        "PENDING",
+        "APPROVED",
+        "REJECTED"
+      ),
       allowNull: false,
-      defaultValue: true,
+      defaultValue: "PENDING",
     },
   },
   {

@@ -1,13 +1,21 @@
 /**
- * User Roles
+ * ---------------------------------------------------------
+ * Application Roles
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ---------------------------------------------------------
+ *
+ * Current single-department implementation:
+ * HOD      → Department Administrator
+ * FACULTY  → Teaching/Academic User
+ *
+ * Students do not have login accounts.
+ * There is no ADMIN login in the current architecture.
+ * ---------------------------------------------------------
  */
 
 const ROLES = Object.freeze({
-    SUPER_ADMIN: "SUPER_ADMIN",
-    ADMIN: "ADMIN",
-    HOD: "HOD",
-    FACULTY: "FACULTY",
-    STUDENT: "STUDENT",
-  });
-  
-  export default ROLES;
+  HOD: "HOD",
+  FACULTY: "FACULTY",
+});
+
+export default ROLES;

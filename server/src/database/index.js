@@ -3,39 +3,87 @@
  * Database Index
  * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
+ *
+ * Central Sequelize model registry and association configuration.
+ *
+ * Architecture:
+ *
+ * Program
+ *   └── Batch
+ *         └── Semester
+ *
+ * Department
+ *   ├── Course
+ *   ├── Faculty
+ *   └── Student
+ *
+ * Course
+ *   └── Course Outcome
+ *
+ * Course Offering
+ *   ├── Course
+ *   ├── Batch
+ *   ├── Semester
+ *   └── Faculty
+ *
+ * Course Offering
+ *   ├── Assessments
+ *   ├── CO Attainments
+ *   ├── PO Attainments
+ *   └── Course Registrations
+ *
+ * ------------------------------------------------------------------
  */
 
 import sequelize from "./connection.js";
 
-// Import ALL models
+/**
+ * ------------------------------------------------------------------
+ * Import ALL Models
+ * ------------------------------------------------------------------
+ */
+
 import User from "./models/User.js";
 import Department from "./models/Department.js";
 import Program from "./models/Program.js";
 import Course from "./models/Course.js";
 import Faculty from "./models/Faculty.js";
 import Student from "./models/Student.js";
+
 import CourseOutcome from "./models/CourseOutcome.js";
+
 import AcademicYear from "./models/AcademicYear.js";
 import Batch from "./models/Batch.js";
 import Semester from "./models/Semester.js";
+
 import CourseOffering from "./models/CourseOffering.js";
+
 import Assessment from "./models/Assessment.js";
 import AssessmentQuestion from "./models/AssessmentQuestion.js";
-import COAttainment from "./models/COAttainment.js";
-import ProgramOutcome from "./models/ProgramOutcome.js";
 import StudentQuestionMark from "./models/StudentQuestionMark.js";
-import Enrollment from "./models/Enrollment.js";
-import CourseRegistration from "./models/CourseRegistration.js";
+
+import COAttainment from "./models/COAttainment.js";
+
+import ProgramOutcome from "./models/ProgramOutcome.js";
 import COPOMapping from "./models/COPOMapping.js";
 import POAttainment from "./models/POAttainment.js";
+
 import ProgramSpecificOutcome from "./models/ProgramSpecificOutcome.js";
 import CoPsoMapping from "./models/CoPsoMapping.js";
+
+import Enrollment from "./models/Enrollment.js";
+import CourseRegistration from "./models/CourseRegistration.js";
+
+
 /**
- * ------------------------------------------------------------------
- * Program and Batch Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * PROGRAM AND BATCH ASSOCIATIONS
+ * ==================================================================
  */
 
+/**
+ * Program → Batches
+ */
 Program.hasMany(Batch, {
   foreignKey: "programId",
   as: "batches",
@@ -43,6 +91,9 @@ Program.hasMany(Batch, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Batch → Program
+ */
 Batch.belongsTo(Program, {
   foreignKey: "programId",
   as: "program",
@@ -50,32 +101,70 @@ Batch.belongsTo(Program, {
   onUpdate: "CASCADE",
 });
 
+
 /**
- * ------------------------------------------------------------------
- * Student Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * DEPARTMENT AND STUDENT ASSOCIATIONS
+ * ==================================================================
  */
 
-Program.hasMany(Student, {
-  foreignKey: "programId",
+/**
+ * Department → Students
+ */
+Department.hasMany(Student, {
+  foreignKey: "departmentId",
+  as: "students",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Student → Department
+ */
+Student.belongsTo(Department, {
+  foreignKey: "departmentId",
+  as: "department",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
+
+
+/**
+ * ==================================================================
+ * STUDENT → SEMESTER ASSOCIATIONS
+ * ==================================================================
+ */
+
+/**
+ * Semester → Students
+ */
+Semester.hasMany(Student, {
+  foreignKey: "semesterId",
   as: "students",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
 
-Student.belongsTo(Program, {
-  foreignKey: "programId",
-  as: "program",
+/**
+ * Student → Semester
+ */
+Student.belongsTo(Semester, {
+  foreignKey: "semesterId",
+  as: "semester",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
 
+
 /**
- * ------------------------------------------------------------------
- * Course Outcome Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * COURSE OUTCOME ASSOCIATIONS
+ * ==================================================================
  */
 
+/**
+ * Course → Course Outcomes
+ */
 Course.hasMany(CourseOutcome, {
   foreignKey: "courseId",
   as: "courseOutcomes",
@@ -83,6 +172,9 @@ Course.hasMany(CourseOutcome, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Course Outcome → Course
+ */
 CourseOutcome.belongsTo(Course, {
   foreignKey: "courseId",
   as: "course",
@@ -90,12 +182,16 @@ CourseOutcome.belongsTo(Course, {
   onUpdate: "CASCADE",
 });
 
+
 /**
- * ------------------------------------------------------------------
- * Semester Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * BATCH → SEMESTER ASSOCIATIONS
+ * ==================================================================
  */
 
+/**
+ * Batch → Semesters
+ */
 Batch.hasMany(Semester, {
   foreignKey: "batchId",
   as: "semesters",
@@ -103,6 +199,9 @@ Batch.hasMany(Semester, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Semester → Batch
+ */
 Semester.belongsTo(Batch, {
   foreignKey: "batchId",
   as: "batch",
@@ -110,6 +209,16 @@ Semester.belongsTo(Batch, {
   onUpdate: "CASCADE",
 });
 
+
+/**
+ * ==================================================================
+ * ACADEMIC YEAR → SEMESTER ASSOCIATIONS
+ * ==================================================================
+ */
+
+/**
+ * Academic Year → Semesters
+ */
 AcademicYear.hasMany(Semester, {
   foreignKey: "academicYearId",
   as: "semesters",
@@ -117,6 +226,9 @@ AcademicYear.hasMany(Semester, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Semester → Academic Year
+ */
 Semester.belongsTo(AcademicYear, {
   foreignKey: "academicYearId",
   as: "academicYear",
@@ -124,12 +236,33 @@ Semester.belongsTo(AcademicYear, {
   onUpdate: "CASCADE",
 });
 
+
 /**
- * ------------------------------------------------------------------
- * Course Offering Associations
+ * ==================================================================
+ * COURSE OFFERING ASSOCIATIONS
+ * ==================================================================
+ *
+ * Current Course Offering structure:
+ *
+ * Course
+ * Batch
+ * Semester
+ * Faculty
+ * Section
+ *
+ * NOTE:
+ * facultyId currently exists directly in course_offerings.
+ * Therefore Faculty ↔ CourseOffering association MUST remain.
+ *
+ * Faculty Assignment as a separate UI/module can be implemented
+ * later without breaking the current Course Offering architecture.
+ *
  * ------------------------------------------------------------------
  */
 
+/**
+ * Course → Course Offerings
+ */
 Course.hasMany(CourseOffering, {
   foreignKey: "courseId",
   as: "courseOfferings",
@@ -137,6 +270,9 @@ Course.hasMany(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Course Offering → Course
+ */
 CourseOffering.belongsTo(Course, {
   foreignKey: "courseId",
   as: "course",
@@ -144,6 +280,10 @@ CourseOffering.belongsTo(Course, {
   onUpdate: "CASCADE",
 });
 
+
+/**
+ * Batch → Course Offerings
+ */
 Batch.hasMany(CourseOffering, {
   foreignKey: "batchId",
   as: "courseOfferings",
@@ -151,6 +291,9 @@ Batch.hasMany(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Course Offering → Batch
+ */
 CourseOffering.belongsTo(Batch, {
   foreignKey: "batchId",
   as: "batch",
@@ -158,6 +301,10 @@ CourseOffering.belongsTo(Batch, {
   onUpdate: "CASCADE",
 });
 
+
+/**
+ * Semester → Course Offerings
+ */
 Semester.hasMany(CourseOffering, {
   foreignKey: "semesterId",
   as: "courseOfferings",
@@ -165,6 +312,9 @@ Semester.hasMany(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Course Offering → Semester
+ */
 CourseOffering.belongsTo(Semester, {
   foreignKey: "semesterId",
   as: "semester",
@@ -172,6 +322,10 @@ CourseOffering.belongsTo(Semester, {
   onUpdate: "CASCADE",
 });
 
+
+/**
+ * Faculty → Course Offerings
+ */
 Faculty.hasMany(CourseOffering, {
   foreignKey: "facultyId",
   as: "courseOfferings",
@@ -179,6 +333,9 @@ Faculty.hasMany(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Course Offering → Faculty
+ */
 CourseOffering.belongsTo(Faculty, {
   foreignKey: "facultyId",
   as: "faculty",
@@ -186,12 +343,16 @@ CourseOffering.belongsTo(Faculty, {
   onUpdate: "CASCADE",
 });
 
+
 /**
- * ------------------------------------------------------------------
- * Assessment Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * ASSESSMENT ASSOCIATIONS
+ * ==================================================================
  */
 
+/**
+ * Course Offering → Assessments
+ */
 CourseOffering.hasMany(Assessment, {
   foreignKey: "courseOfferingId",
   as: "assessments",
@@ -199,6 +360,9 @@ CourseOffering.hasMany(Assessment, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Assessment → Course Offering
+ */
 Assessment.belongsTo(CourseOffering, {
   foreignKey: "courseOfferingId",
   as: "courseOffering",
@@ -206,12 +370,16 @@ Assessment.belongsTo(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
+
 /**
- * ------------------------------------------------------------------
- * Assessment Question Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * ASSESSMENT QUESTION ASSOCIATIONS
+ * ==================================================================
  */
 
+/**
+ * Assessment → Questions
+ */
 Assessment.hasMany(AssessmentQuestion, {
   foreignKey: "assessmentId",
   as: "questions",
@@ -219,6 +387,9 @@ Assessment.hasMany(AssessmentQuestion, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Assessment Question → Assessment
+ */
 AssessmentQuestion.belongsTo(Assessment, {
   foreignKey: "assessmentId",
   as: "assessment",
@@ -226,6 +397,10 @@ AssessmentQuestion.belongsTo(Assessment, {
   onUpdate: "CASCADE",
 });
 
+
+/**
+ * Course Outcome → Assessment Questions
+ */
 CourseOutcome.hasMany(AssessmentQuestion, {
   foreignKey: "courseOutcomeId",
   as: "assessmentQuestions",
@@ -233,19 +408,26 @@ CourseOutcome.hasMany(AssessmentQuestion, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Assessment Question → Course Outcome
+ */
 AssessmentQuestion.belongsTo(CourseOutcome, {
   foreignKey: "courseOutcomeId",
   as: "courseOutcome",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
+
+
 /**
- * ------------------------------------------------------------------
- * CO Attainment Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * CO ATTAINMENT ASSOCIATIONS
+ * ==================================================================
  */
 
-// Course Offering → CO Attainments
+/**
+ * Course Offering → CO Attainments
+ */
 CourseOffering.hasMany(COAttainment, {
   foreignKey: "courseOfferingId",
   as: "coAttainments",
@@ -253,7 +435,9 @@ CourseOffering.hasMany(COAttainment, {
   onUpdate: "CASCADE",
 });
 
-// CO Attainment → Course Offering
+/**
+ * CO Attainment → Course Offering
+ */
 COAttainment.belongsTo(CourseOffering, {
   foreignKey: "courseOfferingId",
   as: "courseOffering",
@@ -261,7 +445,10 @@ COAttainment.belongsTo(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
-// Course Outcome → CO Attainments
+
+/**
+ * Course Outcome → CO Attainments
+ */
 CourseOutcome.hasMany(COAttainment, {
   foreignKey: "courseOutcomeId",
   as: "coAttainments",
@@ -269,29 +456,49 @@ CourseOutcome.hasMany(COAttainment, {
   onUpdate: "CASCADE",
 });
 
-// CO Attainment → Course Outcome
+/**
+ * CO Attainment → Course Outcome
+ */
 COAttainment.belongsTo(CourseOutcome, {
   foreignKey: "courseOutcomeId",
   as: "courseOutcome",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
+
+
+/**
+ * ==================================================================
+ * PROGRAM OUTCOME ASSOCIATIONS
+ * ==================================================================
+ */
+
+/**
+ * Program → Program Outcomes
+ */
 Program.hasMany(ProgramOutcome, {
   foreignKey: "programId",
   as: "programOutcomes",
 });
 
+/**
+ * Program Outcome → Program
+ */
 ProgramOutcome.belongsTo(Program, {
   foreignKey: "programId",
   as: "program",
 });
 
+
 /**
- * ------------------------------------------------------------------
- * CO-PO Mapping Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * CO–PO MAPPING ASSOCIATIONS
+ * ==================================================================
  */
 
+/**
+ * Course Outcome → CO-PO Mappings
+ */
 CourseOutcome.hasMany(COPOMapping, {
   foreignKey: "courseOutcomeId",
   as: "poMappings",
@@ -299,6 +506,9 @@ CourseOutcome.hasMany(COPOMapping, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * CO-PO Mapping → Course Outcome
+ */
 COPOMapping.belongsTo(CourseOutcome, {
   foreignKey: "courseOutcomeId",
   as: "courseOutcome",
@@ -306,6 +516,10 @@ COPOMapping.belongsTo(CourseOutcome, {
   onUpdate: "CASCADE",
 });
 
+
+/**
+ * Program Outcome → CO-PO Mappings
+ */
 ProgramOutcome.hasMany(COPOMapping, {
   foreignKey: "programOutcomeId",
   as: "coMappings",
@@ -313,6 +527,9 @@ ProgramOutcome.hasMany(COPOMapping, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * CO-PO Mapping → Program Outcome
+ */
 COPOMapping.belongsTo(ProgramOutcome, {
   foreignKey: "programOutcomeId",
   as: "programOutcome",
@@ -320,6 +537,16 @@ COPOMapping.belongsTo(ProgramOutcome, {
   onUpdate: "CASCADE",
 });
 
+
+/**
+ * ==================================================================
+ * PO ATTAINMENT ASSOCIATIONS
+ * ==================================================================
+ */
+
+/**
+ * Course Offering → PO Attainments
+ */
 CourseOffering.hasMany(POAttainment, {
   foreignKey: "courseOfferingId",
   as: "poAttainments",
@@ -327,6 +554,9 @@ CourseOffering.hasMany(POAttainment, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * PO Attainment → Course Offering
+ */
 POAttainment.belongsTo(CourseOffering, {
   foreignKey: "courseOfferingId",
   as: "courseOffering",
@@ -334,6 +564,10 @@ POAttainment.belongsTo(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
+
+/**
+ * Program Outcome → PO Attainments
+ */
 ProgramOutcome.hasMany(POAttainment, {
   foreignKey: "programOutcomeId",
   as: "poAttainments",
@@ -341,44 +575,66 @@ ProgramOutcome.hasMany(POAttainment, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * PO Attainment → Program Outcome
+ */
 POAttainment.belongsTo(ProgramOutcome, {
   foreignKey: "programOutcomeId",
   as: "programOutcome",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
-// ==============================
-// CO - PSO Mapping Associations
-// ==============================
 
+
+/**
+ * ==================================================================
+ * CO–PSO MAPPING ASSOCIATIONS
+ * ==================================================================
+ */
+
+/**
+ * Course Outcome → CO-PSO Mappings
+ */
 CourseOutcome.hasMany(CoPsoMapping, {
   foreignKey: "courseOutcomeId",
   as: "coPsoMappings",
 });
 
+/**
+ * CO-PSO Mapping → Course Outcome
+ */
 CoPsoMapping.belongsTo(CourseOutcome, {
   foreignKey: "courseOutcomeId",
   as: "courseOutcome",
 });
 
+
+/**
+ * Program Specific Outcome → CO-PSO Mappings
+ */
 ProgramSpecificOutcome.hasMany(CoPsoMapping, {
   foreignKey: "programSpecificOutcomeId",
   as: "coPsoMappings",
 });
 
+/**
+ * CO-PSO Mapping → Program Specific Outcome
+ */
 CoPsoMapping.belongsTo(ProgramSpecificOutcome, {
   foreignKey: "programSpecificOutcomeId",
   as: "programSpecificOutcome",
 });
 
+
 /**
- * 
- * ------------------------------------------------------------------
- * Student Question Mark Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * STUDENT QUESTION MARK ASSOCIATIONS
+ * ==================================================================
  */
 
-// Student → Student Question Marks
+/**
+ * Student → Question Marks
+ */
 Student.hasMany(StudentQuestionMark, {
   foreignKey: "studentId",
   as: "questionMarks",
@@ -386,7 +642,9 @@ Student.hasMany(StudentQuestionMark, {
   onUpdate: "CASCADE",
 });
 
-// Student Question Mark → Student
+/**
+ * Student Question Mark → Student
+ */
 StudentQuestionMark.belongsTo(Student, {
   foreignKey: "studentId",
   as: "student",
@@ -394,7 +652,10 @@ StudentQuestionMark.belongsTo(Student, {
   onUpdate: "CASCADE",
 });
 
-// Assessment Question → Student Question Marks
+
+/**
+ * Assessment Question → Student Question Marks
+ */
 AssessmentQuestion.hasMany(StudentQuestionMark, {
   foreignKey: "assessmentQuestionId",
   as: "studentMarks",
@@ -402,19 +663,26 @@ AssessmentQuestion.hasMany(StudentQuestionMark, {
   onUpdate: "CASCADE",
 });
 
-// Student Question Mark → Assessment Question
+/**
+ * Student Question Mark → Assessment Question
+ */
 StudentQuestionMark.belongsTo(AssessmentQuestion, {
   foreignKey: "assessmentQuestionId",
   as: "assessmentQuestion",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
+
+
 /**
- * ------------------------------------------------------------------
- * Enrollment Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * ENROLLMENT ASSOCIATIONS
+ * ==================================================================
  */
 
+/**
+ * Student → Enrollments
+ */
 Student.hasMany(Enrollment, {
   foreignKey: "studentId",
   as: "enrollments",
@@ -422,6 +690,9 @@ Student.hasMany(Enrollment, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Enrollment → Student
+ */
 Enrollment.belongsTo(Student, {
   foreignKey: "studentId",
   as: "student",
@@ -429,6 +700,10 @@ Enrollment.belongsTo(Student, {
   onUpdate: "CASCADE",
 });
 
+
+/**
+ * Batch → Enrollments
+ */
 Batch.hasMany(Enrollment, {
   foreignKey: "batchId",
   as: "enrollments",
@@ -436,6 +711,9 @@ Batch.hasMany(Enrollment, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Enrollment → Batch
+ */
 Enrollment.belongsTo(Batch, {
   foreignKey: "batchId",
   as: "batch",
@@ -443,12 +721,16 @@ Enrollment.belongsTo(Batch, {
   onUpdate: "CASCADE",
 });
 
+
 /**
- * ------------------------------------------------------------------
- * Course Registration Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * COURSE REGISTRATION ASSOCIATIONS
+ * ==================================================================
  */
 
+/**
+ * Student → Course Registrations
+ */
 Student.hasMany(CourseRegistration, {
   foreignKey: "studentId",
   as: "courseRegistrations",
@@ -456,6 +738,9 @@ Student.hasMany(CourseRegistration, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Course Registration → Student
+ */
 CourseRegistration.belongsTo(Student, {
   foreignKey: "studentId",
   as: "student",
@@ -463,6 +748,10 @@ CourseRegistration.belongsTo(Student, {
   onUpdate: "CASCADE",
 });
 
+
+/**
+ * Course Offering → Course Registrations
+ */
 CourseOffering.hasMany(CourseRegistration, {
   foreignKey: "courseOfferingId",
   as: "courseRegistrations",
@@ -470,18 +759,26 @@ CourseOffering.hasMany(CourseRegistration, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Course Registration → Course Offering
+ */
 CourseRegistration.belongsTo(CourseOffering, {
   foreignKey: "courseOfferingId",
   as: "courseOffering",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
+
+
 /**
- * ------------------------------------------------------------------
- * Program Specific Outcome Associations
- * ------------------------------------------------------------------
+ * ==================================================================
+ * PROGRAM SPECIFIC OUTCOME ASSOCIATIONS
+ * ==================================================================
  */
 
+/**
+ * Program → Program Specific Outcomes
+ */
 Program.hasMany(ProgramSpecificOutcome, {
   foreignKey: "programId",
   as: "programSpecificOutcomes",
@@ -489,18 +786,33 @@ Program.hasMany(ProgramSpecificOutcome, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Program Specific Outcome → Program
+ */
 ProgramSpecificOutcome.belongsTo(Program, {
   foreignKey: "programId",
   as: "program",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
+
+
 /**
- * ------------------------------------------------------------------
- * Program ↔ Course Associations
+ * ==================================================================
+ * PROGRAM ↔ COURSE ASSOCIATIONS
+ * ==================================================================
+ *
+ * Kept for existing database compatibility.
+ *
+ * Program is not part of the current Course Offering application
+ * workflow.
+ *
  * ------------------------------------------------------------------
  */
 
+/**
+ * Program → Courses
+ */
 Program.hasMany(Course, {
   foreignKey: "programId",
   as: "courses",
@@ -508,70 +820,148 @@ Program.hasMany(Course, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * Course → Program
+ */
 Course.belongsTo(Program, {
   foreignKey: "programId",
   as: "program",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
+
+
 /**
+ * ==================================================================
+ * DEPARTMENT ↔ COURSE ASSOCIATIONS
+ * ==================================================================
+ *
+ * Department is the application-level relationship used for
+ * Course management.
+ *
  * ------------------------------------------------------------------
- * Database Connection
- * ------------------------------------------------------------------
+ */
+
+/**
+ * Department → Courses
+ */
+Department.hasMany(Course, {
+  foreignKey: "departmentId",
+  as: "courses",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Course → Department
+ */
+Course.belongsTo(Department, {
+  foreignKey: "departmentId",
+  as: "department",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+
+/**
+ * ==================================================================
+ * DATABASE CONNECTION
+ * ==================================================================
  */
 
 const connectDatabase = async () => {
   try {
+    /**
+     * Authenticate database connection
+     */
     await sequelize.authenticate();
 
-    console.log("✅ Database connected successfully.");
+    console.log(
+      "✅ Database connected successfully."
+    );
 
     /**
-     * TEMPORARY FOR DEVELOPMENT
+     * --------------------------------------------------------------
+     * TEMPORARY DEVELOPMENT SYNCHRONIZATION
+     * --------------------------------------------------------------
      *
-     * Replace sequelize.sync() with Sequelize migrations
-     * before production deployment.
+     * This is currently being used during development.
+     *
+     * Before production deployment, replace sequelize.sync()
+     * with Sequelize migrations.
+     *
+     * --------------------------------------------------------------
      */
+
     await sequelize.sync();
 
-    console.log("✅ Database synchronized successfully.");
+    console.log(
+      "✅ Database synchronized successfully."
+    );
   } catch (error) {
-    console.error("❌ Failed to connect to database.");
+    console.error(
+      "❌ Failed to connect to database."
+    );
+
     console.error(error);
 
     process.exit(1);
   }
 };
 
+
 /**
- * ------------------------------------------------------------------
- * Exports
- * ------------------------------------------------------------------
+ * ==================================================================
+ * EXPORTS
+ * ==================================================================
  */
 
 export {
   sequelize,
+
   User,
+
   Department,
+
   Program,
+
   Course,
+
   Faculty,
+
   Student,
+
   CourseOutcome,
+
   AcademicYear,
+
   Batch,
+
   Semester,
+
   CourseOffering,
+
   Assessment,
+
   AssessmentQuestion,
+
   COAttainment,
+
   ProgramOutcome,
+
   COPOMapping,
+
   StudentQuestionMark,
+
   Enrollment,
+
   CourseRegistration,
+
   POAttainment,
+
   ProgramSpecificOutcome,
+
   CoPsoMapping,
+
   connectDatabase,
 };

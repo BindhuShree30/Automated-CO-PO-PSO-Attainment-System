@@ -10,69 +10,61 @@ import { Router } from "express";
 import facultyController from "./faculty.controller.js";
 
 import authMiddleware from "../../middleware/auth.middleware.js";
-import roleMiddleware from "../../middleware/role.middleware.js";
-import validate from "../../middleware/validate.middleware.js";
-
-import ROLES from "../../shared/constants/roles.js";
-
-import {
-  createFacultySchema,
-  updateFacultySchema,
-  facultyIdSchema,
-} from "./faculty.schema.js";
 
 const router = Router();
 
-/**
- * Create Faculty
- */
-router.post(
-  "/",
-  authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
-  validate(createFacultySchema),
-  facultyController.createFaculty
-);
 
 /**
- * Get All Faculties
+ * ------------------------------------------------------------------
+ * Get Approved Faculty
+ * ------------------------------------------------------------------
+ *
+ * IMPORTANT:
+ *
+ * This route MUST come before:
+ *
+ * /:id
+ *
+ * Otherwise Express may interpret "approved" as an ID.
+ *
+ * GET /api/v1/faculty/approved
+ * ------------------------------------------------------------------
+ */
+router.get(
+  "/approved",
+  authMiddleware,
+  facultyController.getApprovedFaculty
+);
+
+
+/**
+ * ------------------------------------------------------------------
+ * Get All Faculty
+ * ------------------------------------------------------------------
+ *
+ * GET /api/v1/faculty
+ * ------------------------------------------------------------------
  */
 router.get(
   "/",
   authMiddleware,
-  facultyController.getFaculties
+  facultyController.getAllFaculty
 );
 
+
 /**
+ * ------------------------------------------------------------------
  * Get Faculty By ID
+ * ------------------------------------------------------------------
+ *
+ * GET /api/v1/faculty/:id
+ * ------------------------------------------------------------------
  */
 router.get(
   "/:id",
   authMiddleware,
-  validate(facultyIdSchema),
   facultyController.getFacultyById
 );
 
-/**
- * Update Faculty
- */
-router.put(
-  "/:id",
-  authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
-  validate(updateFacultySchema),
-  facultyController.updateFaculty
-);
-
-/**
- * Delete Faculty
- */
-router.delete(
-  "/:id",
-  authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
-  validate(facultyIdSchema),
-  facultyController.deleteFaculty
-);
 
 export default router;

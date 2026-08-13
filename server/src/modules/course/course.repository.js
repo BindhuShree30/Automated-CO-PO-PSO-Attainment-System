@@ -1,12 +1,19 @@
 /**
  * ------------------------------------------------------------------
  * Course Repository
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ *
+ * Handles all database operations related to Courses.
+ *
+ * Program is retained only for backward compatibility.
+ * Department is the active relationship used by the application.
+ *
  * ------------------------------------------------------------------
  */
 
 import {
   Course,
-  Program,
   Department,
 } from "../../database/index.js";
 
@@ -28,29 +35,18 @@ const findCourseById = async (id) => {
   return await Course.findByPk(id, {
     include: [
       {
-        model: Program,
-        as: "program",
+        model: Department,
+        as: "department",
         attributes: [
           "id",
           "code",
           "name",
-          "departmentId",
         ],
-        include: [
-          {
-            model: Department,
-            as: "department",
-            attributes: [
-              "id",
-              "code",
-              "name",
-            ],
       },
     ],
-  },
-],
   });
 };
+
 /**
  * ------------------------------------------------------------------
  * Generic Find By ID
@@ -82,16 +78,6 @@ const findAllCourses = async () => {
   return await Course.findAll({
     include: [
       {
-        model: Program,
-        as: "program",
-        attributes: [
-          "id",
-          "code",
-          "name",
-          "departmentId",
-        ],
-         include: [
-      {
         model: Department,
         as: "department",
         attributes: [
@@ -99,11 +85,9 @@ const findAllCourses = async () => {
           "code",
           "name",
         ],
-        
       },
     ],
-  },
-],
+
     order: [
       ["code", "ASC"],
     ],
@@ -116,7 +100,9 @@ const findAllCourses = async () => {
  * ------------------------------------------------------------------
  */
 const updateCourse = async (course, data) => {
-  return await course.update(data);
+  await course.update(data);
+
+  return await findCourseById(course.id);
 };
 
 /**

@@ -29,7 +29,7 @@ const router = Router();
 router.post(
   "/",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD),
   validate(createCourseSchema),
   courseController.createCourse
 );
@@ -59,7 +59,7 @@ router.get(
 router.put(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD),
   validate(updateCourseSchema),
   courseController.updateCourse
 );
@@ -70,7 +70,7 @@ router.put(
 router.delete(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD),
   validate(courseIdSchema),
   courseController.deleteCourse
 );

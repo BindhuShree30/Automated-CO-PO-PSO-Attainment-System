@@ -30,6 +30,8 @@ import poAttainmentRoutes from "../modules/poAttainment/poAttainment.routes.js";
 import programSpecificOutcomeRoutes from "../modules/programSpecificOutcome/programSpecificOutcome.routes.js";
 import coPsoMappingRoutes from "../modules/coPsoMapping/coPsoMapping.routes.js";
 import dashboardRoutes from "../modules/dashboard/dashboard.routes.js";
+import hodRoutes from "../modules/hod/hod.routes.js";
+
 const router = Router();
 
 /**
@@ -55,6 +57,13 @@ router.use("/auth", authRoutes);
 
 /**
  * ------------------------------------------------------------------
+ * HOD Routes
+ * ------------------------------------------------------------------
+ */
+router.use("/hod", hodRoutes);
+
+/**
+ * ------------------------------------------------------------------
  * Department Routes
  * ------------------------------------------------------------------
  */
@@ -73,14 +82,23 @@ router.use("/programs", programRoutes);
  * ------------------------------------------------------------------
  */
 router.use("/courses", courseRoutes);
+
+/**
+ * ------------------------------------------------------------------
+ * Dashboard Routes
+ * ------------------------------------------------------------------
+ */
 router.use("/dashboard", dashboardRoutes);
 
 /**
  * ------------------------------------------------------------------
  * Faculty Routes
+ *
+ * Base URL:
+ * /api/v1/faculty
  * ------------------------------------------------------------------
  */
-router.use("/faculties", facultyRoutes);
+router.use("/faculty", facultyRoutes);
 
 /**
  * ------------------------------------------------------------------
@@ -136,7 +154,10 @@ router.use("/enrollments", enrollmentRoutes);
  * Course Registration Routes
  * ------------------------------------------------------------------
  */
-router.use("/course-registrations", courseRegistrationRoutes);
+router.use(
+  "/course-registrations",
+  courseRegistrationRoutes
+);
 
 /**
  * ------------------------------------------------------------------
@@ -150,42 +171,61 @@ router.use("/assessments", assessmentRoutes);
  * Assessment Question Routes
  * ------------------------------------------------------------------
  */
-router.use("/assessment-questions", assessmentQuestionRoutes);
+router.use(
+  "/assessment-questions",
+  assessmentQuestionRoutes
+);
 
 /**
  * ------------------------------------------------------------------
  * Student Question Mark Routes
  * ------------------------------------------------------------------
  */
-router.use("/student-question-marks", studentQuestionMarkRoutes);
+router.use(
+  "/student-question-marks",
+  studentQuestionMarkRoutes
+);
 
 /**
  * ------------------------------------------------------------------
  * CO Attainment Routes
  * ------------------------------------------------------------------
  */
-router.use("/co-attainments", coAttainmentRoutes);
+router.use(
+  "/co-attainments",
+  coAttainmentRoutes
+);
 
 /**
  * ------------------------------------------------------------------
  * Program Outcome Routes
  * ------------------------------------------------------------------
  */
-router.use("/program-outcomes", programOutcomeRoutes);
+router.use(
+  "/program-outcomes",
+  programOutcomeRoutes
+);
 
 /**
  * ------------------------------------------------------------------
- * CO-PO Mapping Routes
+ * CO–PO Mapping Routes
  * ------------------------------------------------------------------
  */
-router.use("/co-po-mappings", coPOMappingRoutes);
+router.use(
+  "/co-po-mappings",
+  coPOMappingRoutes
+);
 
 /**
  * ------------------------------------------------------------------
  * PO Attainment Routes
  * ------------------------------------------------------------------
  */
-router.use("/po-attainments", poAttainmentRoutes);
+router.use(
+  "/po-attainments",
+  poAttainmentRoutes
+);
+
 /**
  * ------------------------------------------------------------------
  * Program Specific Outcome Routes
@@ -195,13 +235,20 @@ router.use(
   "/program-specific-outcomes",
   programSpecificOutcomeRoutes
 );
+
 /**
  * ------------------------------------------------------------------
- * CO-PSO Mapping Routes
+ * CO–PSO Mapping Routes
  * ------------------------------------------------------------------
  */
-router.use("/co-pso-mappings", coPsoMappingRoutes
-
+router.use(
+  "/co-pso-mappings",
+  coPsoMappingRoutes
 );
 
+/**
+ * ------------------------------------------------------------------
+ * Export
+ * ------------------------------------------------------------------
+ */
 export default router;

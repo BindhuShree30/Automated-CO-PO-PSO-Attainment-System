@@ -1,197 +1,324 @@
-import StudentList from "../pages/student/StudentList";
-import AddStudent from "../pages/student/AddStudent";
-import EditStudent from "../pages/student/EditStudent";
-
-import { Navigate, Route, Routes } from "react-router-dom";
+import {
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
 
 import DashboardLayout from "../layouts/DashboardLayout";
 
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 
+/* =========================================================
+   AUTH
+========================================================= */
+
 import Login from "../pages/auth/Login";
+import Register from "../pages/auth/Register";
 
-import AdminDashboard from "../pages/admin/Dashboard";
-import DepartmentList from "../pages/department/DepartmentList";
-import AddDepartment from "../pages/department/AddDepartment";
-import EditDepartment from "../pages/department/EditDepartment";
-import ProgramList from "../pages/program/ProgramList";
-import AddProgram from "../pages/program/AddProgram";
-import EditProgram from "../pages/program/EditProgram";
-import CourseList from "../pages/course/CourseList";
-import AddCourse from "../pages/course/AddCourse";
-import EditCourse from "../pages/course/EditCourse";
-import Faculty from "../pages/admin/Faculty";
-import Reports from "../pages/admin/Reports";
-import CourseOutcomeList from "../pages/courseOutcome/CourseOutcomeList";
-import AddCourseOutcome from "../pages/courseOutcome/AddCourseOutcome";
-import EditCourseOutcome from "../pages/courseOutcome/EditCourseOutcome";
-import FacultyDashboard from "../pages/faculty/Dashboard";
-import StudentDashboard from "../pages/student/Dashboard";
+/* =========================================================
+   HOD
+========================================================= */
 
-import Unauthorized from "../pages/common/Unauthorized";
-import NotFound from "../pages/common/NotFound";
+import HodDashboard from "../pages/hod/Dashboard";
+import HodFaculty from "../pages/hod/Faculty";
+import HodStudents from "../pages/hod/Students";
+import HodCourses from "../pages/hod/Courses";
+
+/* =========================================================
+   BATCH
+========================================================= */
+
+import Batch from "../pages/batch/Batch";
+import BatchForm from "../pages/batch/BatchForm";
+
+/* =========================================================
+   PROGRAM OUTCOME
+========================================================= */
+
 import ProgramOutcomeList from "../pages/programOutcome/ProgramOutcomeList";
 import AddProgramOutcome from "../pages/programOutcome/AddProgramOutcome";
 import EditProgramOutcome from "../pages/programOutcome/EditProgramOutcome";
 
-// Uncomment this ONLY if the file exists:
-// src/pages/coPoMapping/COPOMatrix.jsx
+/* =========================================================
+   FACULTY
+========================================================= */
+
+import FacultyDashboard from "../pages/faculty/Dashboard";
+
+/* =========================================================
+   COURSE OUTCOME
+========================================================= */
+
+import CourseOutcomeList from "../pages/courseOutcome/CourseOutcomeList";
+import AddCourseOutcome from "../pages/courseOutcome/AddCourseOutcome";
+import EditCourseOutcome from "../pages/courseOutcome/EditCourseOutcome";
+
+/* =========================================================
+   CO-PO MAPPING
+========================================================= */
+
 import COPOMatrix from "../pages/coPoMapping/COPOMatrix";
+
+/* =========================================================
+   COURSE OFFERING
+========================================================= */
+
+import CourseOfferingList from "../pages/courseOffering/CourseOfferingList";
+import AddCourseOffering from "../pages/courseOffering/AddCourseOffering";
+import EditCourseOffering from "../pages/courseOffering/EditCourseOffering";
+
+/* =========================================================
+   FACULTY ASSIGNMENT
+========================================================= */
+
+import FacultyAssignment from "../pages/facultyAssignment/FacultyAssignment";
+
+/* =========================================================
+   COMMON
+========================================================= */
+
+import Unauthorized from "../pages/common/Unauthorized";
+import NotFound from "../pages/common/NotFound";
+
 
 function AppRoutes() {
   return (
     <Routes>
 
-      {/* Public Routes */}
+      {/* =====================================================
+          PUBLIC ROUTES
+      ===================================================== */}
+
       <Route element={<PublicRoute />}>
-        <Route path="/login" element={<Login />} />
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
       </Route>
 
-      {/* ================= ADMIN ================= */}
-      <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+
+      {/* =====================================================
+          HOD ROUTES
+      ===================================================== */}
+
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={["HOD"]}
+          />
+        }
+      >
+
         <Route element={<DashboardLayout />}>
 
+          {/* =================================================
+              HOD DASHBOARD
+          ================================================= */}
+
           <Route
-            path="/admin/dashboard"
-            element={<AdminDashboard />}
+            path="/hod/dashboard"
+            element={<HodDashboard />}
+          />
+
+
+          {/* =================================================
+              HOD FACULTY
+          ================================================= */}
+
+          <Route
+            path="/hod/faculty"
+            element={<HodFaculty />}
+          />
+
+
+          {/* =================================================
+              HOD STUDENTS
+          ================================================= */}
+
+          <Route
+            path="/hod/students"
+            element={<HodStudents />}
+          />
+
+
+          {/* =================================================
+              HOD COURSES
+          ================================================= */}
+
+          <Route
+            path="/hod/courses"
+            element={<HodCourses />}
+          />
+
+
+          {/* =================================================
+              HOD BATCH MANAGEMENT
+          ================================================= */}
+
+          <Route
+            path="/hod/batches"
+            element={<Batch />}
           />
 
           <Route
-            path="/admin/departments"
-            element={<DepartmentList />}
+            path="/hod/batches/add"
+            element={<BatchForm />}
           />
 
           <Route
-            path="/admin/departments/add"
-            element={<AddDepartment />}
+            path="/hod/batches/edit/:id"
+            element={<BatchForm />}
           />
 
-          <Route
-            path="/admin/departments/edit/:id"
-            element={<EditDepartment />}
-          />
+
+          {/* =================================================
+              HOD PROGRAM OUTCOMES
+          ================================================= */}
 
           <Route
-            path="/admin/programs"
-            element={<ProgramList />}
-          />
-
-          <Route
-            path="/admin/programs/add"
-            element={<AddProgram />}
-          />
-
-          <Route
-            path="/admin/programs/edit/:id"
-            element={<EditProgram />}
-          />
-
-          <Route
-            path="/admin/courses"
-            element={<CourseList />}
-          />
-
-          <Route
-            path="/admin/courses/add"
-            element={<AddCourse />}
-          />
-
-          <Route
-            path="/admin/courses/edit/:id"
-            element={<EditCourse />}
-          />
-
-          <Route
-            path="/admin/faculty"
-            element={<Faculty />}
-          />
-
-          <Route
-            path="/admin/students"
-            element={<StudentList />}
-          />
-
-          <Route
-            path="/admin/students/add"
-            element={<AddStudent />}
-          />
-
-          <Route
-            path="/admin/students/edit/:id"
-            element={<EditStudent />}
-          />
-
-          <Route
-            path="/admin/reports"
-            element={<Reports />}
-          />
-          <Route
-            path="/admin/course-outcomes"
-            element={<CourseOutcomeList />}
-          />
-
-          <Route
-            path="/admin/course-outcomes/add"
-            element={<AddCourseOutcome />}
-          />
-
-          <Route
-            path="/admin/course-outcomes/edit/:id"
-            element={<EditCourseOutcome />}
-          />
-          <Route
-            path="/admin/program-outcomes"
+            path="/hod/program-outcomes"
             element={<ProgramOutcomeList />}
           />
 
           <Route
-            path="/admin/program-outcomes/add"
+            path="/hod/program-outcomes/add"
             element={<AddProgramOutcome />}
           />
 
           <Route
-            path="/admin/program-outcomes/edit/:id"
+            path="/hod/program-outcomes/edit/:id"
             element={<EditProgramOutcome />}
           />
 
+
+          {/* =================================================
+              HOD COURSE OFFERINGS
+          ================================================= */}
+
           <Route
-            path="/admin/co-po-matrix"
-            element={<COPOMatrix />}
+            path="/hod/course-offerings"
+            element={<CourseOfferingList />}
+          />
+
+          <Route
+            path="/hod/course-offerings/add"
+            element={<AddCourseOffering />}
+          />
+
+          <Route
+            path="/hod/course-offerings/edit/:id"
+            element={<EditCourseOffering />}
+          />
+
+
+          {/* =================================================
+              HOD FACULTY ASSIGNMENT
+          ================================================= */}
+
+          <Route
+            path="/hod/faculty-assignment"
+            element={<FacultyAssignment />}
           />
 
         </Route>
+
       </Route>
 
-      {/* ================= FACULTY ================= */}
-      <Route element={<ProtectedRoute allowedRoles={["FACULTY"]} />}>
+
+      {/* =====================================================
+          FACULTY ROUTES
+      ===================================================== */}
+
+      <Route
+        element={
+          <ProtectedRoute
+            allowedRoles={["FACULTY"]}
+          />
+        }
+      >
+
         <Route element={<DashboardLayout />}>
+
+          {/* =================================================
+              FACULTY DASHBOARD
+          ================================================= */}
+
           <Route
             path="/faculty/dashboard"
             element={<FacultyDashboard />}
           />
+
+
+          {/* =================================================
+              COURSE OUTCOMES
+          ================================================= */}
+
+          <Route
+            path="/faculty/course-outcomes"
+            element={<CourseOutcomeList />}
+          />
+
+          <Route
+            path="/faculty/course-outcomes/add"
+            element={<AddCourseOutcome />}
+          />
+
+          <Route
+            path="/faculty/course-outcomes/edit/:id"
+            element={<EditCourseOutcome />}
+          />
+
+
+          {/* =================================================
+              CO-PO MAPPING
+          ================================================= */}
+
+          <Route
+            path="/faculty/co-po-mapping"
+            element={<COPOMatrix />}
+          />
+
         </Route>
+
       </Route>
 
-      {/* ================= STUDENT ================= */}
-      <Route element={<ProtectedRoute allowedRoles={["STUDENT"]} />}>
-        <Route element={<DashboardLayout />}>
-          <Route
-            path="/student/dashboard"
-            element={<StudentDashboard />}
-          />
-        </Route>
-      </Route>
+
+      {/* =====================================================
+          UNAUTHORIZED
+      ===================================================== */}
 
       <Route
         path="/unauthorized"
         element={<Unauthorized />}
       />
 
+
+      {/* =====================================================
+          ROOT
+      ===================================================== */}
+
       <Route
         path="/"
-        element={<Navigate to="/login" replace />}
+        element={
+          <Navigate
+            to="/login"
+            replace
+          />
+        }
       />
+
+
+      {/* =====================================================
+          404
+      ===================================================== */}
 
       <Route
         path="*"

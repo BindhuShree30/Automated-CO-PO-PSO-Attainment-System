@@ -3,6 +3,11 @@
  * Program Outcome Routes
  * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
+ *
+ * HOD manages Program Outcomes.
+ * Faculty can access Program Outcomes for academic mapping.
+ *
+ * ------------------------------------------------------------------
  */
 
 import { Router } from "express";
@@ -25,18 +30,26 @@ import {
 const router = Router();
 
 /**
+ * ------------------------------------------------------------------
  * Create Program Outcome
+ * ------------------------------------------------------------------
+ *
+ * HOD only.
  */
 router.post(
   "/",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD),
   validate(createProgramOutcomeSchema),
   programOutcomeController.createProgramOutcome
 );
 
 /**
+ * ------------------------------------------------------------------
  * Get All Program Outcomes
+ * ------------------------------------------------------------------
+ *
+ * Authenticated users can view Program Outcomes.
  */
 router.get(
   "/",
@@ -45,7 +58,11 @@ router.get(
 );
 
 /**
+ * ------------------------------------------------------------------
  * Get Program Outcomes By Program
+ * ------------------------------------------------------------------
+ *
+ * Used by CO–PO Mapping.
  */
 router.get(
   "/program/:programId",
@@ -55,7 +72,9 @@ router.get(
 );
 
 /**
+ * ------------------------------------------------------------------
  * Get Program Outcome By ID
+ * ------------------------------------------------------------------
  */
 router.get(
   "/:id",
@@ -65,23 +84,31 @@ router.get(
 );
 
 /**
+ * ------------------------------------------------------------------
  * Update Program Outcome
+ * ------------------------------------------------------------------
+ *
+ * HOD only.
  */
 router.put(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD),
   validate(updateProgramOutcomeSchema),
   programOutcomeController.updateProgramOutcome
 );
 
 /**
+ * ------------------------------------------------------------------
  * Delete Program Outcome
+ * ------------------------------------------------------------------
+ *
+ * HOD only.
  */
 router.delete(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD),
   validate(programOutcomeIdSchema),
   programOutcomeController.deleteProgramOutcome
 );
