@@ -36,6 +36,20 @@ const Assessment = sequelize.define(
       allowNull: false,
     },
 
+    entryMode: {
+      type: DataTypes.ENUM("QUESTION_WISE", "DIRECT_MARKS"),
+      allowNull: false,
+      defaultValue: "DIRECT_MARKS",
+      field: "entry_mode",
+    },
+
+    calculationMethod: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      defaultValue: "DIRECT",
+      field: "calculation_method",
+    },
+
     courseOfferingId: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -89,6 +103,10 @@ const Assessment = sequelize.define(
       {
         fields: ["status"],
         name: "idx_assessment_status",
+      },
+      {
+        fields: ["entry_mode"],
+        name: "idx_assessment_entry_mode",
       },
     ],
   }

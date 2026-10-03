@@ -19,6 +19,7 @@ import {
   PersonPlus,
   PencilSquare,
   Award,
+  Cpu,
 } from "react-bootstrap-icons";
 
 function Sidebar() {
@@ -122,8 +123,8 @@ function Sidebar() {
 
       {
         name: "Curriculum Gap",
-        icon: <FileEarmarkBarGraph />,
-        path: "/hod/curriculum-gap",
+        icon: <Cpu />,
+        path: "/faculty/curriculum-gaps",
       },
 
       // =======================================================
@@ -251,6 +252,16 @@ function Sidebar() {
       },
 
       // =======================================================
+      // CURRICULUM GAP ANALYSIS (NBA CRITERION 2)
+      // =======================================================
+
+      {
+        name: "Curriculum Gap",
+        icon: <Cpu />,
+        path: "/faculty/curriculum-gaps",
+      },
+
+      // =======================================================
       // REPORTS
       // =======================================================
 
@@ -258,16 +269,6 @@ function Sidebar() {
         name: "Reports",
         icon: <FileEarmarkBarGraph />,
         path: "/faculty/reports",
-      },
-
-      // =======================================================
-      // CURRICULUM GAP
-      // =======================================================
-
-      {
-        name: "Curriculum Gap",
-        icon: <FileEarmarkBarGraph />,
-        path: "/faculty/curriculum-gap",
       },
 
       // =======================================================

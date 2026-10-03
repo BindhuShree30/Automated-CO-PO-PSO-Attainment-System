@@ -29,7 +29,6 @@ import assessmentRoutes from "../modules/assessment/assessment.routes.js";
 import assessmentQuestionRoutes from "../modules/assessmentQuestion/assessmentQuestion.routes.js";
 import studentQuestionMarkRoutes from "../modules/studentQuestionMark/studentQuestionMark.routes.js";
 
-
 import coAttainmentRoutes from "../modules/coAttainment/coAttainment.routes.js";
 
 import programOutcomeRoutes from "../modules/programOutcome/programOutcome.routes.js";
@@ -81,28 +80,42 @@ router.use("/hod", hodRoutes);
 
 /**
  * ------------------------------------------------------------------
- * Curriculum Routes
+ * Curriculum Routes (Syllabus PDF Extraction & AI Gap Analysis)
  * ------------------------------------------------------------------
+ * Base URL: /api/v1/curriculum
+ *
+ * Examples:
+ * POST /api/v1/curriculum/upload-syllabus
+ * POST /api/v1/curriculum/extract/:syllabusId
+ * POST /api/v1/curriculum/analyze/:syllabusId
+ * POST /api/v1/curriculum/industry-discovery/:syllabusId
+ * POST /api/v1/curriculum/gap-analysis/:syllabusId
  */
 
-router.use("/curriculum", curriculumRoutes);
+if (typeof curriculumRoutes === "function") {
+  router.use("/curriculum", curriculumRoutes);
+} else {
+  console.error("❌ Warning: curriculumRoutes is not a valid middleware/router function.");
+}
 
 /**
  * ------------------------------------------------------------------
- * Curriculum Import Routes
+ * Curriculum Import Routes (Scheme Excel Imports for HOD)
  * ------------------------------------------------------------------
- *
- * Base URL:
- * /api/v1/curriculum
+ * Base URL: /api/v1/curriculum-imports
  *
  * Examples:
- * POST /api/v1/curriculum/curriculums/:curriculumId/import
- * GET  /api/v1/curriculum/curriculums/:curriculumId/imports
- * GET  /api/v1/curriculum/curriculum-imports/:importId
- * GET  /api/v1/curriculum/curriculum-imports/:importId/rows
+ * POST /api/v1/curriculum-imports/curriculums/:curriculumId/import
+ * GET  /api/v1/curriculum-imports/curriculums/:curriculumId/imports
+ * GET  /api/v1/curriculum-imports/curriculum-imports/:importId
+ * GET  /api/v1/curriculum-imports/curriculum-imports/:importId/rows
  */
 
-router.use("/curriculum", CurriculumImportRoutes);
+if (typeof CurriculumImportRoutes === "function") {
+  router.use("/curriculum-imports", CurriculumImportRoutes);
+} else {
+  console.error("❌ Warning: CurriculumImportRoutes is not a valid middleware/router function.");
+}
 
 /**
  * ------------------------------------------------------------------
@@ -140,9 +153,7 @@ router.use("/dashboard", dashboardRoutes);
  * ------------------------------------------------------------------
  * Faculty Routes
  * ------------------------------------------------------------------
- *
- * Base URL:
- * /api/v1/faculty
+ * Base URL: /api/v1/faculty
  */
 
 router.use("/faculty", facultyRoutes);
@@ -217,10 +228,7 @@ router.use("/enrollments", enrollmentRoutes);
  * ------------------------------------------------------------------
  */
 
-router.use(
-  "/course-registrations",
-  courseRegistrationRoutes
-);
+router.use("/course-registrations", courseRegistrationRoutes);
 
 /**
  * ------------------------------------------------------------------
@@ -236,10 +244,7 @@ router.use("/assessments", assessmentRoutes);
  * ------------------------------------------------------------------
  */
 
-router.use(
-  "/assessment-questions",
-  assessmentQuestionRoutes
-);
+router.use("/assessment-questions", assessmentQuestionRoutes);
 
 /**
  * ------------------------------------------------------------------
@@ -247,25 +252,7 @@ router.use(
  * ------------------------------------------------------------------
  */
 
-router.use(
-  "/student-question-marks",
-  studentQuestionMarkRoutes
-);
-
-/**
- * ------------------------------------------------------------------
- * Marks Entry Routes
- * ------------------------------------------------------------------
- *
- * Base URL:
- * /api/v1/marks-entries
- *
- * Examples:
- * GET  /api/v1/marks-entries/course-offering/:courseOfferingId/assessment/:assessmentId
- * POST /api/v1/marks-entries/bulk
- */
-
-
+router.use("/student-question-marks", studentQuestionMarkRoutes);
 
 /**
  * ------------------------------------------------------------------
@@ -273,10 +260,7 @@ router.use(
  * ------------------------------------------------------------------
  */
 
-router.use(
-  "/co-attainments",
-  coAttainmentRoutes
-);
+router.use("/co-attainments", coAttainmentRoutes);
 
 /**
  * ------------------------------------------------------------------
@@ -284,10 +268,7 @@ router.use(
  * ------------------------------------------------------------------
  */
 
-router.use(
-  "/program-outcomes",
-  programOutcomeRoutes
-);
+router.use("/program-outcomes", programOutcomeRoutes);
 
 /**
  * ------------------------------------------------------------------
@@ -295,10 +276,7 @@ router.use(
  * ------------------------------------------------------------------
  */
 
-router.use(
-  "/co-po-mappings",
-  coPOMappingRoutes
-);
+router.use("/co-po-mappings", coPOMappingRoutes);
 
 /**
  * ------------------------------------------------------------------
@@ -306,10 +284,7 @@ router.use(
  * ------------------------------------------------------------------
  */
 
-router.use(
-  "/po-attainments",
-  poAttainmentRoutes
-);
+router.use("/po-attainments", poAttainmentRoutes);
 
 /**
  * ------------------------------------------------------------------
@@ -317,10 +292,7 @@ router.use(
  * ------------------------------------------------------------------
  */
 
-router.use(
-  "/program-specific-outcomes",
-  programSpecificOutcomeRoutes
-);
+router.use("/program-specific-outcomes", programSpecificOutcomeRoutes);
 
 /**
  * ------------------------------------------------------------------
@@ -328,10 +300,7 @@ router.use(
  * ------------------------------------------------------------------
  */
 
-router.use(
-  "/co-pso-mappings",
-  coPsoMappingRoutes
-);
+router.use("/co-pso-mappings", coPsoMappingRoutes);
 
 /**
  * ------------------------------------------------------------------

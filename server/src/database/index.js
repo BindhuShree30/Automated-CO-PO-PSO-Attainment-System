@@ -59,6 +59,7 @@ import Syllabus from "./models/Syllabus.js";
 import Assessment from "./models/Assessment.js";
 import AssessmentQuestion from "./models/AssessmentQuestion.js";
 import StudentQuestionMark from "./models/StudentQuestionMark.js";
+import StudentAssessmentMark from "./models/StudentAssessmentMark.js";
 import COAttainment from "./models/COAttainment.js";
 import ProgramOutcome from "./models/ProgramOutcome.js";
 import COPOMapping from "./models/COPOMapping.js";
@@ -361,23 +362,6 @@ Semester.belongsTo(AcademicYear, {
  * ==================================================================
  * COURSE OFFERING ASSOCIATIONS
  * ==================================================================
- *
- * Current Course Offering structure:
- *
- * Course
- * Batch
- * Semester
- * Faculty
- * Section
- *
- * NOTE:
- * facultyId currently exists directly in course_offerings.
- * Therefore Faculty ↔ CourseOffering association MUST remain.
- *
- * Faculty Assignment as a separate UI/module can be implemented
- * later without breaking the current Course Offering architecture.
- *
- * ------------------------------------------------------------------
  */
 
 /**
@@ -552,7 +536,7 @@ Assessment.belongsTo(CourseOffering, {
 
 /**
  * ==================================================================
- * ASSESSMENT QUESTION ASSOCIATIONS
+ * ASSESSMENT QUESTION ASSOCIATIONS (Question-Wise Mode: CIE/IA)
  * ==================================================================
  */
 
@@ -593,6 +577,52 @@ AssessmentQuestion.belongsTo(CourseOutcome, {
   foreignKey: "courseOutcomeId",
   as: "courseOutcome",
   onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * ==================================================================
+ * STUDENT ASSESSMENT MARKS ASSOCIATIONS (Direct Marks: Quiz, SEE, etc.)
+ * ==================================================================
+ */
+
+/**
+ * Assessment → Direct Marks
+ */
+Assessment.hasMany(StudentAssessmentMark, {
+  foreignKey: "assessmentId",
+  as: "directMarks",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Direct Mark → Assessment
+ */
+StudentAssessmentMark.belongsTo(Assessment, {
+  foreignKey: "assessmentId",
+  as: "assessment",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Student → Direct Marks
+ */
+Student.hasMany(StudentAssessmentMark, {
+  foreignKey: "studentId",
+  as: "directMarks",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Direct Mark → Student
+ */
+StudentAssessmentMark.belongsTo(Student, {
+  foreignKey: "studentId",
+  as: "student",
+  onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
 
@@ -796,7 +826,7 @@ CoPsoMapping.belongsTo(ProgramSpecificOutcome, {
 
 /**
  * ==================================================================
- * STUDENT QUESTION MARK ASSOCIATIONS
+ * STUDENT QUESTION MARK ASSOCIATIONS (Question-Wise Mode)
  * ==================================================================
  */
 
@@ -988,13 +1018,6 @@ ProgramSpecificOutcome.belongsTo(Program, {
  * ==================================================================
  * PROGRAM ↔ COURSE ASSOCIATIONS
  * ==================================================================
- *
- * Kept for existing database compatibility.
- *
- * Program is not part of the current Course Offering application
- * workflow.
- *
- * ------------------------------------------------------------------
  */
 
 /**
@@ -1021,11 +1044,6 @@ Course.belongsTo(Program, {
  * ==================================================================
  * DEPARTMENT ↔ COURSE ASSOCIATIONS
  * ==================================================================
- *
- * Department is the application-level relationship used for
- * Course management.
- *
- * ------------------------------------------------------------------
  */
 
 /**
@@ -1102,28 +1120,10 @@ SkillSource.belongsTo(IndustrySkill, {
 
 const connectDatabase = async () => {
   try {
-    /**
-     * Authenticate database connection
-     */
     await sequelize.authenticate();
-
     console.log("✅ Database connected successfully.");
 
-    /**
-     * --------------------------------------------------------------
-     * TEMPORARY DEVELOPMENT SYNCHRONIZATION
-     * --------------------------------------------------------------
-     *
-     * This is currently being used during development.
-     *
-     * Before production deployment, replace sequelize.sync()
-     * with Sequelize migrations.
-     *
-     * --------------------------------------------------------------
-     */
-
     await sequelize.sync();
-
     console.log("✅ Database synchronized successfully.");
   } catch (error) {
     console.error("❌ Failed to connect to database.");
@@ -1165,6 +1165,7 @@ export {
   COPOMapping,
 
   StudentQuestionMark,
+  StudentAssessmentMark,
 
   Enrollment,
   CourseRegistration,

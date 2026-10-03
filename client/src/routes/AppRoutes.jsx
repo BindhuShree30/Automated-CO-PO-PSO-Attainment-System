@@ -53,7 +53,7 @@ import EditProgramSpecificOutcome from "../pages/programSpecificOutcome/EditProg
    FACULTY
 ========================================================= */
 
-import FacultyDashboard from "../pages/faculty/Dashboard";
+import FacultyDashboard from "../pages/faculty/DashBoard";
 import FacultyCourses from "../pages/faculty/Courses";
 import CoPsoMapping from "../pages/faculty/CoPsoMapping";
 import FacultyStudents from "../pages/faculty/Students";
@@ -64,6 +64,7 @@ import CourseRegistrationList from "../pages/courseRegistration/CourseRegistrati
 import CourseRegistrationStudents from "../pages/courseRegistration/CourseRegistrationStudents";
 import MarksLedger from "../pages/faculty/MarksLedger";
 import COAttainment from "../pages/faculty/COAttainment";
+import CurriculumGaps from "../pages/faculty/CurriculumGaps";
 
 /* =========================================================
    COURSE OUTCOME
@@ -322,7 +323,7 @@ function AppRoutes() {
             element={<MarksEntry />}
           />
           <Route
-            path="/faculty/marks-ledger" 
+            path="/faculty/marks-ledger"
             element={<MarksLedger />}
           />
 
@@ -333,6 +334,15 @@ function AppRoutes() {
           <Route
             path="/faculty/attainment"
             element={<COAttainment />}
+          />
+
+          {/* =================================================
+              CURRICULUM GAP ANALYSIS (NBA CRITERION 2)
+          ================================================= */}
+
+          <Route
+            path="/faculty/curriculum-gaps"
+            element={<CurriculumGaps />}
           />
 
           {/* =================================================

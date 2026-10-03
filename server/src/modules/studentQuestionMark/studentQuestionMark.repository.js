@@ -1,4 +1,5 @@
 import StudentQuestionMark from "../../database/models/StudentQuestionMark.js";
+import StudentAssessmentMark from "../../database/models/StudentAssessmentMark.js";
 import Student from "../../database/models/Student.js";
 import AssessmentQuestion from "../../database/models/AssessmentQuestion.js";
 import Assessment from "../../database/models/Assessment.js";
@@ -66,10 +67,7 @@ const createStudentQuestionMark = async (data, transaction = null) => {
   });
 };
 
-const bulkCreateStudentQuestionMarks = async (
-  data,
-  transaction = null
-) => {
+const bulkCreateStudentQuestionMarks = async (data, transaction = null) => {
   return await StudentQuestionMark.bulkCreate(data, {
     transaction,
   });
@@ -81,10 +79,7 @@ const findStudentQuestionMarkById = async (id) => {
   });
 };
 
-const findByStudentAndQuestion = async (
-  studentId,
-  assessmentQuestionId
-) => {
+const findByStudentAndQuestion = async (studentId, assessmentQuestionId) => {
   return await StudentQuestionMark.findOne({
     where: {
       studentId,
@@ -166,9 +161,7 @@ const findMarksByStudentId = async (studentId) => {
   });
 };
 
-const findMarksByAssessmentQuestionId = async (
-  assessmentQuestionId
-) => {
+const findMarksByAssessmentQuestionId = async (assessmentQuestionId) => {
   return await StudentQuestionMark.findAll({
     where: { assessmentQuestionId },
     include: studentQuestionMarkIncludes,
@@ -176,10 +169,7 @@ const findMarksByAssessmentQuestionId = async (
   });
 };
 
-const findMarksByStudentAndAssessment = async (
-  studentId,
-  assessmentId
-) => {
+const findMarksByStudentAndAssessment = async (studentId, assessmentId) => {
   return await StudentQuestionMark.findAll({
     where: {
       studentId,
@@ -248,18 +238,65 @@ const deleteMarksByQuestionIds = async (
   });
 };
 
-const updateStudentQuestionMark = async (
-  studentQuestionMark,
-  data
-) => {
+const updateStudentQuestionMark = async (studentQuestionMark, data) => {
   await studentQuestionMark.update(data);
   return await findStudentQuestionMarkById(studentQuestionMark.id);
 };
 
-const deleteStudentQuestionMark = async (
-  studentQuestionMark
-) => {
+const deleteStudentQuestionMark = async (studentQuestionMark) => {
   return await studentQuestionMark.destroy();
+};
+
+// ================================================================
+// DIRECT / OVERALL MARKS REPOSITORY METHODS (Quiz, SEE, Lab, etc.)
+// ================================================================
+
+/**
+ * Find all direct marks by assessment ID
+ */
+const findDirectMarksByAssessment = async (assessmentId) => {
+  return await StudentAssessmentMark.findAll({
+    where: { assessmentId },
+    include: [
+      {
+        model: Student,
+        as: "student",
+        attributes: ["id", "usn", "firstName", "lastName", "email"],
+      },
+    ],
+    order: [[{ model: Student, as: "student" }, "usn", "ASC"]],
+  });
+};
+
+/**
+ * Upsert a single direct mark record
+ */
+const upsertDirectMark = async (data, transaction = null) => {
+  const existing = await StudentAssessmentMark.findOne({
+    where: {
+      assessmentId: data.assessmentId,
+      studentId: data.studentId,
+    },
+    transaction,
+  });
+
+  if (existing) {
+    return await existing.update(data, { transaction });
+  }
+
+  return await StudentAssessmentMark.create(data, { transaction });
+};
+
+/**
+ * Bulk upsert direct marks
+ */
+const bulkUpsertDirectMarks = async (records, transaction = null) => {
+  const results = [];
+  for (const record of records) {
+    const saved = await upsertDirectMark(record, transaction);
+    results.push(saved);
+  }
+  return results;
 };
 
 export default {
@@ -275,4 +312,9 @@ export default {
   deleteMarksByQuestionIds,
   updateStudentQuestionMark,
   deleteStudentQuestionMark,
+
+  // Direct marks repository exports
+  findDirectMarksByAssessment,
+  upsertDirectMark,
+  bulkUpsertDirectMarks,
 };

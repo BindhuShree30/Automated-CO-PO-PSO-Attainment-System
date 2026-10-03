@@ -1,8 +1,19 @@
+/**
+ * ------------------------------------------------------------------
+ * Student Question Mark Service
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ */
+
 import studentQuestionMarkRepository from "./studentQuestionMark.repository.js";
 import studentRepository from "../student/student.repository.js";
 import assessmentQuestionRepository from "../assessmentQuestion/assessmentQuestion.repository.js";
 import courseRegistrationRepository from "../courseRegistration/courseRegistration.repository.js";
 import Assessment from "../../database/models/Assessment.js";
+import AssessmentQuestion from "../../database/models/AssessmentQuestion.js";
+import StudentQuestionMark from "../../database/models/StudentQuestionMark.js";
+import StudentAssessmentMark from "../../database/models/StudentAssessmentMark.js";
+import Student from "../../database/models/Student.js";
 import ApiError from "../../shared/errors/ApiError.js";
 
 const QUESTION_GROUPS = {
@@ -59,12 +70,8 @@ const validateAssessment = async (assessmentId) => {
 /**
  * Validate student and course registration.
  */
-const validateStudentForAssessment = async (
-  studentId,
-  assessment
-) => {
-  const student =
-    await studentRepository.findStudentById(studentId);
+const validateStudentForAssessment = async (studentId, assessment) => {
+  const student = await studentRepository.findStudentById(studentId);
 
   if (!student) {
     throw new ApiError(404, "Student not found.");
@@ -90,34 +97,21 @@ const validateStudentForAssessment = async (
  * Create one Student Question Mark.
  */
 const createStudentQuestionMark = async (data) => {
-  const {
-    studentId,
-    assessmentQuestionId,
-  } = data;
+  const { studentId, assessmentQuestionId } = data;
 
-  let {
-    marksObtained,
-    isAbsent = false,
-    isAttempted = false,
-  } = data;
+  let { marksObtained, isAbsent = false, isAttempted = false } = data;
 
-  const student =
-    await studentRepository.findStudentById(studentId);
+  const student = await studentRepository.findStudentById(studentId);
 
   if (!student) {
     throw new ApiError(404, "Student not found.");
   }
 
   const assessmentQuestion =
-    await assessmentQuestionRepository.findById(
-      assessmentQuestionId
-    );
+    await assessmentQuestionRepository.findById(assessmentQuestionId);
 
   if (!assessmentQuestion) {
-    throw new ApiError(
-      404,
-      "Assessment Question not found."
-    );
+    throw new ApiError(404, "Assessment Question not found.");
   }
 
   const existingMark =
@@ -133,8 +127,7 @@ const createStudentQuestionMark = async (data) => {
     );
   }
 
-  const courseOfferingId =
-    assessmentQuestion.assessment?.courseOfferingId;
+  const courseOfferingId = assessmentQuestion.assessment?.courseOfferingId;
 
   if (!courseOfferingId) {
     throw new ApiError(
@@ -182,22 +175,14 @@ const createStudentQuestionMark = async (data) => {
   }
 
   const obtainedMarks = Number(marksObtained);
-  const maximumMarks = Number(
-    assessmentQuestion.maxMarks
-  );
+  const maximumMarks = Number(assessmentQuestion.maxMarks);
 
   if (Number.isNaN(obtainedMarks)) {
-    throw new ApiError(
-      400,
-      "Marks obtained must be a valid number."
-    );
+    throw new ApiError(400, "Marks obtained must be a valid number.");
   }
 
   if (obtainedMarks < 0) {
-    throw new ApiError(
-      400,
-      "Marks obtained cannot be negative."
-    );
+    throw new ApiError(400, "Marks obtained cannot be negative.");
   }
 
   if (obtainedMarks > maximumMarks) {
@@ -214,10 +199,7 @@ const createStudentQuestionMark = async (data) => {
       marksObtained: obtainedMarks,
       isAbsent,
       isAttempted,
-      status:
-        data.status === undefined
-          ? true
-          : Boolean(data.status),
+      status: data.status === undefined ? true : Boolean(data.status),
     });
 
   return await studentQuestionMarkRepository.findStudentQuestionMarkById(
@@ -237,15 +219,10 @@ const getStudentQuestionMarks = async () => {
  */
 const getStudentQuestionMarkById = async (id) => {
   const studentQuestionMark =
-    await studentQuestionMarkRepository.findStudentQuestionMarkById(
-      id
-    );
+    await studentQuestionMarkRepository.findStudentQuestionMarkById(id);
 
   if (!studentQuestionMark) {
-    throw new ApiError(
-      404,
-      "Student Question Mark not found."
-    );
+    throw new ApiError(404, "Student Question Mark not found.");
   }
 
   return studentQuestionMark;
@@ -255,34 +232,24 @@ const getStudentQuestionMarkById = async (id) => {
  * Get marks by student.
  */
 const getMarksByStudentId = async (studentId) => {
-  const student =
-    await studentRepository.findStudentById(studentId);
+  const student = await studentRepository.findStudentById(studentId);
 
   if (!student) {
     throw new ApiError(404, "Student not found.");
   }
 
-  return await studentQuestionMarkRepository.findMarksByStudentId(
-    studentId
-  );
+  return await studentQuestionMarkRepository.findMarksByStudentId(studentId);
 };
 
 /**
  * Get marks by assessment question.
  */
-const getMarksByAssessmentQuestionId = async (
-  assessmentQuestionId
-) => {
+const getMarksByAssessmentQuestionId = async (assessmentQuestionId) => {
   const assessmentQuestion =
-    await assessmentQuestionRepository.findById(
-      assessmentQuestionId
-    );
+    await assessmentQuestionRepository.findById(assessmentQuestionId);
 
   if (!assessmentQuestion) {
-    throw new ApiError(
-      404,
-      "Assessment Question not found."
-    );
+    throw new ApiError(404, "Assessment Question not found.");
   }
 
   return await studentQuestionMarkRepository.findMarksByAssessmentQuestionId(
@@ -291,19 +258,12 @@ const getMarksByAssessmentQuestionId = async (
 };
 
 /**
- * Get all saved marks for one student in one assessment.
+ * Get all saved marks for one student in one assessment (Question-Wise).
  */
-const getMarksByAssessmentAndStudent = async (
-  assessmentId,
-  studentId
-) => {
-  const assessment =
-    await validateAssessment(assessmentId);
+const getMarksByAssessmentAndStudent = async (assessmentId, studentId) => {
+  const assessment = await validateAssessment(assessmentId);
 
-  await validateStudentForAssessment(
-    studentId,
-    assessment
-  );
+  await validateStudentForAssessment(studentId, assessment);
 
   return await studentQuestionMarkRepository.findMarksByStudentAndAssessment(
     studentId,
@@ -312,27 +272,50 @@ const getMarksByAssessmentAndStudent = async (
 };
 
 /**
- * Save all marks for one student in one assessment.
- *
- * This is the main Marks Entry operation.
+ * ================================================================
+ * GET ALL MARKS FOR AN ENTIRE ASSESSMENT (MASTER LEDGER TABLE)
+ * ================================================================
  */
-const saveBulkStudentMarks = async (
-  assessmentId,
-  studentId,
-  data
-) => {
-  const assessment =
-    await validateAssessment(assessmentId);
+const getMarksByAssessment = async (assessmentId) => {
+  await validateAssessment(assessmentId);
 
-  await validateStudentForAssessment(
-    studentId,
-    assessment
-  );
+  const marks = await StudentQuestionMark.findAll({
+    include: [
+      {
+        model: AssessmentQuestion,
+        as: "assessmentQuestion",
+        where: { assessmentId },
+        attributes: [
+          "id",
+          "questionNumber",
+          "maxMarks",
+          "assessmentId",
+          "courseOutcomeId",
+        ],
+      },
+      {
+        model: Student,
+        as: "student",
+        attributes: ["id", "usn", "firstName", "lastName"],
+      },
+    ],
+    order: [["createdAt", "ASC"]],
+  });
 
-  const {
-    selectedQuestions,
-    marks,
-  } = data;
+  return marks;
+};
+
+/**
+ * Save all marks for one student in one assessment (Question-Wise).
+ *
+ * This is the main Marks Entry operation for CIE/IA.
+ */
+const saveBulkStudentMarks = async (assessmentId, studentId, data) => {
+  const assessment = await validateAssessment(assessmentId);
+
+  await validateStudentForAssessment(studentId, assessment);
+
+  const { selectedQuestions, marks } = data;
 
   /**
    * ------------------------------------------------------------
@@ -340,20 +323,14 @@ const saveBulkStudentMarks = async (
    * ------------------------------------------------------------
    */
   const assessmentQuestions =
-    await assessmentQuestionRepository.findByAssessmentId(
-      assessmentId
-    );
+    await assessmentQuestionRepository.findByAssessmentId(assessmentId);
 
-  const activeQuestions =
-    assessmentQuestions.filter(
-      (question) => question.status !== false
-    );
+  const activeQuestions = assessmentQuestions.filter(
+    (question) => question.status !== false
+  );
 
   if (activeQuestions.length === 0) {
-    throw new ApiError(
-      400,
-      "No active assessment questions are available."
-    );
+    throw new ApiError(400, "No active assessment questions are available.");
   }
 
   /**
@@ -367,47 +344,26 @@ const saveBulkStudentMarks = async (
     selectedQuestions.part3,
   ];
 
-  const selectedMainQuestionSet =
-    new Set(selectedMainQuestions);
+  const selectedMainQuestionSet = new Set(selectedMainQuestions);
 
   /**
    * ------------------------------------------------------------
    * Build expected selected question list.
-   *
-   * Example:
-   * Part 1 = Q1
-   * Part 2 = Q4
-   * Part 3 = Q6
-   *
-   * Expected:
-   * Q1(a), Q1(b), Q1(c),
-   * Q4(a), Q4(b), Q4(c),
-   * Q6
    * ------------------------------------------------------------
    */
-  const expectedQuestions =
-    activeQuestions.filter((question) => {
-      const mainNumber =
-        getMainQuestionNumber(
-          question.questionNumber
-        );
-
-      return selectedMainQuestionSet.has(
-        mainNumber
-      );
-    });
+  const expectedQuestions = activeQuestions.filter((question) => {
+    const mainNumber = getMainQuestionNumber(question.questionNumber);
+    return selectedMainQuestionSet.has(mainNumber);
+  });
 
   /**
    * Verify every selected main question actually exists.
    */
   for (const mainQuestion of selectedMainQuestions) {
-    const matchingQuestions =
-      activeQuestions.filter(
-        (question) =>
-          getMainQuestionNumber(
-            question.questionNumber
-          ) === mainQuestion
-      );
+    const matchingQuestions = activeQuestions.filter(
+      (question) =>
+        getMainQuestionNumber(question.questionNumber) === mainQuestion
+    );
 
     if (matchingQuestions.length === 0) {
       throw new ApiError(
@@ -420,29 +376,14 @@ const saveBulkStudentMarks = async (
   /**
    * ------------------------------------------------------------
    * Candidate paper maximum check.
-   *
-   * Selected groups for this IA should total:
-   * Part 1 = 20
-   * Part 2 = 20
-   * Part 3 = 10
-   * Total  = 50
-   *
-   * The backend does NOT require the student's obtained marks
-   * to equal 50. Only the selected question maximum must equal
-   * the assessment maximum.
    * ------------------------------------------------------------
    */
-  const selectedMaximumMarks =
-    expectedQuestions.reduce(
-      (total, question) =>
-        total + Number(question.maxMarks),
-      0
-    );
+  const selectedMaximumMarks = expectedQuestions.reduce(
+    (total, question) => total + Number(question.maxMarks),
+    0
+  );
 
-  if (
-    selectedMaximumMarks !==
-    Number(assessment.maxMarks)
-  ) {
+  if (selectedMaximumMarks !== Number(assessment.maxMarks)) {
     throw new ApiError(
       400,
       `Selected questions total ${selectedMaximumMarks} marks, but this assessment is ${assessment.maxMarks} marks.`
@@ -454,30 +395,16 @@ const saveBulkStudentMarks = async (
    * Validate marks array.
    * ------------------------------------------------------------
    */
+  const expectedQuestionIds = expectedQuestions.map((question) => question.id);
+  const expectedQuestionIdSet = new Set(expectedQuestionIds);
 
-  const expectedQuestionIds =
-    expectedQuestions.map(
-      (question) => question.id
-    );
-
-  const expectedQuestionIdSet =
-    new Set(expectedQuestionIds);
-
-  const suppliedQuestionIds =
-    marks.map(
-      (mark) => mark.assessmentQuestionId
-    );
-
-  const suppliedQuestionIdSet =
-    new Set(suppliedQuestionIds);
+  const suppliedQuestionIds = marks.map((mark) => mark.assessmentQuestionId);
+  const suppliedQuestionIdSet = new Set(suppliedQuestionIds);
 
   /**
    * Duplicate question IDs are not allowed.
    */
-  if (
-    suppliedQuestionIds.length !==
-    suppliedQuestionIdSet.size
-  ) {
+  if (suppliedQuestionIds.length !== suppliedQuestionIdSet.size) {
     throw new ApiError(
       400,
       "Duplicate assessment questions were supplied in the marks entry."
@@ -488,13 +415,8 @@ const saveBulkStudentMarks = async (
    * Every selected question must have a marks entry.
    */
   for (const questionId of expectedQuestionIds) {
-    if (
-      !suppliedQuestionIdSet.has(questionId)
-    ) {
-      const question =
-        expectedQuestions.find(
-          (item) => item.id === questionId
-        );
+    if (!suppliedQuestionIdSet.has(questionId)) {
+      const question = expectedQuestions.find((item) => item.id === questionId);
 
       throw new ApiError(
         400,
@@ -505,24 +427,12 @@ const saveBulkStudentMarks = async (
 
   /**
    * No alternative question may be supplied.
-   *
-   * This is what prevents:
-   *
-   * Q1(a) + Q1(b) + Q2(c)
-   *
-   * when Q1 was selected.
    */
   for (const suppliedId of suppliedQuestionIds) {
-    if (
-      !expectedQuestionIdSet.has(
-        suppliedId
-      )
-    ) {
-      const suppliedQuestion =
-        activeQuestions.find(
-          (question) =>
-            question.id === suppliedId
-        );
+    if (!expectedQuestionIdSet.has(suppliedId)) {
+      const suppliedQuestion = activeQuestions.find(
+        (question) => question.id === suppliedId
+      );
 
       if (!suppliedQuestion) {
         throw new ApiError(
@@ -544,16 +454,12 @@ const saveBulkStudentMarks = async (
    * ------------------------------------------------------------
    */
   const records = [];
-
   let totalObtainedMarks = 0;
 
   for (const mark of marks) {
-    const question =
-      activeQuestions.find(
-        (item) =>
-          item.id ===
-          mark.assessmentQuestionId
-      );
+    const question = activeQuestions.find(
+      (item) => item.id === mark.assessmentQuestionId
+    );
 
     if (!question) {
       throw new ApiError(
@@ -562,40 +468,20 @@ const saveBulkStudentMarks = async (
       );
     }
 
-    let marksObtained =
-      Number(mark.marksObtained);
+    let marksObtained = Number(mark.marksObtained);
+    let isAbsent = Boolean(mark.isAbsent);
+    let isAttempted = Boolean(mark.isAttempted);
 
-    let isAbsent =
-      Boolean(mark.isAbsent);
-
-    let isAttempted =
-      Boolean(mark.isAttempted);
-
-    /**
-     * Absent:
-     * marks = 0
-     * attempted = false
-     */
     if (isAbsent) {
       marksObtained = 0;
       isAttempted = false;
     }
 
-    /**
-     * Not attempted:
-     * marks = 0
-     */
     if (!isAttempted) {
       marksObtained = 0;
     }
 
-    /**
-     * Absent + attempted is invalid.
-     */
-    if (
-      isAbsent &&
-      isAttempted
-    ) {
+    if (isAbsent && isAttempted) {
       throw new ApiError(
         400,
         `${question.questionNumber}: an absent question cannot be attempted.`
@@ -616,26 +502,20 @@ const saveBulkStudentMarks = async (
       );
     }
 
-    const questionMaximum =
-      Number(question.maxMarks);
+    const questionMaximum = Number(question.maxMarks);
 
-    if (
-      marksObtained >
-      questionMaximum
-    ) {
+    if (marksObtained > questionMaximum) {
       throw new ApiError(
         400,
         `${question.questionNumber}: marks cannot exceed ${questionMaximum}.`
       );
     }
 
-    totalObtainedMarks +=
-      marksObtained;
+    totalObtainedMarks += marksObtained;
 
     records.push({
       studentId,
-      assessmentQuestionId:
-        question.id,
+      assessmentQuestionId: question.id,
       marksObtained,
       isAbsent,
       isAttempted,
@@ -643,14 +523,7 @@ const saveBulkStudentMarks = async (
     });
   }
 
-  /**
-   * Student's obtained marks can never exceed
-   * the assessment maximum.
-   */
-  if (
-    totalObtainedMarks >
-    Number(assessment.maxMarks)
-  ) {
+  if (totalObtainedMarks > Number(assessment.maxMarks)) {
     throw new ApiError(
       400,
       `Total obtained marks (${totalObtainedMarks}) cannot exceed assessment maximum marks (${assessment.maxMarks}).`
@@ -660,13 +533,9 @@ const saveBulkStudentMarks = async (
   /**
    * ------------------------------------------------------------
    * Transaction
-   *
-   * Existing marks for this student + assessment are replaced
-   * atomically.
    * ------------------------------------------------------------
    */
-  const transaction =
-    await Assessment.sequelize.transaction();
+  const transaction = await Assessment.sequelize.transaction();
 
   try {
     await studentQuestionMarkRepository.deleteMarksByQuestionIds(
@@ -691,17 +560,13 @@ const saveBulkStudentMarks = async (
 
     return {
       assessmentId,
-      assessmentName:
-        assessment.name,
-      assessmentMaxMarks:
-        Number(assessment.maxMarks),
+      assessmentName: assessment.name,
+      assessmentMaxMarks: Number(assessment.maxMarks),
       studentId,
       selectedQuestions,
-      selectedQuestionMaximum:
-        selectedMaximumMarks,
+      selectedQuestionMaximum: selectedMaximumMarks,
       totalObtainedMarks,
-      totalQuestions:
-        createdMarks.length,
+      totalQuestions: createdMarks.length,
       marks: savedMarks,
     };
   } catch (error) {
@@ -713,52 +578,34 @@ const saveBulkStudentMarks = async (
 /**
  * Update one Student Question Mark.
  */
-const updateStudentQuestionMark = async (
-  id,
-  data
-) => {
+const updateStudentQuestionMark = async (id, data) => {
   const studentQuestionMark =
-    await studentQuestionMarkRepository.findStudentQuestionMarkById(
-      id
-    );
+    await studentQuestionMarkRepository.findStudentQuestionMarkById(id);
 
   if (!studentQuestionMark) {
-    throw new ApiError(
-      404,
-      "Student Question Mark not found."
-    );
+    throw new ApiError(404, "Student Question Mark not found.");
   }
 
-  const assessmentQuestion =
-    studentQuestionMark.assessmentQuestion;
+  const assessmentQuestion = studentQuestionMark.assessmentQuestion;
 
   if (!assessmentQuestion) {
-    throw new ApiError(
-      404,
-      "Assessment Question not found."
-    );
+    throw new ApiError(404, "Assessment Question not found.");
   }
 
   let marksObtained =
     data.marksObtained !== undefined
       ? Number(data.marksObtained)
-      : Number(
-          studentQuestionMark.marksObtained
-        );
+      : Number(studentQuestionMark.marksObtained);
 
   let isAbsent =
     data.isAbsent !== undefined
       ? Boolean(data.isAbsent)
-      : Boolean(
-          studentQuestionMark.isAbsent
-        );
+      : Boolean(studentQuestionMark.isAbsent);
 
   let isAttempted =
     data.isAttempted !== undefined
       ? Boolean(data.isAttempted)
-      : Boolean(
-          studentQuestionMark.isAttempted
-        );
+      : Boolean(studentQuestionMark.isAttempted);
 
   if (isAbsent) {
     marksObtained = 0;
@@ -769,37 +616,21 @@ const updateStudentQuestionMark = async (
     marksObtained = 0;
   }
 
-  if (
-    isAbsent &&
-    isAttempted
-  ) {
-    throw new ApiError(
-      400,
-      "An absent question cannot be attempted."
-    );
+  if (isAbsent && isAttempted) {
+    throw new ApiError(400, "An absent question cannot be attempted.");
   }
 
-  const maximumMarks =
-    Number(assessmentQuestion.maxMarks);
+  const maximumMarks = Number(assessmentQuestion.maxMarks);
 
   if (Number.isNaN(marksObtained)) {
-    throw new ApiError(
-      400,
-      "Marks obtained must be a valid number."
-    );
+    throw new ApiError(400, "Marks obtained must be a valid number.");
   }
 
   if (marksObtained < 0) {
-    throw new ApiError(
-      400,
-      "Marks obtained cannot be negative."
-    );
+    throw new ApiError(400, "Marks obtained cannot be negative.");
   }
 
-  if (
-    marksObtained >
-    maximumMarks
-  ) {
+  if (marksObtained > maximumMarks) {
     throw new ApiError(
       400,
       `Marks obtained cannot exceed question maximum marks of ${maximumMarks}.`
@@ -820,24 +651,117 @@ const updateStudentQuestionMark = async (
 /**
  * Delete one Student Question Mark.
  */
-const deleteStudentQuestionMark = async (
-  id
-) => {
+const deleteStudentQuestionMark = async (id) => {
   const studentQuestionMark =
-    await studentQuestionMarkRepository.findStudentQuestionMarkById(
-      id
-    );
+    await studentQuestionMarkRepository.findStudentQuestionMarkById(id);
 
   if (!studentQuestionMark) {
-    throw new ApiError(
-      404,
-      "Student Question Mark not found."
-    );
+    throw new ApiError(404, "Student Question Mark not found.");
   }
 
   await studentQuestionMarkRepository.deleteStudentQuestionMark(
     studentQuestionMark
   );
+};
+
+// ================================================================
+// DIRECT / OVERALL MARKS METHODS (Quiz, Assignment, Lab, SEE, Project)
+// ================================================================
+
+/**
+ * Get all direct marks for an assessment
+ */
+const getDirectMarksByAssessment = async (assessmentId) => {
+  await validateAssessment(assessmentId);
+
+  const marks = await StudentAssessmentMark.findAll({
+    where: { assessmentId },
+    include: [
+      {
+        model: Student,
+        as: "student",
+        attributes: ["id", "usn", "firstName", "lastName"],
+      },
+    ],
+    order: [[{ model: Student, as: "student" }, "usn", "ASC"]],
+  });
+
+  return marks;
+};
+
+/**
+ * Bulk upsert direct marks for an assessment
+ */
+const saveBulkDirectMarks = async (assessmentId, marksList) => {
+  const assessment = await validateAssessment(assessmentId);
+
+  if (!Array.isArray(marksList) || marksList.length === 0) {
+    throw new ApiError(400, "Marks payload must be a non-empty array.");
+  }
+
+  const maxMarks = Number(assessment.maxMarks);
+  const transaction = await Assessment.sequelize.transaction();
+
+  try {
+    for (const record of marksList) {
+      const isAbsent = Boolean(record.isAbsent);
+      let numVal = isAbsent ? 0 : Number(record.marksObtained);
+
+      if (
+        !isAbsent &&
+        (isNaN(numVal) ||
+          record.marksObtained === "" ||
+          record.marksObtained === null)
+      ) {
+        numVal = null;
+      }
+
+      if (numVal !== null && numVal > maxMarks) {
+        throw new ApiError(
+          400,
+          `Marks obtained (${numVal}) cannot exceed assessment maximum marks (${maxMarks}).`
+        );
+      }
+
+      const existing = await StudentAssessmentMark.findOne({
+        where: {
+          assessmentId,
+          studentId: record.studentId,
+        },
+        transaction,
+      });
+
+      if (existing) {
+        await existing.update(
+          {
+            marksObtained: numVal,
+            isAbsent,
+          },
+          { transaction }
+        );
+      } else {
+        await StudentAssessmentMark.create(
+          {
+            assessmentId,
+            studentId: record.studentId,
+            marksObtained: numVal,
+            isAbsent,
+          },
+          { transaction }
+        );
+      }
+    }
+
+    await transaction.commit();
+
+    return {
+      assessmentId,
+      totalSaved: marksList.length,
+    };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };
 
 export default {
@@ -846,8 +770,13 @@ export default {
   getStudentQuestionMarkById,
   getMarksByStudentId,
   getMarksByAssessmentQuestionId,
+  getMarksByAssessment, // <-- Exported here
   getMarksByAssessmentAndStudent,
   saveBulkStudentMarks,
   updateStudentQuestionMark,
   deleteStudentQuestionMark,
+
+  // Direct Marks exports
+  getDirectMarksByAssessment,
+  saveBulkDirectMarks,
 };

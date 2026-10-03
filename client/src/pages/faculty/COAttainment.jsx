@@ -5,16 +5,26 @@ import {
   Printer,
   ExclamationTriangle,
   ArrowRepeat,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
 } from "react-bootstrap-icons";
+import { useQuery } from "@tanstack/react-query";
 
 import { useMyCourseOfferings } from "../../hooks/useCourseOfferings";
 import {
   useCourseOfferingAttainments,
   useCalculateCOAttainment,
 } from "../../hooks/useCOAttainment";
+import { useRegistrationsByCourseOffering } from "../../hooks/useCourseRegistrations";
+import {
+  getAssessmentsByCourseOffering,
+  getMarksByAssessment,
+} from "../../services/studentQuestionMarkService";
 
 function COAttainment() {
   const [selectedCourseOfferingId, setSelectedCourseOfferingId] = useState("");
+  const [showBest2Table, setShowBest2Table] = useState(false);
 
   // Default configuration derived from institutional template (sheet 'CO Attai')
   const [aqsmLevel, setAqsmLevel] = useState(3);
@@ -37,14 +47,133 @@ function COAttainment() {
     refetch: refetchAttainments,
   } = useCourseOfferingAttainments(selectedCourseOfferingId);
 
-  // 3. Calculation Mutation
+  // Natural alphanumeric sort: Ensures strict sequence CO1 -> CO2 -> CO3 -> CO4 -> CO5
+  const sortedAttainments = useMemo(() => {
+    if (!attainments || attainments.length === 0) return [];
+    return [...attainments].sort((a, b) => {
+      const codeA = String(a.courseOutcome?.code || "").trim();
+      const codeB = String(b.courseOutcome?.code || "").trim();
+      return codeA.localeCompare(codeB, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      });
+    });
+  }, [attainments]);
+
+  // 3. Fetch Registered Students
+  const { data: registrations = [] } =
+    useRegistrationsByCourseOffering(selectedCourseOfferingId);
+
+  // 4. Fetch Assessments to identify IA-1, IA-2, IA-3
+  const { data: assessments = [] } = useQuery({
+    queryKey: ["assessments", "courseOffering", selectedCourseOfferingId],
+    enabled: Boolean(selectedCourseOfferingId),
+    queryFn: async () => {
+      const res = await getAssessmentsByCourseOffering(selectedCourseOfferingId);
+      return res?.data?.data || res?.data || [];
+    },
+  });
+
+  const iaAssessments = useMemo(() => {
+    return assessments.filter((a) => {
+      const t = String(a.type || "").toUpperCase();
+      return (
+        ["CIE", "IA", "INTERNAL"].includes(t) ||
+        a.calculationMethod === "BEST_OF_2"
+      );
+    });
+  }, [assessments]);
+
+  // 5. Fetch Marks for all IAs to build the Best 2 of 3 student table
+  const { data: iaMarksMap = {}, refetch: refetchIAMarks } = useQuery({
+    queryKey: ["iaMarksPerAssessment", iaAssessments.map((a) => a.id).join(",")],
+    enabled: iaAssessments.length > 0,
+    queryFn: async () => {
+      const map = {};
+      await Promise.all(
+        iaAssessments.map(async (ia) => {
+          try {
+            const res = await getMarksByAssessment(ia.id);
+            const marksList = res?.data?.data || res?.data || res || [];
+            map[ia.id] = Array.isArray(marksList) ? marksList : [];
+          } catch {
+            map[ia.id] = [];
+          }
+        })
+      );
+      return map;
+    },
+  });
+
+  // Calculate Student-Wise Best 2 of 3 IA Scores
+  const studentIABreakdown = useMemo(() => {
+    if (registrations.length === 0 || iaAssessments.length === 0) return [];
+
+    return registrations.map((r, idx) => {
+      const s = r.student || {};
+      const sId = String(s.id || r.studentId || r.student_id || r.id || "").trim();
+      const studentUsn = String(s.usn || s.USN || "").trim().toUpperCase();
+
+      const iaScores = iaAssessments.map((ia) => {
+        const marksList = iaMarksMap[ia.id] || [];
+
+        const studentMarks = marksList.filter((m) => {
+          const mStudentId = String(
+            m.studentId || m.student_id || m.student?.id || ""
+          ).trim();
+          const mUsn = String(
+            m.student?.usn || m.student?.USN || m.usn || ""
+          ).trim().toUpperCase();
+
+          return (sId && mStudentId === sId) || (studentUsn && mUsn === studentUsn);
+        });
+
+        if (studentMarks.length === 0) {
+          return { iaId: ia.id, name: ia.name, score: 0, isAbsent: true };
+        }
+
+        const isAbs = studentMarks.every((m) => Boolean(m.isAbsent ?? m.is_absent));
+        const total = studentMarks.reduce((acc, m) => {
+          const markAbsent = Boolean(m.isAbsent ?? m.is_absent);
+          const rawMark = markAbsent
+            ? 0
+            : Number((m.marksObtained ?? m.marks_obtained) || 0);
+          return acc + rawMark;
+        }, 0);
+
+        return {
+          iaId: ia.id,
+          name: ia.name,
+          score: total,
+          isAbsent: isAbs,
+        };
+      });
+
+      const sorted = [...iaScores].sort((a, b) => b.score - a.score);
+      const top1 = sorted[0]?.score || 0;
+      const top2 = sorted[1]?.score || 0;
+      const best2Average = Number(((top1 + top2) / 2).toFixed(2));
+      const droppedIA = iaScores.length >= 3 ? sorted[sorted.length - 1]?.name : null;
+
+      return {
+        slNo: idx + 1,
+        studentId: sId || idx,
+        usn: studentUsn || "-",
+        name: `${s.firstName || ""} ${s.lastName || ""}`.trim() || s.name || "-",
+        iaScores,
+        best2Average,
+        droppedIA,
+      };
+    });
+  }, [registrations, iaAssessments, iaMarksMap]);
+
+  // 6. Calculation Mutation
   const calculateMutation = useCalculateCOAttainment();
 
   const currentOffering = useMemo(() => {
     return courseOfferings.find((c) => c.id === selectedCourseOfferingId);
   }, [courseOfferings, selectedCourseOfferingId]);
 
-  // Handle Calculate All Trigger
   const handleCalculateAll = async () => {
     if (!selectedCourseOfferingId) {
       toast.error("Please select a course offering.");
@@ -55,8 +184,9 @@ function COAttainment() {
       await calculateMutation.mutateAsync({
         courseOfferingId: selectedCourseOfferingId,
       });
-      toast.success("CO Attainment calculated successfully!");
-      refetchAttainments();
+      toast.success("CO Attainment calculated successfully with Best 2 of 3!");
+      await refetchAttainments();
+      await refetchIAMarks();
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
@@ -65,7 +195,6 @@ function COAttainment() {
     }
   };
 
-  // Threshold badge styling
   const getLevelBadge = (level) => {
     switch (Number(level)) {
       case 3:
@@ -79,7 +208,6 @@ function COAttainment() {
     }
   };
 
-  // Indirect Feedback Level computation: >=70% -> 3, >=60% -> 2, >=50% -> 1, else 0
   const indirectFeedbackLevel = useMemo(() => {
     const pct = Number(studentFeedbackPct || 0);
     if (pct >= 70) return 3;
@@ -88,19 +216,14 @@ function COAttainment() {
     return 0;
   }, [studentFeedbackPct]);
 
-  // Consolidated table calculations matching 'CO Attai' sheet
+  // Built directly from sortedAttainments so Matrix 2 inherits CO1 -> CO2 -> CO3 -> CO4 -> CO5 order
   const consolidatedRows = useMemo(() => {
-    return attainments.map((att) => {
+    return sortedAttainments.map((att) => {
       const coCode = att.courseOutcome?.code || "CO";
       const iaLevel = Number(att.attainmentLevel || 0);
 
-      // CIE Attainment = (25/50)*IA + (25/50)*AQSM = 0.5 * IA + 0.5 * AQSM
       const cieAttainment = Number((0.5 * iaLevel + 0.5 * aqsmLevel).toFixed(2));
-
-      // Direct Attainment = 0.5 * SEE + 0.5 * CIE
       const directAttainment = Number((0.5 * seeLevel + 0.5 * cieAttainment).toFixed(2));
-
-      // Overall CO Course Attainment = 0.8 * Direct + 0.2 * Indirect
       const overallAttainment = Number(
         (0.8 * directAttainment + 0.2 * indirectFeedbackLevel).toFixed(2)
       );
@@ -119,9 +242,8 @@ function COAttainment() {
         overallAttainment,
       };
     });
-  }, [attainments, aqsmLevel, seeLevel, indirectFeedbackLevel]);
+  }, [sortedAttainments, aqsmLevel, seeLevel, indirectFeedbackLevel]);
 
-  // Average Overall CO Attainment
   const averageOverallAttainment = useMemo(() => {
     if (consolidatedRows.length === 0) return 0;
     const sum = consolidatedRows.reduce((acc, r) => acc + r.overallAttainment, 0);
@@ -129,13 +251,13 @@ function COAttainment() {
   }, [consolidatedRows]);
 
   return (
-    <div className="container-fluid p-4">
+    <div className="container-fluid p-4 co-attainment-container">
       {/* HEADER CONTROLS */}
       <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 d-print-none gap-2">
         <div>
           <h2 className="fw-bold mb-1">Course Outcome (CO) Attainment</h2>
           <p className="text-muted mb-0">
-            Calculate, analyze, and review Direct, Indirect, and Overall CO Attainments.
+            Automated Direct, Indirect, and Best 2 of 3 IA Evaluation Analysis.
           </p>
         </div>
 
@@ -144,7 +266,7 @@ function COAttainment() {
             type="button"
             className="btn btn-outline-dark d-inline-flex align-items-center gap-2 shadow-sm"
             onClick={() => window.print()}
-            disabled={attainments.length === 0}
+            disabled={sortedAttainments.length === 0}
           >
             <Printer /> Print Statement
           </button>
@@ -158,7 +280,7 @@ function COAttainment() {
             {calculateMutation.isPending ? (
               <>
                 <ArrowRepeat className="spinner-border spinner-border-sm" />
-                Calculating...
+                Calculating Best 2 of 3...
               </>
             ) : (
               <>
@@ -241,23 +363,23 @@ function COAttainment() {
       {/* PRINTABLE CONTAINER */}
       <div className="printable-area">
         {/* PRINT-ONLY HEADER */}
-        <div className="d-none d-print-block text-center border-bottom pb-3 mb-4">
-          <h3 className="fw-bold mb-1">
+        <div className="d-none d-print-block text-center border-bottom pb-2 mb-3">
+          <h4 className="fw-bold mb-1">
             DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING
-          </h3>
-          <h5 className="fw-semibold text-secondary mb-2">
+          </h4>
+          <h6 className="fw-semibold text-secondary mb-2">
             Course Outcome Attainment Analysis Statement
-          </h5>
-          <div className="row small mt-3">
-            <div className="col-4 text-start">
+          </h6>
+          <div className="d-flex justify-content-between small px-2 mt-2">
+            <div>
               <strong>Course:</strong> {currentOffering?.course?.code} -{" "}
               {currentOffering?.course?.name}
             </div>
-            <div className="col-4 text-center">
+            <div>
               <strong>Section:</strong> {currentOffering?.section || "A"}
             </div>
-            <div className="col-4 text-end">
-              <strong>Scale:</strong> Level 3 (&ge;70%), Level 2 (&ge;60%), Level 1 (&ge;50%)
+            <div>
+              <strong>Rule:</strong> Best 2 of 3 IA Evaluation (VTU/NBA)
             </div>
           </div>
         </div>
@@ -267,40 +389,45 @@ function COAttainment() {
             <div className="spinner-border text-primary mb-2" role="status"></div>
             <p className="text-muted">Loading attainment records...</p>
           </div>
-        ) : attainments.length === 0 ? (
+        ) : sortedAttainments.length === 0 ? (
           <div className="card border-0 shadow-sm text-center p-5">
             <div className="mb-3 text-muted">
               <ExclamationTriangle size={40} className="text-warning mb-2" />
               <h5>No Attainment Data Found</h5>
               <p className="text-muted">
-                Marks may not have been evaluated yet. Click <strong>"Calculate Attainment"</strong> above to compute CO attainments.
+                Click <strong>"Calculate Attainment"</strong> above to compute CO attainments using Best 2 of 3 IA logic.
               </p>
             </div>
           </div>
         ) : (
           <>
             {/* 1. INTERNAL TEST ATTAINMENT CARD */}
-            <div className="card border-0 shadow-sm mb-4">
-              <div className="card-header bg-white py-3">
-                <h5 className="fw-bold mb-0">
+            <div className="card border-0 shadow-sm mb-4 attainment-card">
+              <div className="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                <h6 className="fw-bold mb-0">
                   1. Internal Assessment (IA) Test Attainment
-                </h5>
+                </h6>
+                {iaAssessments.length >= 3 && (
+                  <span className="badge bg-primary-subtle text-primary border border-primary-subtle d-print-none">
+                    <CheckCircle className="me-1" /> Best 2 of 3 IA Active
+                  </span>
+                )}
               </div>
               <div className="card-body p-0">
                 <div className="table-responsive">
-                  <table className="table table-hover align-middle mb-0 text-center">
+                  <table className="table table-bordered table-hover align-middle mb-0 text-center">
                     <thead className="table-light">
                       <tr>
-                        <th style={{ width: "90px" }}>CO Code</th>
+                        <th style={{ width: "80px" }}>CO Code</th>
                         <th className="text-start">Description</th>
-                        <th>Total Obtained</th>
-                        <th>Effective Max</th>
-                        <th>Attainment %</th>
-                        <th>Attainment Level</th>
+                        <th style={{ width: "120px" }}>Total Obtained</th>
+                        <th style={{ width: "120px" }}>Effective Max</th>
+                        <th style={{ width: "120px" }}>Attainment %</th>
+                        <th style={{ width: "140px" }}>Attainment Level</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {attainments.map((att) => (
+                      {sortedAttainments.map((att) => (
                         <tr key={att.id}>
                           <td className="fw-bold text-primary">
                             {att.courseOutcome?.code}
@@ -326,13 +453,81 @@ function COAttainment() {
               </div>
             </div>
 
-            {/* 2. CONSOLIDATED OVERALL CO ATTAINMENT MATRIX */}
-            <div className="card border-0 shadow-sm mb-4">
-              <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <h5 className="fw-bold mb-0">
+            {/* 2. COLLAPSIBLE: BEST 2 OF 3 IA STUDENT LEDGER */}
+            {iaAssessments.length >= 3 && (
+              <div className="card border-0 shadow-sm mb-4 d-print-none">
+                <div
+                  className="card-header bg-white py-3 d-flex justify-content-between align-items-center cursor-pointer"
+                  onClick={() => setShowBest2Table(!showBest2Table)}
+                >
+                  <h6 className="fw-bold mb-0 text-secondary">
+                    View Student-Wise Best 2 of 3 IA Calculation Ledger ({studentIABreakdown.length} Students)
+                  </h6>
+                  <button className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1">
+                    {showBest2Table ? <ChevronUp /> : <ChevronDown />}
+                    {showBest2Table ? "Hide Ledger" : "Show Ledger"}
+                  </button>
+                </div>
+                {showBest2Table && (
+                  <div className="card-body p-0">
+                    <div className="table-responsive" style={{ maxHeight: "350px" }}>
+                      <table className="table table-sm table-hover align-middle mb-0 text-center">
+                        <thead className="table-light sticky-top">
+                          <tr>
+                            <th>#</th>
+                            <th className="text-start">USN</th>
+                            <th className="text-start">Name</th>
+                            {iaAssessments.map((ia) => (
+                              <th key={ia.id}>{ia.name}</th>
+                            ))}
+                            <th className="table-success">Best 2 Average</th>
+                            <th className="text-muted small">Dropped Test</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {studentIABreakdown.map((row) => (
+                            <tr key={row.studentId}>
+                              <td>{row.slNo}</td>
+                              <td className="text-start fw-semibold">{row.usn}</td>
+                              <td className="text-start">{row.name}</td>
+                              {row.iaScores.map((scoreObj) => (
+                                <td key={scoreObj.iaId}>
+                                  {scoreObj.isAbsent ? (
+                                    <span className="text-danger small fw-bold">AB</span>
+                                  ) : (
+                                    scoreObj.score
+                                  )}
+                                </td>
+                              ))}
+                              <td className="fw-bold table-success text-success">
+                                {row.best2Average}
+                              </td>
+                              <td className="text-muted small">
+                                {row.droppedIA ? (
+                                  <span className="badge bg-secondary-subtle text-dark border">
+                                    {row.droppedIA}
+                                  </span>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 3. CONSOLIDATED OVERALL CO ATTAINMENT MATRIX */}
+            <div className="card border-0 shadow-sm mb-4 attainment-card">
+              <div className="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                <h6 className="fw-bold mb-0">
                   2. Overall Course Outcome Attainment Matrix
-                </h5>
-                <span className="badge bg-dark fs-6">
+                </h6>
+                <span className="badge bg-dark fs-6 d-print-inline">
                   Average Overall Attainment: {averageOverallAttainment} / 3.0
                 </span>
               </div>
@@ -341,7 +536,7 @@ function COAttainment() {
                   <table className="table table-bordered table-hover align-middle mb-0 text-center">
                     <thead className="table-light">
                       <tr>
-                        <th style={{ width: "90px" }}>CO</th>
+                        <th style={{ width: "80px" }}>CO</th>
                         <th>IA Test Attainment</th>
                         <th>AQSM Attainment</th>
                         <th>CIE Attainment (50%)</th>
@@ -384,11 +579,11 @@ function COAttainment() {
                   </table>
                 </div>
               </div>
-              <div className="card-footer bg-white small text-muted py-3 d-print-none">
+              <div className="card-footer bg-white small text-muted py-2 d-print-none">
                 <strong>Formulas Applied:</strong>
                 <ul className="mb-0 mt-1 ps-3">
                   <li>
-                    CIE Attainment = 0.5 * IA Test Level + 0.5 * AQSM Level
+                    CIE Attainment = 0.5 * IA Test Level (Best 2 of 3) + 0.5 * AQSM Level
                   </li>
                   <li>
                     Direct CO Attainment = 0.5 * SEE Level + 0.5 * CIE Attainment
@@ -401,11 +596,11 @@ function COAttainment() {
             </div>
 
             {/* PRINT-ONLY SIGNATURE SECTION */}
-            <div className="d-none d-print-flex justify-content-between mt-5 pt-5 px-3">
+            <div className="d-none d-print-flex justify-content-between mt-4 pt-4 px-3 page-break-inside-avoid">
               <div className="text-center">
                 <div
                   className="border-top border-dark pt-1"
-                  style={{ width: "200px" }}
+                  style={{ width: "180px" }}
                 >
                   Course Instructor
                 </div>
@@ -413,7 +608,7 @@ function COAttainment() {
               <div className="text-center">
                 <div
                   className="border-top border-dark pt-1"
-                  style={{ width: "200px" }}
+                  style={{ width: "180px" }}
                 >
                   Module Coordinator
                 </div>
@@ -421,7 +616,7 @@ function COAttainment() {
               <div className="text-center">
                 <div
                   className="border-top border-dark pt-1"
-                  style={{ width: "200px" }}
+                  style={{ width: "180px" }}
                 >
                   Head of Department (HOD)
                 </div>
@@ -431,37 +626,90 @@ function COAttainment() {
         )}
       </div>
 
-      {/* PRINT CSS */}
+      {/* FULL PRINT ISOLATION & CENTERING CSS */}
       <style>{`
         @media print {
           @page {
-            size: A4 portrait;
-            margin: 12mm;
+            size: landscape;
+            margin: 10mm 12mm;
           }
-          body {
-            background: white !important;
-            color: black !important;
+
+          /* 1. Hide everything else in the body */
+          body * {
+            visibility: hidden;
           }
-          aside, nav, .d-print-none {
-            display: none !important;
+
+          /* 2. Show only printable area and pull it to center */
+          .printable-area,
+          .printable-area * {
+            visibility: visible !important;
           }
-          main {
+
+          .printable-area {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            display: block !important;
+          }
+
+          /* 3. Neutralize layout wrappers */
+          html, body {
+            width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
-            height: auto !important;
+            background: #fff !important;
+            color: #000 !important;
+            overflow: visible !important;
+          }
+
+          /* 4. Table sizing and borders */
+          .table-responsive {
+            overflow: visible !important;
             width: 100% !important;
+            display: block !important;
           }
-          .printable-area {
-            box-shadow: none !important;
-            border: none !important;
+
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            font-size: 11px !important;
+            margin: 0 auto !important;
           }
-          .table {
-            font-size: 11px;
-            border-color: #333 !important;
+
+          th, td {
+            border: 1px solid #333 !important;
+            padding: 5px 6px !important;
+            text-align: center !important;
+            color: #000 !important;
           }
-          .table th, .table td {
-            padding: 5px 8px !important;
-            border-color: #666 !important;
+
+          th {
+            background-color: #f1f3f5 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          .attainment-card {
+            border: 1px solid #444 !important;
+            margin-bottom: 14px !important;
+            page-break-inside: avoid;
+          }
+
+          .badge {
+            border: 1px solid #333 !important;
+            color: #000 !important;
+            background: transparent !important;
+            font-size: 9px !important;
+            padding: 2px 5px !important;
+            white-space: nowrap !important;
+          }
+
+          .page-break-inside-avoid {
+            page-break-inside: avoid;
           }
         }
       `}</style>

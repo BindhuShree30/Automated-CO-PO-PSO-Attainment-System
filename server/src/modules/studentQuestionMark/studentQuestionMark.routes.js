@@ -1,124 +1,132 @@
+/**
+ * ------------------------------------------------------------------
+ * Student Question Mark Routes
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ */
+
 import { Router } from "express";
 import studentQuestionMarkController from "./studentQuestionMark.controller.js";
-import authMiddleware from "../../middleware/auth.middleware.js";
-import roleMiddleware from "../../middleware/role.middleware.js";
-import validate from "../../middleware/validate.middleware.js";
-import ROLES from "../../shared/constants/roles.js";
-
-import {
-  createStudentQuestionMarkSchema,
-  updateStudentQuestionMarkSchema,
-  assessmentStudentMarksSchema,
-  bulkStudentMarksSchema,
-} from "./studentQuestionMark.schema.js";
 
 const router = Router();
 
-/**
- * ================================================================
- * MARKS ENTRY
- * ================================================================
- */
+// ==================================================================
+// DIRECT / OVERALL MARKS ROUTES (Quiz, Assignment, Lab, SEE, Project)
+// ==================================================================
 
 /**
- * Get marks for one Student in one Assessment
- *
- * GET
- * /api/v1/student-question-marks/assessment/:assessmentId/student/:studentId
+ * Get all direct marks for an assessment
+ * GET /api/v1/student-question-marks/assessment/:assessmentId/direct
+ */
+router.get(
+  "/assessment/:assessmentId/direct",
+  studentQuestionMarkController.getDirectMarksByAssessment
+);
+
+/**
+ * Bulk save direct marks for an assessment
+ * POST /api/v1/student-question-marks/assessment/:assessmentId/direct/bulk
+ */
+router.post(
+  "/assessment/:assessmentId/direct/bulk",
+  studentQuestionMarkController.saveBulkDirectMarks
+);
+
+// ==================================================================
+// QUESTION-WISE MARKS ROUTES (CIE / IA)
+// ==================================================================
+
+/**
+ * Get all question marks for an assessment across all students (Master Ledger)
+ * GET /api/v1/student-question-marks/assessment/:assessmentId
+ */
+router.get(
+  "/assessment/:assessmentId",
+  studentQuestionMarkController.getMarksByAssessment
+);
+
+/**
+ * Get marks for one Student in one Assessment (Question-wise)
+ * GET /api/v1/student-question-marks/assessment/:assessmentId/student/:studentId
  */
 router.get(
   "/assessment/:assessmentId/student/:studentId",
-  authMiddleware,
-  validate(assessmentStudentMarksSchema),
   studentQuestionMarkController.getMarksByAssessmentAndStudent
 );
 
 /**
- * Save all marks for one Student in one Assessment
- *
- * POST
- * /api/v1/student-question-marks/assessment/:assessmentId/student/:studentId/bulk
+ * Save marks for one Student in one Assessment (Question-wise)
+ * POST /api/v1/student-question-marks/assessment/:assessmentId/student/:studentId/bulk
  */
 router.post(
   "/assessment/:assessmentId/student/:studentId/bulk",
-  authMiddleware,
-  roleMiddleware(ROLES.ADMIN, ROLES.FACULTY),
-  validate(bulkStudentMarksSchema),
   studentQuestionMarkController.saveBulkStudentMarks
 );
 
 /**
- * ================================================================
- * EXISTING CRUD
- * ================================================================
- */
-
-/**
- * Create one mark
- */
-router.post(
-  "/",
-  authMiddleware,
-  roleMiddleware(ROLES.ADMIN, ROLES.FACULTY),
-  validate(createStudentQuestionMarkSchema),
-  studentQuestionMarkController.createStudentQuestionMark
-);
-
-/**
- * Get all marks
- */
-router.get(
-  "/",
-  authMiddleware,
-  studentQuestionMarkController.getStudentQuestionMarks
-);
-
-/**
- * Get marks by Student
+ * Get all marks by Student ID
+ * GET /api/v1/student-question-marks/student/:studentId
  */
 router.get(
   "/student/:studentId",
-  authMiddleware,
   studentQuestionMarkController.getMarksByStudentId
 );
 
 /**
- * Get marks by Assessment Question
+ * Get all marks by Assessment Question ID
+ * GET /api/v1/student-question-marks/question/:assessmentQuestionId
  */
 router.get(
   "/question/:assessmentQuestionId",
-  authMiddleware,
   studentQuestionMarkController.getMarksByAssessmentQuestionId
 );
 
+// ==================================================================
+// STANDARD CRUD ROUTES
+// ==================================================================
+
 /**
- * Get mark by ID
+ * Get all question marks
+ * GET /api/v1/student-question-marks
+ */
+router.get(
+  "/",
+  studentQuestionMarkController.getStudentQuestionMarks
+);
+
+/**
+ * Create a single question mark entry
+ * POST /api/v1/student-question-marks
+ */
+router.post(
+  "/",
+  studentQuestionMarkController.createStudentQuestionMark
+);
+
+/**
+ * Get a single question mark entry by ID
+ * GET /api/v1/student-question-marks/:id
  */
 router.get(
   "/:id",
-  authMiddleware,
   studentQuestionMarkController.getStudentQuestionMarkById
 );
 
 /**
- * Update one mark
+ * Update a single question mark entry by ID
+ * PUT /api/v1/student-question-marks/:id
  */
 router.put(
   "/:id",
-  authMiddleware,
-  roleMiddleware(ROLES.ADMIN, ROLES.FACULTY),
-  validate(updateStudentQuestionMarkSchema),
   studentQuestionMarkController.updateStudentQuestionMark
 );
 
 /**
- * Delete one mark
+ * Delete a question mark entry by ID
+ * DELETE /api/v1/student-question-marks/:id
  */
 router.delete(
   "/:id",
-  authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
-  validate(updateStudentQuestionMarkSchema),
   studentQuestionMarkController.deleteStudentQuestionMark
 );
 

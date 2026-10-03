@@ -1,125 +1,86 @@
 import { Router } from "express";
-
 import multer from "multer";
 
 import controller from "./curriculum.controller.js";
-
 import authenticate from "../../middleware/auth.middleware.js";
-
-import validate from "../../middleware/validate.middleware.js";
-
-import {
-  uploadSyllabusSchema,
-  extractSyllabusSchema,
-} from "./curriculum.schema.js";
 
 const router = Router();
 
-/**
- * ============================================================
- * Multer configuration
- * ============================================================
- */
-
+// Configure multer with memory storage (safe on all OS platforms)
 const upload = multer({
-  dest: "uploads/temp/",
-
+  storage: multer.memoryStorage(),
   limits: {
-    fileSize: 10 * 1024 * 1024,
+    fileSize: 15 * 1024 * 1024, // 15 MB
   },
-
   fileFilter: (req, file, cb) => {
     const isPdf =
-      file.mimetype === "application/pdf";
+      file.mimetype === "application/pdf" ||
+      file.originalname.toLowerCase().endsWith(".pdf");
 
     if (!isPdf) {
-      return cb(
-        new Error(
-          "Only PDF syllabus files are allowed."
-        )
-      );
+      return cb(new Error("Only PDF syllabus files are allowed."));
     }
-
     cb(null, true);
   },
 });
 
 /**
- * ============================================================
- * Upload syllabus
- * ============================================================
- *
- * POST
- * /api/v1/curriculum/upload-syllabus
- *
- * Multipart field:
- * syllabus
- *
- * ============================================================
+ * Health check for this sub-router
+ * GET /api/v1/curriculum/ping
  */
+router.get("/ping", (req, res) => {
+  res.json({ success: true, message: "Curriculum router is live!" });
+});
 
+/**
+ * 1. Upload syllabus PDF
+ * POST /api/v1/curriculum/upload-syllabus
+ */
 router.post(
   "/upload-syllabus",
   authenticate,
   upload.single("syllabus"),
-  validate(uploadSyllabusSchema),
   controller.uploadSyllabus
 );
 
 /**
- * ============================================================
- * Extract syllabus text
- * ============================================================
- *
- * POST
- * /api/v1/curriculum/extract/:syllabusId
- *
- * ============================================================
+ * 2. Extract text from PDF
+ * POST /api/v1/curriculum/extract/:syllabusId
  */
-
 router.post(
   "/extract/:syllabusId",
   authenticate,
-  validate(extractSyllabusSchema),
   controller.extractSyllabusText
 );
 
 /**
- * ============================================================
- * Analyze syllabus using Gemini AI
- * ============================================================
- *
- * POST
- * /api/v1/curriculum/analyze/:syllabusId
- *
- * No request body required.
- *
- * The endpoint uses:
- *
- * Syllabus
- *    ↓
- * extractedText
- *    ↓
- * Gemini AI
- *    ↓
- * Structured syllabus skills/topics
- *
- * ============================================================
+ * 3. Analyze syllabus using Gemini AI
+ * POST /api/v1/curriculum/analyze/:syllabusId
  */
-
 router.post(
   "/analyze/:syllabusId",
   authenticate,
   controller.analyzeSyllabus
 );
+
+/**
+ * 4. Discover industry skills
+ * POST /api/v1/curriculum/industry-discovery/:syllabusId
+ */
 router.post(
   "/industry-discovery/:syllabusId",
   authenticate,
   controller.discoverIndustrySkills
 );
+
+/**
+ * 5. Run curriculum gap analysis
+ * POST /api/v1/curriculum/gap-analysis/:syllabusId
+ */
 router.post(
   "/gap-analysis/:syllabusId",
   authenticate,
+  upload.single("industryPdf"),
   controller.analyzeCurriculumGaps
 );
 

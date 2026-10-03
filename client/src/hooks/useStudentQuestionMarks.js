@@ -3,7 +3,13 @@ import {
   getMarksByAssessmentAndStudent,
   saveBulkStudentMarks,
   getQuestionsByAssessmentId,
+  getDirectMarksByAssessment,
+  saveBulkDirectMarks,
 } from "../services/studentQuestionMarkService";
+
+// ==================================================================
+// QUESTION-WISE HOOKS (CIE / IA)
+// ==================================================================
 
 export const useAssessmentQuestions = (assessmentId) => {
   return useQuery({
@@ -40,6 +46,39 @@ export const useSaveStudentMarks = () => {
           variables.assessmentId,
           variables.studentId,
         ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["allAssessmentMarks", variables.assessmentId],
+      });
+    },
+  });
+};
+
+// ==================================================================
+// DIRECT / OVERALL MARKS HOOKS (Quiz, Assignment, Lab, SEE, Project)
+// ==================================================================
+
+export const useDirectMarks = (assessmentId) => {
+  return useQuery({
+    queryKey: ["directAssessmentMarks", assessmentId],
+    enabled: Boolean(assessmentId),
+    queryFn: async () => {
+      const res = await getDirectMarksByAssessment(assessmentId);
+      const list = res?.data?.data || res?.data || [];
+      return Array.isArray(list) ? list : [];
+    },
+  });
+};
+
+export const useSaveDirectMarks = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ assessmentId, marks }) =>
+      saveBulkDirectMarks(assessmentId, marks),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["directAssessmentMarks", variables.assessmentId],
       });
     },
   });
