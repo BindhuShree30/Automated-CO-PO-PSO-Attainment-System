@@ -65,6 +65,7 @@ import CourseRegistrationStudents from "../pages/courseRegistration/CourseRegist
 import MarksLedger from "../pages/faculty/MarksLedger";
 import COAttainment from "../pages/faculty/COAttainment";
 import CurriculumGaps from "../pages/faculty/CurriculumGaps";
+import POAttainment from "../pages/faculty/POAttainment";
 
 /* =========================================================
    COURSE OUTCOME
@@ -334,6 +335,15 @@ function AppRoutes() {
           <Route
             path="/faculty/attainment"
             element={<COAttainment />}
+          />
+
+          {/* =================================================
+              PO & PSO ATTAINMENT
+          ================================================= */}
+
+          <Route
+            path="/faculty/po-attainment"
+            element={<POAttainment />}
           />
 
           {/* =================================================

@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import poAttainmentService from "./poAttainment.service.js";
 
 const createPOAttainment = async (req, res, next) => {
@@ -21,19 +20,52 @@ const createPOAttainment = async (req, res, next) => {
 
 const calculatePOAttainment = async (req, res, next) => {
   try {
-    const { courseOfferingId, programOutcomeId } =
-      req.validatedData.body;
+    const { courseOfferingId, programOutcomeId } = req.validatedData.body;
 
-    const attainment =
-      await poAttainmentService.calculatePOAttainment(
+    if (programOutcomeId) {
+      const attainment = await poAttainmentService.calculatePOAttainment(
         courseOfferingId,
         programOutcomeId
       );
 
+      return res.status(StatusCodes.OK).json({
+        success: true,
+        message: "PO Attainment calculated successfully.",
+        data: attainment,
+        error: null,
+      });
+    }
+
+    // If no single PO is specified, calculate the complete matrix
+    const matrix =
+      await poAttainmentService.calculateCourseOfferingAttainmentMatrix(
+        courseOfferingId
+      );
+
     return res.status(StatusCodes.OK).json({
       success: true,
-      message: "PO Attainment calculated successfully.",
-      data: attainment,
+      message: "Complete Course PO/PSO Attainment Matrix calculated successfully.",
+      data: matrix,
+      error: null,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getCourseAttainmentMatrix = async (req, res, next) => {
+  try {
+    const { courseOfferingId } = req.validatedData.params;
+
+    const matrix =
+      await poAttainmentService.calculateCourseOfferingAttainmentMatrix(
+        courseOfferingId
+      );
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Course PO/PSO Attainment Matrix fetched successfully.",
+      data: matrix,
       error: null,
     });
   } catch (error) {
@@ -43,8 +75,7 @@ const calculatePOAttainment = async (req, res, next) => {
 
 const getPOAttainments = async (req, res, next) => {
   try {
-    const attainments =
-      await poAttainmentService.getPOAttainments();
+    const attainments = await poAttainmentService.getPOAttainments();
 
     return res.status(StatusCodes.OK).json({
       success: true,
@@ -60,9 +91,7 @@ const getPOAttainments = async (req, res, next) => {
 const getPOAttainmentById = async (req, res, next) => {
   try {
     const { id } = req.validatedData.params;
-
-    const attainment =
-      await poAttainmentService.getPOAttainmentById(id);
+    const attainment = await poAttainmentService.getPOAttainmentById(id);
 
     return res.status(StatusCodes.OK).json({
       success: true,
@@ -78,12 +107,10 @@ const getPOAttainmentById = async (req, res, next) => {
 const updatePOAttainment = async (req, res, next) => {
   try {
     const { id } = req.validatedData.params;
-
-    const attainment =
-      await poAttainmentService.updatePOAttainment(
-        id,
-        req.validatedData.body
-      );
+    const attainment = await poAttainmentService.updatePOAttainment(
+      id,
+      req.validatedData.body
+    );
 
     return res.status(StatusCodes.OK).json({
       success: true,
@@ -99,7 +126,6 @@ const updatePOAttainment = async (req, res, next) => {
 const deletePOAttainment = async (req, res, next) => {
   try {
     const { id } = req.validatedData.params;
-
     await poAttainmentService.deletePOAttainment(id);
 
     return res.status(StatusCodes.OK).json({
@@ -116,6 +142,7 @@ const deletePOAttainment = async (req, res, next) => {
 export default {
   createPOAttainment,
   calculatePOAttainment,
+  getCourseAttainmentMatrix,
   getPOAttainments,
   getPOAttainmentById,
   updatePOAttainment,

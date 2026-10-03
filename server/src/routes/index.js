@@ -284,7 +284,11 @@ router.use("/co-po-mappings", coPOMappingRoutes);
  * ------------------------------------------------------------------
  */
 
-router.use("/po-attainments", poAttainmentRoutes);
+if (typeof poAttainmentRoutes === "function") {
+  router.use("/po-attainments", poAttainmentRoutes);
+} else {
+  console.error("❌ Warning: poAttainmentRoutes is not a valid middleware/router function.");
+}
 
 /**
  * ------------------------------------------------------------------

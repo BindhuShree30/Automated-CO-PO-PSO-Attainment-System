@@ -20,6 +20,7 @@ import {
   PencilSquare,
   Award,
   Cpu,
+  Calculator,
 } from "react-bootstrap-icons";
 
 function Sidebar() {
@@ -105,6 +106,16 @@ function Sidebar() {
         name: "Course Offerings",
         icon: <JournalCheck />,
         path: "/hod/course-offerings",
+      },
+
+      // =======================================================
+      // PO & PSO ATTAINMENT
+      // =======================================================
+
+      {
+        name: "PO & PSO Attainment",
+        icon: <Calculator />,
+        path: "/faculty/po-attainment",
       },
 
       // =======================================================
@@ -249,6 +260,16 @@ function Sidebar() {
         name: "CO–PSO Mapping",
         icon: <Diagram3 />,
         path: "/faculty/co-pso-mapping",
+      },
+
+      // =======================================================
+      // PO & PSO ATTAINMENT
+      // =======================================================
+
+      {
+        name: "PO & PSO Attainment",
+        icon: <Calculator />,
+        path: "/faculty/po-attainment",
       },
 
       // =======================================================
