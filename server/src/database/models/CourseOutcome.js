@@ -27,6 +27,7 @@ const CourseOutcome = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       field: "co_number",
+
       validate: {
         min: 1,
       },
@@ -69,18 +70,27 @@ const CourseOutcome = sequelize.define(
     indexes: [
       {
         unique: true,
-        fields: ["course_id", "co_number"],
+        fields: [
+          "course_id",
+          "co_number",
+        ],
         name: "unique_course_co_number",
       },
+
       {
         unique: true,
-        fields: ["course_id", "code"],
+        fields: [
+          "course_id",
+          "code",
+        ],
         name: "unique_course_co_code",
       },
+
       {
         fields: ["course_id"],
         name: "idx_course_outcome_course",
       },
+
       {
         fields: ["status"],
         name: "idx_course_outcome_status",
@@ -88,5 +98,18 @@ const CourseOutcome = sequelize.define(
     ],
   }
 );
+
+/**
+ * ------------------------------------------------------------------
+ * Associations
+ * ------------------------------------------------------------------
+ */
+
+CourseOutcome.associate = (models) => {
+  CourseOutcome.hasMany(models.AssessmentQuestion, {
+    foreignKey: "courseOutcomeId",
+    as: "assessmentQuestions",
+  });
+};
 
 export default CourseOutcome;

@@ -1,39 +1,71 @@
-/**
- * ------------------------------------------------------------------
- * Student Question Mark Routes
- * Project : Automated CO–PO–PSO Attainment Analysis System
- * ------------------------------------------------------------------
- */
-
 import { Router } from "express";
-
 import studentQuestionMarkController from "./studentQuestionMark.controller.js";
 import authMiddleware from "../../middleware/auth.middleware.js";
 import roleMiddleware from "../../middleware/role.middleware.js";
 import validate from "../../middleware/validate.middleware.js";
-
 import ROLES from "../../shared/constants/roles.js";
 
 import {
   createStudentQuestionMarkSchema,
   updateStudentQuestionMarkSchema,
+  assessmentStudentMarksSchema,
+  bulkStudentMarksSchema,
 } from "./studentQuestionMark.schema.js";
 
 const router = Router();
 
 /**
- * Create Student Question Mark
+ * ================================================================
+ * MARKS ENTRY
+ * ================================================================
+ */
+
+/**
+ * Get marks for one Student in one Assessment
+ *
+ * GET
+ * /api/v1/student-question-marks/assessment/:assessmentId/student/:studentId
+ */
+router.get(
+  "/assessment/:assessmentId/student/:studentId",
+  authMiddleware,
+  validate(assessmentStudentMarksSchema),
+  studentQuestionMarkController.getMarksByAssessmentAndStudent
+);
+
+/**
+ * Save all marks for one Student in one Assessment
+ *
+ * POST
+ * /api/v1/student-question-marks/assessment/:assessmentId/student/:studentId/bulk
+ */
+router.post(
+  "/assessment/:assessmentId/student/:studentId/bulk",
+  authMiddleware,
+  roleMiddleware(ROLES.ADMIN, ROLES.FACULTY),
+  validate(bulkStudentMarksSchema),
+  studentQuestionMarkController.saveBulkStudentMarks
+);
+
+/**
+ * ================================================================
+ * EXISTING CRUD
+ * ================================================================
+ */
+
+/**
+ * Create one mark
  */
 router.post(
   "/",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.ADMIN, ROLES.FACULTY),
   validate(createStudentQuestionMarkSchema),
   studentQuestionMarkController.createStudentQuestionMark
 );
 
 /**
- * Get All Student Question Marks
+ * Get all marks
  */
 router.get(
   "/",
@@ -42,7 +74,7 @@ router.get(
 );
 
 /**
- * Get Marks By Student
+ * Get marks by Student
  */
 router.get(
   "/student/:studentId",
@@ -51,7 +83,7 @@ router.get(
 );
 
 /**
- * Get Marks By Assessment Question
+ * Get marks by Assessment Question
  */
 router.get(
   "/question/:assessmentQuestionId",
@@ -60,11 +92,7 @@ router.get(
 );
 
 /**
- * Get Student Question Mark By ID
- *
- * IMPORTANT:
- * Keep /:id after /student/:studentId and
- * /question/:assessmentQuestionId.
+ * Get mark by ID
  */
 router.get(
   "/:id",
@@ -73,23 +101,24 @@ router.get(
 );
 
 /**
- * Update Student Question Mark
+ * Update one mark
  */
 router.put(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.ADMIN, ROLES.FACULTY),
   validate(updateStudentQuestionMarkSchema),
   studentQuestionMarkController.updateStudentQuestionMark
 );
 
 /**
- * Delete Student Question Mark
+ * Delete one mark
  */
 router.delete(
   "/:id",
   authMiddleware,
   roleMiddleware(ROLES.ADMIN),
+  validate(updateStudentQuestionMarkSchema),
   studentQuestionMarkController.deleteStudentQuestionMark
 );
 

@@ -30,7 +30,7 @@ const router = Router();
 router.post(
   "/",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD,ROLES.FACULTY),
   validate(createAssessmentSchema),
   assessmentController.createAssessment
 );
@@ -73,7 +73,7 @@ router.get(
 router.put(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD,ROLES.FACULTY),
   validate(updateAssessmentSchema),
   assessmentController.updateAssessment
 );
@@ -84,7 +84,7 @@ router.put(
 router.delete(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD,ROLES.FACULTY),
   validate(assessmentIdSchema),
   assessmentController.deleteAssessment
 );

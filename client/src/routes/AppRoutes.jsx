@@ -5,7 +5,6 @@ import {
 } from "react-router-dom";
 
 import DashboardLayout from "../layouts/DashboardLayout";
-
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 
@@ -24,6 +23,8 @@ import HodDashboard from "../pages/hod/Dashboard";
 import HodFaculty from "../pages/hod/Faculty";
 import HodStudents from "../pages/hod/Students";
 import HodCourses from "../pages/hod/Courses";
+import CurriculumImport from "../pages/hod/CurriculumImport";
+import CurriculumImportReview from "../pages/hod/CurriculumImportReview";
 
 /* =========================================================
    BATCH
@@ -41,10 +42,28 @@ import AddProgramOutcome from "../pages/programOutcome/AddProgramOutcome";
 import EditProgramOutcome from "../pages/programOutcome/EditProgramOutcome";
 
 /* =========================================================
+   PROGRAM SPECIFIC OUTCOME
+========================================================= */
+
+import ProgramSpecificOutcomeList from "../pages/programSpecificOutcome/ProgramSpecificOutcomeList";
+import AddProgramSpecificOutcome from "../pages/programSpecificOutcome/AddProgramSpecificOutcome";
+import EditProgramSpecificOutcome from "../pages/programSpecificOutcome/EditProgramSpecificOutcome";
+
+/* =========================================================
    FACULTY
 ========================================================= */
 
 import FacultyDashboard from "../pages/faculty/Dashboard";
+import FacultyCourses from "../pages/faculty/Courses";
+import CoPsoMapping from "../pages/faculty/CoPsoMapping";
+import FacultyStudents from "../pages/faculty/Students";
+import Assessments from "../pages/faculty/Assessments";
+import QuestionMapping from "../pages/faculty/QuestionMapping";
+import MarksEntry from "../pages/faculty/MarksEntry";
+import CourseRegistrationList from "../pages/courseRegistration/CourseRegistrationList";
+import CourseRegistrationStudents from "../pages/courseRegistration/CourseRegistrationStudents";
+import MarksLedger from "../pages/faculty/MarksLedger";
+import COAttainment from "../pages/faculty/COAttainment";
 
 /* =========================================================
    COURSE OUTCOME
@@ -81,17 +100,14 @@ import FacultyAssignment from "../pages/facultyAssignment/FacultyAssignment";
 import Unauthorized from "../pages/common/Unauthorized";
 import NotFound from "../pages/common/NotFound";
 
-
 function AppRoutes() {
   return (
     <Routes>
-
       {/* =====================================================
           PUBLIC ROUTES
       ===================================================== */}
 
       <Route element={<PublicRoute />}>
-
         <Route
           path="/login"
           element={<Login />}
@@ -101,9 +117,7 @@ function AppRoutes() {
           path="/register"
           element={<Register />}
         />
-
       </Route>
-
 
       {/* =====================================================
           HOD ROUTES
@@ -111,14 +125,10 @@ function AppRoutes() {
 
       <Route
         element={
-          <ProtectedRoute
-            allowedRoles={["HOD"]}
-          />
+          <ProtectedRoute allowedRoles={["HOD"]} />
         }
       >
-
         <Route element={<DashboardLayout />}>
-
           {/* =================================================
               HOD DASHBOARD
           ================================================= */}
@@ -127,7 +137,6 @@ function AppRoutes() {
             path="/hod/dashboard"
             element={<HodDashboard />}
           />
-
 
           {/* =================================================
               HOD FACULTY
@@ -138,7 +147,6 @@ function AppRoutes() {
             element={<HodFaculty />}
           />
 
-
           {/* =================================================
               HOD STUDENTS
           ================================================= */}
@@ -148,7 +156,6 @@ function AppRoutes() {
             element={<HodStudents />}
           />
 
-
           {/* =================================================
               HOD COURSES
           ================================================= */}
@@ -157,7 +164,6 @@ function AppRoutes() {
             path="/hod/courses"
             element={<HodCourses />}
           />
-
 
           {/* =================================================
               HOD BATCH MANAGEMENT
@@ -178,6 +184,19 @@ function AppRoutes() {
             element={<BatchForm />}
           />
 
+          {/* =================================================
+              HOD CURRICULUM IMPORT
+          ================================================= */}
+
+          <Route
+            path="/hod/curriculum-import/:curriculumId"
+            element={<CurriculumImport />}
+          />
+
+          <Route
+            path="/hod/curriculum-import-review/:importId"
+            element={<CurriculumImportReview />}
+          />
 
           {/* =================================================
               HOD PROGRAM OUTCOMES
@@ -198,6 +217,24 @@ function AppRoutes() {
             element={<EditProgramOutcome />}
           />
 
+          {/* =================================================
+              HOD PROGRAM SPECIFIC OUTCOMES
+          ================================================= */}
+
+          <Route
+            path="/hod/program-specific-outcomes"
+            element={<ProgramSpecificOutcomeList />}
+          />
+
+          <Route
+            path="/hod/program-specific-outcomes/add"
+            element={<AddProgramSpecificOutcome />}
+          />
+
+          <Route
+            path="/hod/program-specific-outcomes/edit/:id"
+            element={<EditProgramSpecificOutcome />}
+          />
 
           {/* =================================================
               HOD COURSE OFFERINGS
@@ -218,7 +255,6 @@ function AppRoutes() {
             element={<EditCourseOffering />}
           />
 
-
           {/* =================================================
               HOD FACULTY ASSIGNMENT
           ================================================= */}
@@ -227,11 +263,8 @@ function AppRoutes() {
             path="/hod/faculty-assignment"
             element={<FacultyAssignment />}
           />
-
         </Route>
-
       </Route>
-
 
       {/* =====================================================
           FACULTY ROUTES
@@ -239,14 +272,10 @@ function AppRoutes() {
 
       <Route
         element={
-          <ProtectedRoute
-            allowedRoles={["FACULTY"]}
-          />
+          <ProtectedRoute allowedRoles={["FACULTY"]} />
         }
       >
-
         <Route element={<DashboardLayout />}>
-
           {/* =================================================
               FACULTY DASHBOARD
           ================================================= */}
@@ -256,6 +285,92 @@ function AppRoutes() {
             element={<FacultyDashboard />}
           />
 
+          {/* =================================================
+              FACULTY ASSESSMENTS
+          ================================================= */}
+
+          <Route
+            path="/faculty/assessments"
+            element={<Assessments />}
+          />
+
+          {/* =================================================
+              QUESTION MAPPING
+          ================================================= */}
+
+          <Route
+            path="/faculty/question-mapping"
+            element={<QuestionMapping />}
+          />
+
+          <Route
+            path="/faculty/question-mapping/:assessmentId"
+            element={<QuestionMapping />}
+          />
+
+          {/* =================================================
+              MARKS ENTRY & LEDGER
+          ================================================= */}
+
+          <Route
+            path="/faculty/marks-entry"
+            element={<MarksEntry />}
+          />
+
+          <Route
+            path="/faculty/marks-entry/:assessmentId"
+            element={<MarksEntry />}
+          />
+          <Route
+            path="/faculty/marks-ledger" 
+            element={<MarksLedger />}
+          />
+
+          {/* =================================================
+              CO ATTAINMENT
+          ================================================= */}
+
+          <Route
+            path="/faculty/attainment"
+            element={<COAttainment />}
+          />
+
+          {/* =================================================
+              FACULTY MY COURSES
+          ================================================= */}
+
+          <Route
+            path="/faculty/courses"
+            element={<FacultyCourses />}
+          />
+
+          <Route
+            path="/faculty/my-courses"
+            element={<FacultyCourses />}
+          />
+
+          {/* =================================================
+              FACULTY STUDENTS
+          ================================================= */}
+
+          <Route
+            path="/faculty/students"
+            element={<FacultyStudents />}
+          />
+
+          {/* =================================================
+              COURSE REGISTRATION
+          ================================================= */}
+
+          <Route
+            path="/faculty/course-registration"
+            element={<CourseRegistrationList />}
+          />
+
+          <Route
+            path="/faculty/course-registration/:courseOfferingId"
+            element={<CourseRegistrationStudents />}
+          />
 
           {/* =================================================
               COURSE OUTCOMES
@@ -276,7 +391,6 @@ function AppRoutes() {
             element={<EditCourseOutcome />}
           />
 
-
           {/* =================================================
               CO-PO MAPPING
           ================================================= */}
@@ -286,10 +400,16 @@ function AppRoutes() {
             element={<COPOMatrix />}
           />
 
+          {/* =================================================
+              CO-PSO MAPPING
+          ================================================= */}
+
+          <Route
+            path="/faculty/co-pso-mapping"
+            element={<CoPsoMapping />}
+          />
         </Route>
-
       </Route>
-
 
       {/* =====================================================
           UNAUTHORIZED
@@ -299,7 +419,6 @@ function AppRoutes() {
         path="/unauthorized"
         element={<Unauthorized />}
       />
-
 
       {/* =====================================================
           ROOT
@@ -315,7 +434,6 @@ function AppRoutes() {
         }
       />
 
-
       {/* =====================================================
           404
       ===================================================== */}
@@ -324,7 +442,6 @@ function AppRoutes() {
         path="*"
         element={<NotFound />}
       />
-
     </Routes>
   );
 }

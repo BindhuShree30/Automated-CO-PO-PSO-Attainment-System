@@ -50,10 +50,44 @@ router.post(
 
 /**
  * ------------------------------------------------------------------
+ * Get My Course Offerings
+ * ------------------------------------------------------------------
+ *
+ * GET /api/v1/course-offerings/my-courses
+ *
+ * Only FACULTY can access this endpoint.
+ *
+ * Returns ONLY the Course Offerings assigned to
+ * the currently logged-in Faculty.
+ *
+ * IMPORTANT:
+ *
+ * This route MUST appear before:
+ *
+ * /:id
+ *
+ * Otherwise Express may interpret:
+ *
+ * "my-courses"
+ *
+ * as an ID.
+ * ------------------------------------------------------------------
+ */
+router.get(
+  "/my-courses",
+  authMiddleware,
+  roleMiddleware(ROLES.FACULTY),
+  courseOfferingController.getMyCourseOfferings
+);
+
+/**
+ * ------------------------------------------------------------------
  * Get All Course Offerings
  * ------------------------------------------------------------------
  *
  * GET /api/v1/course-offerings
+ *
+ * Used by HOD for Course Offering management.
  * ------------------------------------------------------------------
  */
 router.get(

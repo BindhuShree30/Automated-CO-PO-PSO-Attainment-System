@@ -14,23 +14,37 @@ import courseRoutes from "../modules/course/course.routes.js";
 import facultyRoutes from "../modules/faculty/faculty.routes.js";
 import studentRoutes from "../modules/student/student.routes.js";
 import coRoutes from "../modules/co/co.routes.js";
+
 import academicYearRoutes from "../modules/academicYear/academicYear.routes.js";
 import batchRoutes from "../modules/batch/batch.routes.js";
 import semesterRoutes from "../modules/semester/semester.routes.js";
+
 import courseOfferingRoutes from "../modules/courseOffering/courseOffering.routes.js";
+import facultyAssignmentRoutes from "../modules/facultyAssignment/facultyAssignment.routes.js";
+
 import enrollmentRoutes from "../modules/enrollment/enrollment.routes.js";
 import courseRegistrationRoutes from "../modules/courseRegistration/courseRegistration.routes.js";
+
 import assessmentRoutes from "../modules/assessment/assessment.routes.js";
 import assessmentQuestionRoutes from "../modules/assessmentQuestion/assessmentQuestion.routes.js";
 import studentQuestionMarkRoutes from "../modules/studentQuestionMark/studentQuestionMark.routes.js";
+
+
 import coAttainmentRoutes from "../modules/coAttainment/coAttainment.routes.js";
+
 import programOutcomeRoutes from "../modules/programOutcome/programOutcome.routes.js";
 import coPOMappingRoutes from "../modules/coPOMapping/coPOMapping.routes.js";
 import poAttainmentRoutes from "../modules/poAttainment/poAttainment.routes.js";
+
 import programSpecificOutcomeRoutes from "../modules/programSpecificOutcome/programSpecificOutcome.routes.js";
 import coPsoMappingRoutes from "../modules/coPsoMapping/coPsoMapping.routes.js";
+
 import dashboardRoutes from "../modules/dashboard/dashboard.routes.js";
+
 import hodRoutes from "../modules/hod/hod.routes.js";
+
+import curriculumRoutes from "../modules/curriculum/curriculum.routes.js";
+import CurriculumImportRoutes from "../modules/curriculumImport/curriculumImport.routes.js";
 
 const router = Router();
 
@@ -39,6 +53,7 @@ const router = Router();
  * Health Check
  * ------------------------------------------------------------------
  */
+
 router.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
@@ -53,6 +68,7 @@ router.get("/health", (req, res) => {
  * Authentication Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/auth", authRoutes);
 
 /**
@@ -60,13 +76,40 @@ router.use("/auth", authRoutes);
  * HOD Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/hod", hodRoutes);
+
+/**
+ * ------------------------------------------------------------------
+ * Curriculum Routes
+ * ------------------------------------------------------------------
+ */
+
+router.use("/curriculum", curriculumRoutes);
+
+/**
+ * ------------------------------------------------------------------
+ * Curriculum Import Routes
+ * ------------------------------------------------------------------
+ *
+ * Base URL:
+ * /api/v1/curriculum
+ *
+ * Examples:
+ * POST /api/v1/curriculum/curriculums/:curriculumId/import
+ * GET  /api/v1/curriculum/curriculums/:curriculumId/imports
+ * GET  /api/v1/curriculum/curriculum-imports/:importId
+ * GET  /api/v1/curriculum/curriculum-imports/:importId/rows
+ */
+
+router.use("/curriculum", CurriculumImportRoutes);
 
 /**
  * ------------------------------------------------------------------
  * Department Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/departments", departmentRoutes);
 
 /**
@@ -74,6 +117,7 @@ router.use("/departments", departmentRoutes);
  * Program Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/programs", programRoutes);
 
 /**
@@ -81,6 +125,7 @@ router.use("/programs", programRoutes);
  * Course Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/courses", courseRoutes);
 
 /**
@@ -88,16 +133,18 @@ router.use("/courses", courseRoutes);
  * Dashboard Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/dashboard", dashboardRoutes);
 
 /**
  * ------------------------------------------------------------------
  * Faculty Routes
+ * ------------------------------------------------------------------
  *
  * Base URL:
  * /api/v1/faculty
- * ------------------------------------------------------------------
  */
+
 router.use("/faculty", facultyRoutes);
 
 /**
@@ -105,6 +152,7 @@ router.use("/faculty", facultyRoutes);
  * Student Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/students", studentRoutes);
 
 /**
@@ -112,6 +160,7 @@ router.use("/students", studentRoutes);
  * Course Outcome Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/co", coRoutes);
 
 /**
@@ -119,6 +168,7 @@ router.use("/co", coRoutes);
  * Academic Year Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/academic-years", academicYearRoutes);
 
 /**
@@ -126,6 +176,7 @@ router.use("/academic-years", academicYearRoutes);
  * Batch Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/batches", batchRoutes);
 
 /**
@@ -133,6 +184,7 @@ router.use("/batches", batchRoutes);
  * Semester Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/semesters", semesterRoutes);
 
 /**
@@ -140,13 +192,23 @@ router.use("/semesters", semesterRoutes);
  * Course Offering Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/course-offerings", courseOfferingRoutes);
+
+/**
+ * ------------------------------------------------------------------
+ * Faculty Assignment Routes
+ * ------------------------------------------------------------------
+ */
+
+router.use("/faculty-assignments", facultyAssignmentRoutes);
 
 /**
  * ------------------------------------------------------------------
  * Enrollment Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/enrollments", enrollmentRoutes);
 
 /**
@@ -154,6 +216,7 @@ router.use("/enrollments", enrollmentRoutes);
  * Course Registration Routes
  * ------------------------------------------------------------------
  */
+
 router.use(
   "/course-registrations",
   courseRegistrationRoutes
@@ -164,6 +227,7 @@ router.use(
  * Assessment Routes
  * ------------------------------------------------------------------
  */
+
 router.use("/assessments", assessmentRoutes);
 
 /**
@@ -171,6 +235,7 @@ router.use("/assessments", assessmentRoutes);
  * Assessment Question Routes
  * ------------------------------------------------------------------
  */
+
 router.use(
   "/assessment-questions",
   assessmentQuestionRoutes
@@ -181,6 +246,7 @@ router.use(
  * Student Question Mark Routes
  * ------------------------------------------------------------------
  */
+
 router.use(
   "/student-question-marks",
   studentQuestionMarkRoutes
@@ -188,9 +254,25 @@ router.use(
 
 /**
  * ------------------------------------------------------------------
+ * Marks Entry Routes
+ * ------------------------------------------------------------------
+ *
+ * Base URL:
+ * /api/v1/marks-entries
+ *
+ * Examples:
+ * GET  /api/v1/marks-entries/course-offering/:courseOfferingId/assessment/:assessmentId
+ * POST /api/v1/marks-entries/bulk
+ */
+
+
+
+/**
+ * ------------------------------------------------------------------
  * CO Attainment Routes
  * ------------------------------------------------------------------
  */
+
 router.use(
   "/co-attainments",
   coAttainmentRoutes
@@ -201,6 +283,7 @@ router.use(
  * Program Outcome Routes
  * ------------------------------------------------------------------
  */
+
 router.use(
   "/program-outcomes",
   programOutcomeRoutes
@@ -211,6 +294,7 @@ router.use(
  * CO–PO Mapping Routes
  * ------------------------------------------------------------------
  */
+
 router.use(
   "/co-po-mappings",
   coPOMappingRoutes
@@ -221,6 +305,7 @@ router.use(
  * PO Attainment Routes
  * ------------------------------------------------------------------
  */
+
 router.use(
   "/po-attainments",
   poAttainmentRoutes
@@ -231,6 +316,7 @@ router.use(
  * Program Specific Outcome Routes
  * ------------------------------------------------------------------
  */
+
 router.use(
   "/program-specific-outcomes",
   programSpecificOutcomeRoutes
@@ -241,6 +327,7 @@ router.use(
  * CO–PSO Mapping Routes
  * ------------------------------------------------------------------
  */
+
 router.use(
   "/co-pso-mappings",
   coPsoMappingRoutes
@@ -251,4 +338,5 @@ router.use(
  * Export
  * ------------------------------------------------------------------
  */
+
 export default router;

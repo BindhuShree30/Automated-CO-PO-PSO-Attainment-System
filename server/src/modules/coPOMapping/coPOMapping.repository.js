@@ -1,3 +1,10 @@
+/**
+ * ------------------------------------------------------------------
+ * CO–PO Mapping Repository
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ */
+
 import {
   COPOMapping,
   Course,
@@ -8,16 +15,20 @@ import {
 
 /**
  * ------------------------------------------------------------------
- * Create CO-PO Mapping
+ * Create Mapping
  * ------------------------------------------------------------------
  */
-const create = async (data) => {
-  return await COPOMapping.create(data);
+const create = async (
+  data
+) => {
+  return await COPOMapping.create(
+    data
+  );
 };
 
 /**
  * ------------------------------------------------------------------
- * Get All CO-PO Mappings
+ * Get All Mappings
  * ------------------------------------------------------------------
  */
 const findAll = async () => {
@@ -40,155 +51,203 @@ const findAll = async () => {
  * Get Mapping By ID
  * ------------------------------------------------------------------
  */
-const findById = async (id) => {
-  return await COPOMapping.findByPk(id, {
-    include: [
-      {
-        model: CourseOutcome,
-        as: "courseOutcome",
-      },
-      {
-        model: ProgramOutcome,
-        as: "programOutcome",
-      },
-    ],
-  });
+const findById = async (
+  id
+) => {
+  return await COPOMapping.findByPk(
+    id,
+    {
+      include: [
+        {
+          model: CourseOutcome,
+          as: "courseOutcome",
+        },
+        {
+          model: ProgramOutcome,
+          as: "programOutcome",
+        },
+      ],
+    }
+  );
 };
 
 /**
  * ------------------------------------------------------------------
- * Get Mappings By Course Outcome
+ * Get By Course Outcome
  * ------------------------------------------------------------------
  */
-const findByCourseOutcomeId = async (courseOutcomeId) => {
-  return await COPOMapping.findAll({
-    where: {
-      courseOutcomeId,
-    },
-    include: [
-      {
-        model: ProgramOutcome,
-        as: "programOutcome",
+const findByCourseOutcomeId =
+  async (
+    courseOutcomeId
+  ) => {
+    return await COPOMapping.findAll({
+      where: {
+        courseOutcomeId,
       },
-    ],
-  });
-};
+
+      include: [
+        {
+          model: ProgramOutcome,
+          as: "programOutcome",
+        },
+      ],
+    });
+  };
 
 /**
  * ------------------------------------------------------------------
- * Get Mappings By Program Outcome
+ * Get By Program Outcome
  * ------------------------------------------------------------------
  */
-const findByProgramOutcomeId = async (programOutcomeId) => {
-  return await COPOMapping.findAll({
-    where: {
-      programOutcomeId,
-    },
-    include: [
-      {
-        model: CourseOutcome,
-        as: "courseOutcome",
+const findByProgramOutcomeId =
+  async (
+    programOutcomeId
+  ) => {
+    return await COPOMapping.findAll({
+      where: {
+        programOutcomeId,
       },
-    ],
-  });
-};
+
+      include: [
+        {
+          model: CourseOutcome,
+          as: "courseOutcome",
+        },
+      ],
+    });
+  };
 
 /**
  * ------------------------------------------------------------------
  * Find Existing Mapping
  * ------------------------------------------------------------------
  */
-const findExistingMapping = async (
-  courseOutcomeId,
-  programOutcomeId
-) => {
-  return await COPOMapping.findOne({
-    where: {
-      courseOutcomeId,
-      programOutcomeId,
-    },
-  });
-};
-
-/**
- * ------------------------------------------------------------------
- * Get NBA Matrix Data
- * ------------------------------------------------------------------
- */
-const getMatrixData = async (courseId) => {
-  const course = await Course.findByPk(courseId, {
-    include: [
-      {
-        model: Program,
-        as: "program",
-      },
-      {
-        model: CourseOutcome,
-        as: "courseOutcomes",
-      },
-    ],
-  });
-
-  if (!course) {
-    return null;
-  }
-
-  const programOutcomes = await ProgramOutcome.findAll({
-    where: {
-      programId: course.programId,
-      status: true,
-    },
-    order: [["code", "ASC"]],
-  });
-
-  const mappings = await COPOMapping.findAll({
-    include: [
-      {
-        model: CourseOutcome,
-        as: "courseOutcome",
-        where: {
-          courseId,
-        },
-      },
-      {
-        model: ProgramOutcome,
-        as: "programOutcome",
-      },
-    ],
-  });
-
-  return {
-    course,
-    courseOutcomes: course.courseOutcomes,
-    programOutcomes,
-    mappings,
-  };
-};
-
-/**
- * ------------------------------------------------------------------
- * Save NBA Matrix
- * ------------------------------------------------------------------
- */
-const saveMatrix = async (matrix) => {
-  for (const row of matrix) {
-    const existing = await COPOMapping.findOne({
+const findExistingMapping =
+  async (
+    courseOutcomeId,
+    programOutcomeId
+  ) => {
+    return await COPOMapping.findOne({
       where: {
-        courseOutcomeId: row.courseOutcomeId,
-        programOutcomeId: row.programOutcomeId,
+        courseOutcomeId,
+        programOutcomeId,
       },
     });
+  };
+
+/**
+ * ------------------------------------------------------------------
+ * Get Matrix Data
+ * ------------------------------------------------------------------
+ */
+const getMatrixData =
+  async (
+    courseId
+  ) => {
+    const course =
+      await Course.findByPk(
+        courseId,
+        {
+          include: [
+            {
+              model: Program,
+              as: "program",
+            },
+
+            {
+              model: CourseOutcome,
+              as: "courseOutcomes",
+            },
+          ],
+        }
+      );
+
+    if (!course) {
+      return null;
+    }
+
+    const programOutcomes =
+      await ProgramOutcome.findAll({
+        where: {
+          programId:
+            course.programId,
+
+          status: true,
+        },
+
+        order: [
+          ["code", "ASC"],
+        ],
+      });
+
+    const mappings =
+      await COPOMapping.findAll({
+        include: [
+          {
+            model: CourseOutcome,
+            as: "courseOutcome",
+
+            where: {
+              courseId,
+            },
+          },
+
+          {
+            model: ProgramOutcome,
+            as: "programOutcome",
+          },
+        ],
+      });
+
+    return {
+      course,
+      courseOutcomes:
+        course.courseOutcomes,
+
+      programOutcomes,
+
+      mappings,
+    };
+  };
+
+/**
+ * ------------------------------------------------------------------
+ * Save Matrix
+ * ------------------------------------------------------------------
+ */
+const saveMatrix = async (
+  matrix
+) => {
+  for (const row of matrix) {
+    const existing =
+      await COPOMapping.findOne({
+        where: {
+          courseOutcomeId:
+            row.courseOutcomeId,
+
+          programOutcomeId:
+            row.programOutcomeId,
+        },
+      });
 
     if (existing) {
       await existing.update({
-        mappingLevel: row.mappingLevel,
+        mappingLevel:
+          row.mappingLevel,
+
         status: true,
       });
     } else {
       await COPOMapping.create({
-        courseOutcomeId: row.courseOutcomeId,
-        programOutcomeId: row.programOutcomeId,
-        mappingLevel: row.mappingLevel,
+        courseOutcomeId:
+          row.courseOutcomeId,
+
+        programOutcomeId:
+          row.programOutcomeId,
+
+        mappingLevel:
+          row.mappingLevel,
+
         status: true,
       });
     }
@@ -202,8 +261,13 @@ const saveMatrix = async (matrix) => {
  * Update Mapping
  * ------------------------------------------------------------------
  */
-const update = async (mapping, data) => {
-  return await mapping.update(data);
+const update = async (
+  mapping,
+  data
+) => {
+  return await mapping.update(
+    data
+  );
 };
 
 /**
@@ -211,7 +275,9 @@ const update = async (mapping, data) => {
  * Delete Mapping
  * ------------------------------------------------------------------
  */
-const remove = async (mapping) => {
+const remove = async (
+  mapping
+) => {
   return await mapping.destroy();
 };
 

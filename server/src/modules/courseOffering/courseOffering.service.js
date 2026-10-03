@@ -11,22 +11,113 @@ import courseOfferingRepository from "./courseOffering.repository.js";
 
 import ApiError from "../../shared/errors/ApiError.js";
 
+import Faculty from "../../database/models/Faculty.js";
+
 /**
  * ------------------------------------------------------------------
  * Get All Course Offerings
  * ------------------------------------------------------------------
  */
+
 const getAllCourseOfferings = async () => {
-  return await courseOfferingRepository
-    .findAllCourseOfferings();
+  return await courseOfferingRepository.findAllCourseOfferings();
 };
+
+
+/**
+ * ------------------------------------------------------------------
+ * Get My Course Offerings
+ * ------------------------------------------------------------------
+ *
+ * Flow:
+ *
+ * JWT
+ *   ↓
+ * req.user.email
+ *   ↓
+ * Faculty
+ *   ↓
+ * Faculty.id
+ *   ↓
+ * course_offerings.faculty_id
+ *
+ * ------------------------------------------------------------------
+ */
+
+const getMyCourseOfferings = async (user) => {
+
+  if (!user) {
+    throw new ApiError(
+      401,
+      "Authenticated user information is unavailable."
+    );
+  }
+
+  if (!user.email) {
+    throw new ApiError(
+      401,
+      "Authenticated user email is unavailable."
+    );
+  }
+
+  /**
+   * --------------------------------------------------------------
+   * Find Faculty
+   * --------------------------------------------------------------
+   */
+
+  const faculty = await Faculty.findOne({
+    where: {
+      email: user.email,
+      status: true,
+    },
+  });
+
+  if (!faculty) {
+    throw new ApiError(
+      404,
+      "Active faculty profile not found."
+    );
+  }
+
+  console.log(
+    "MY COURSES - FACULTY:",
+    {
+      id: faculty.id,
+      name: `${faculty.firstName} ${faculty.lastName}`,
+      email: faculty.email,
+    }
+  );
+
+  /**
+   * --------------------------------------------------------------
+   * Get Course Offerings
+   * --------------------------------------------------------------
+   */
+
+  const courseOfferings =
+    await courseOfferingRepository
+      .findCourseOfferingsByFacultyId(
+        faculty.id
+      );
+
+  console.log(
+    "MY COURSES - RESULT COUNT:",
+    courseOfferings.length
+  );
+
+  return courseOfferings;
+};
+
 
 /**
  * ------------------------------------------------------------------
  * Get Course Offering By ID
  * ------------------------------------------------------------------
  */
+
 const getCourseOfferingById = async (id) => {
+
   const courseOffering =
     await courseOfferingRepository
       .findCourseOfferingById(id);
@@ -41,20 +132,13 @@ const getCourseOfferingById = async (id) => {
   return courseOffering;
 };
 
+
 /**
  * ------------------------------------------------------------------
  * Create Course Offering
  * ------------------------------------------------------------------
- *
- * facultyId MUST be:
- *
- * faculties.id
- *
- * NOT:
- *
- * users.id
- * ------------------------------------------------------------------
  */
+
 const createCourseOffering = async ({
   courseId,
   batchId,
@@ -62,11 +146,13 @@ const createCourseOffering = async ({
   facultyId,
   section,
 }) => {
+
   /**
    * --------------------------------------------------------------
    * Validate Course
    * --------------------------------------------------------------
    */
+
   const course =
     await courseOfferingRepository
       .findCourseById(courseId);
@@ -78,11 +164,13 @@ const createCourseOffering = async ({
     );
   }
 
+
   /**
    * --------------------------------------------------------------
    * Validate Batch
    * --------------------------------------------------------------
    */
+
   const batch =
     await courseOfferingRepository
       .findBatchById(batchId);
@@ -94,11 +182,13 @@ const createCourseOffering = async ({
     );
   }
 
+
   /**
    * --------------------------------------------------------------
    * Validate Semester
    * --------------------------------------------------------------
    */
+
   const semester =
     await courseOfferingRepository
       .findSemesterById(semesterId);
@@ -110,16 +200,13 @@ const createCourseOffering = async ({
     );
   }
 
+
   /**
    * --------------------------------------------------------------
-   * IMPORTANT FACULTY VALIDATION
+   * Validate Faculty
    * --------------------------------------------------------------
-   *
-   * This searches the `faculties` table.
-   *
-   * The selected faculty ID from React must therefore
-   * be faculties.id.
    */
+
   const faculty =
     await courseOfferingRepository
       .findFacultyById(facultyId);
@@ -131,11 +218,6 @@ const createCourseOffering = async ({
     );
   }
 
-  /**
-   * --------------------------------------------------------------
-   * Faculty Must Be Active
-   * --------------------------------------------------------------
-   */
   if (!faculty.status) {
     throw new ApiError(
       403,
@@ -143,11 +225,13 @@ const createCourseOffering = async ({
     );
   }
 
+
   /**
    * --------------------------------------------------------------
-   * Prevent Duplicate Course Offering
+   * Check Duplicate
    * --------------------------------------------------------------
    */
+
   const existingOfferings =
     await courseOfferingRepository
       .findAllCourseOfferings();
@@ -158,6 +242,7 @@ const createCourseOffering = async ({
         offering.courseId === courseId &&
         offering.batchId === batchId &&
         offering.semesterId === semesterId &&
+        offering.facultyId === facultyId &&
         (offering.section || null) ===
           (section || null)
     );
@@ -169,15 +254,18 @@ const createCourseOffering = async ({
     );
   }
 
+
   /**
    * --------------------------------------------------------------
-   * Create Course Offering
+   * Create
    * --------------------------------------------------------------
    */
+
   const transaction =
     await sequelize.transaction();
 
   try {
+
     const courseOffering =
       await courseOfferingRepository
         .createCourseOffering(
@@ -201,22 +289,27 @@ const createCourseOffering = async ({
       .findCourseOfferingById(
         courseOffering.id
       );
+
   } catch (error) {
+
     await transaction.rollback();
 
     throw error;
   }
 };
 
+
 /**
  * ------------------------------------------------------------------
  * Update Course Offering
  * ------------------------------------------------------------------
  */
+
 const updateCourseOffering = async (
   id,
   data
 ) => {
+
   const courseOffering =
     await courseOfferingRepository
       .findCourseOfferingById(id);
@@ -228,11 +321,15 @@ const updateCourseOffering = async (
     );
   }
 
+
   /**
-   * If faculty is being changed,
-   * validate faculties.id.
+   * --------------------------------------------------------------
+   * Validate Faculty
+   * --------------------------------------------------------------
    */
+
   if (data.facultyId) {
+
     const faculty =
       await courseOfferingRepository
         .findFacultyById(
@@ -254,24 +351,27 @@ const updateCourseOffering = async (
     }
   }
 
+
   await courseOfferingRepository
     .updateCourseOffering(
       courseOffering,
       data
     );
 
+
   return await courseOfferingRepository
     .findCourseOfferingById(id);
 };
+
 
 /**
  * ------------------------------------------------------------------
  * Delete Course Offering
  * ------------------------------------------------------------------
  */
-const deleteCourseOffering = async (
-  id
-) => {
+
+const deleteCourseOffering = async (id) => {
+
   const courseOffering =
     await courseOfferingRepository
       .findCourseOfferingById(id);
@@ -294,8 +394,16 @@ const deleteCourseOffering = async (
   };
 };
 
+
+/**
+ * ------------------------------------------------------------------
+ * Export
+ * ------------------------------------------------------------------
+ */
+
 export default {
   getAllCourseOfferings,
+  getMyCourseOfferings,
   getCourseOfferingById,
   createCourseOffering,
   updateCourseOffering,

@@ -50,7 +50,7 @@ function AddProgramOutcome() {
         "Program Outcome created successfully."
       );
 
-      navigate("/admin/program-outcomes");
+      navigate("/hod/program-outcomes");
 
     } catch (error) {
 

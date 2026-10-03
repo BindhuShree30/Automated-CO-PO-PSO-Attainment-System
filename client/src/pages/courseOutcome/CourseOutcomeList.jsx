@@ -52,7 +52,7 @@ function CourseOutcomeList() {
           </h4>
 
           <Link
-            to="/admin/course-outcomes/add"
+            to="/faculty/course-outcomes/add"
             className="btn btn-primary"
           >
             <i className="bi bi-plus-lg me-2"></i>
@@ -186,7 +186,7 @@ function CourseOutcomeList() {
                         <td>
 
                           <Link
-                            to={`/admin/course-outcomes/edit/${co.id}`}
+                            to={`/faculty/course-outcomes/edit/${co.id}`}
                             className="btn btn-warning btn-sm me-2"
                           >
                             <i className="bi bi-pencil-square"></i>

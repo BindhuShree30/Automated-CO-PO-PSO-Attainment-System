@@ -67,14 +67,17 @@ const AssessmentQuestion = sequelize.define(
         ],
         name: "unique_assessment_question_number",
       },
+
       {
         fields: ["assessment_id"],
         name: "idx_assessment_question_assessment",
       },
+
       {
         fields: ["course_outcome_id"],
         name: "idx_assessment_question_co",
       },
+
       {
         fields: ["status"],
         name: "idx_assessment_question_status",
@@ -82,5 +85,23 @@ const AssessmentQuestion = sequelize.define(
     ],
   }
 );
+
+/**
+ * ------------------------------------------------------------------
+ * Associations
+ * ------------------------------------------------------------------
+ */
+
+AssessmentQuestion.associate = (models) => {
+  AssessmentQuestion.belongsTo(models.Assessment, {
+    foreignKey: "assessmentId",
+    as: "assessment",
+  });
+
+  AssessmentQuestion.belongsTo(models.CourseOutcome, {
+    foreignKey: "courseOutcomeId",
+    as: "courseOutcome",
+  });
+};
 
 export default AssessmentQuestion;

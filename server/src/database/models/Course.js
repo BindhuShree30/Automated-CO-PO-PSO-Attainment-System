@@ -4,11 +4,17 @@
  * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
  *
- * Course belongs to a Department.
+ * Course belongs to:
  *
- * Program is NOT used by the current Course Management module.
- * The existing program_id database column is retained only for
- * backward compatibility with old records.
+ * Department
+ * Program
+ *
+ * Program is used for:
+ *
+ * - Program Outcomes
+ * - CO–PO Mapping
+ * - CO–PSO Mapping
+ * - Attainment Analysis
  *
  * ------------------------------------------------------------------
  */
@@ -63,8 +69,6 @@ const Course = sequelize.define(
 
     /**
      * Department
-     *
-     * This is the active academic relationship.
      */
     departmentId: {
       type: DataTypes.UUID,
@@ -73,17 +77,20 @@ const Course = sequelize.define(
     },
 
     /**
-     * Legacy Program ID
+     * Program
      *
-     * NOT REQUIRED.
+     * Active academic relationship.
      *
-     * The Course API does not accept or use programId.
-     * Existing database records may still contain a value.
+     * Required for:
+     *
+     * - Program Outcomes
+     * - CO–PO Mapping
+     * - CO–PSO Mapping
+     * - Attainment Analysis
      */
     programId: {
       type: DataTypes.UUID,
-      allowNull: true,
-      defaultValue: null,
+      allowNull: false,
       field: "program_id",
     },
 
@@ -105,6 +112,10 @@ const Course = sequelize.define(
       {
         fields: ["department_id"],
         name: "idx_course_department",
+      },
+      {
+        fields: ["program_id"],
+        name: "idx_course_program",
       },
       {
         fields: ["semester"],

@@ -8,53 +8,143 @@
 import { z } from "zod";
 
 /**
+ * ------------------------------------------------------------------
+ * UUID Schema Helper
+ * ------------------------------------------------------------------
+ */
+
+const uuidSchema = (fieldName) =>
+    z
+        .string()
+        .uuid(`${fieldName} must be a valid UUID.`);
+
+/**
+ * ------------------------------------------------------------------
  * Course Registration Body Schema
+ * ------------------------------------------------------------------
+ *
+ * Used for creating a single course enrollment.
+ *
+ * Faculty sends:
+ *
+ * {
+ *     studentId,
+ *     courseOfferingId,
+ *     registrationDate,
+ *     status
+ * }
+ *
+ * ------------------------------------------------------------------
  */
+
 const courseRegistrationBodySchema = z.object({
-  studentId: z.uuid("Invalid Student ID."),
 
-  courseOfferingId: z.uuid(
-    "Invalid Course Offering ID."
-  ),
+    studentId: uuidSchema("Student ID"),
 
-  registrationDate: z.iso.date(
-    "Invalid Registration Date."
-  ),
+    courseOfferingId:
+        uuidSchema("Course Offering ID"),
 
-  status: z.boolean().optional(),
+    registrationDate: z
+        .string()
+        .date(
+            "Registration date must be a valid date."
+        ),
+
+    status: z
+        .boolean()
+        .optional()
+        .default(true),
 });
 
 /**
+ * ------------------------------------------------------------------
  * Create Course Registration Schema
+ * ------------------------------------------------------------------
  */
-export const createCourseRegistrationSchema = z.object({
-  body: courseRegistrationBodySchema,
-});
+
+export const createCourseRegistrationSchema =
+    z.object({
+
+        body:
+            courseRegistrationBodySchema,
+
+    });
 
 /**
+ * ------------------------------------------------------------------
  * Update Course Registration Schema
+ * ------------------------------------------------------------------
  */
-export const updateCourseRegistrationSchema = z.object({
-  params: z.object({
-    id: z.uuid("Invalid Course Registration ID."),
-  }),
 
-  body: courseRegistrationBodySchema
-    .partial()
-    .refine(
-      (data) => Object.keys(data).length > 0,
-      {
-        message:
-          "At least one field is required for update.",
-      }
-    ),
-});
+export const updateCourseRegistrationSchema =
+    z.object({
+
+        params: z.object({
+
+            id:
+                uuidSchema(
+                    "Course Registration ID"
+                ),
+
+        }),
+
+        body:
+            courseRegistrationBodySchema
+                .partial()
+                .refine(
+                    (data) =>
+                        Object.keys(data).length > 0,
+                    {
+                        message:
+                            "At least one field is required for update.",
+                    }
+                ),
+
+    });
 
 /**
+ * ------------------------------------------------------------------
  * Course Registration ID Schema
+ * ------------------------------------------------------------------
  */
-export const courseRegistrationIdSchema = z.object({
-  params: z.object({
-    id: z.uuid("Invalid Course Registration ID."),
-  }),
-});
+
+export const courseRegistrationIdSchema =
+    z.object({
+
+        params: z.object({
+
+            id:
+                uuidSchema(
+                    "Course Registration ID"
+                ),
+
+        }),
+
+    });
+
+/**
+ * ------------------------------------------------------------------
+ * Course Offering ID Parameter Schema
+ * ------------------------------------------------------------------
+ *
+ * Used by:
+ *
+ * GET
+ * /course-offering/:courseOfferingId
+ *
+ * ------------------------------------------------------------------
+ */
+
+export const courseOfferingIdParamSchema =
+    z.object({
+
+        params: z.object({
+
+            courseOfferingId:
+                uuidSchema(
+                    "Course Offering ID"
+                ),
+
+        }),
+
+    });

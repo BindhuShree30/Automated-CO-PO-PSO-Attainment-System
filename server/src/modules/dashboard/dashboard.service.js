@@ -1,18 +1,48 @@
-import repository from "./dashboard.repository.js";
+/**
+ * ------------------------------------------------------------------
+ * Dashboard Service
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ *
+ * Handles dashboard business logic.
+ * ------------------------------------------------------------------
+ */
+
+import DashboardRepository from "./dashboard.repository.js";
 
 class DashboardService {
-  /**
-   * Admin Dashboard
-   */
-  async getAdminDashboard() {
-    return await repository.getAdminDashboard();
-  }
 
   /**
-   * Faculty Dashboard
+   * ----------------------------------------------------------------
+   * Get HOD Dashboard
+   * ----------------------------------------------------------------
    */
-  async getFacultyDashboard(facultyId) {
-    return await repository.getFacultyDashboard(facultyId);
+  async getHodDashboard() {
+
+    const dashboardData =
+      await DashboardRepository.getDashboardCounts();
+
+    return dashboardData;
+  }
+
+
+  /**
+   * ----------------------------------------------------------------
+   * Get Faculty Dashboard
+   * ----------------------------------------------------------------
+   *
+   * @param {string} facultyEmail
+   * @returns {Object} Faculty dashboard data
+   * ----------------------------------------------------------------
+   */
+  async getFacultyDashboard(facultyEmail) {
+
+    const dashboardData =
+      await DashboardRepository.getFacultyDashboard(
+        facultyEmail
+      );
+
+    return dashboardData;
   }
 }
 

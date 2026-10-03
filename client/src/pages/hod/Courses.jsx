@@ -9,6 +9,7 @@ import {
 } from "../../hooks/useCourses";
 
 import { useDepartments } from "../../hooks/useDepartments";
+import { usePrograms } from "../../hooks/usePrograms";
 
 function Courses() {
   const {
@@ -18,14 +19,24 @@ function Courses() {
     error,
   } = useCourses();
 
-  const { data: departments = [] } = useDepartments();
+  const {
+    data: departments = [],
+  } = useDepartments();
+
+  const {
+    data: programs = [],
+    isLoading: programsLoading,
+  } = usePrograms();
 
   const createCourse = useCreateCourse();
   const updateCourse = useUpdateCourse();
   const deleteCourse = useDeleteCourse();
 
-  const [showModal, setShowModal] = useState(false);
-  const [editingCourse, setEditingCourse] = useState(null);
+  const [showModal, setShowModal] =
+    useState(false);
+
+  const [editingCourse, setEditingCourse] =
+    useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -33,6 +44,7 @@ function Courses() {
     credits: "",
     semester: "",
     departmentId: "",
+    programId: "",
     status: true,
   });
 
@@ -47,6 +59,7 @@ function Courses() {
       credits: "",
       semester: "",
       departmentId: "",
+      programId: "",
       status: true,
     });
 
@@ -74,10 +87,17 @@ function Courses() {
       code: course.code || "",
       credits: course.credits ?? "",
       semester: course.semester ?? "",
+
       departmentId:
         course.departmentId ||
         course.department?.id ||
         "",
+
+      programId:
+        course.programId ||
+        course.program?.id ||
+        "",
+
       status: course.status ?? true,
     });
 
@@ -112,14 +132,44 @@ function Courses() {
       checked,
     } = event.target;
 
+    // -------------------------------------------------------
+    // Department changed
+    // -------------------------------------------------------
+
+    if (name === "departmentId") {
+      setFormData((previous) => ({
+        ...previous,
+
+        departmentId: value,
+
+        // Reset program because program belongs
+        // to the selected department.
+        programId: "",
+      }));
+
+      return;
+    }
+
     setFormData((previous) => ({
       ...previous,
+
       [name]:
         type === "checkbox"
           ? checked
           : value,
     }));
   };
+
+  // =========================================================
+  // FILTER PROGRAMS BY DEPARTMENT
+  // =========================================================
+
+  const filteredPrograms =
+    programs.filter(
+      (program) =>
+        program.departmentId ===
+        formData.departmentId
+    );
 
   // =========================================================
   // SAVE COURSE
@@ -129,37 +179,70 @@ function Courses() {
     event.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error("Course name is required.");
+      toast.error(
+        "Course name is required."
+      );
       return;
     }
 
     if (!formData.code.trim()) {
-      toast.error("Course code is required.");
+      toast.error(
+        "Course code is required."
+      );
       return;
     }
 
     if (!formData.departmentId) {
-      toast.error("Please select a department.");
+      toast.error(
+        "Please select a department."
+      );
+      return;
+    }
+
+    if (!formData.programId) {
+      toast.error(
+        "Please select a program."
+      );
       return;
     }
 
     if (!formData.semester) {
-      toast.error("Semester is required.");
+      toast.error(
+        "Semester is required."
+      );
       return;
     }
 
     if (!formData.credits) {
-      toast.error("Credits are required.");
+      toast.error(
+        "Credits are required."
+      );
       return;
     }
 
     const payload = {
       name: formData.name.trim(),
-      code: formData.code.trim().toUpperCase(),
-      credits: Number(formData.credits),
-      semester: Number(formData.semester),
-      departmentId: formData.departmentId,
-      status: Boolean(formData.status),
+
+      code: formData.code
+        .trim()
+        .toUpperCase(),
+
+      credits: Number(
+        formData.credits
+      ),
+
+      semester: Number(
+        formData.semester
+      ),
+
+      departmentId:
+        formData.departmentId,
+
+      programId:
+        formData.programId,
+
+      status:
+        Boolean(formData.status),
     };
 
     try {
@@ -173,7 +256,9 @@ function Courses() {
           "Course updated successfully."
         );
       } else {
-        await createCourse.mutateAsync(payload);
+        await createCourse.mutateAsync(
+          payload
+        );
 
         toast.success(
           "Course created successfully."
@@ -194,17 +279,22 @@ function Courses() {
   // DELETE COURSE
   // =========================================================
 
-  const handleDelete = async (course) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${course.code} - ${course.name}"?`
-    );
+  const handleDelete = async (
+    course
+  ) => {
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to delete "${course.code} - ${course.name}"?`
+      );
 
     if (!confirmed) {
       return;
     }
 
     try {
-      await deleteCourse.mutateAsync(course.id);
+      await deleteCourse.mutateAsync(
+        course.id
+      );
 
       toast.success(
         "Course deleted successfully."
@@ -221,14 +311,35 @@ function Courses() {
   // GET DEPARTMENT
   // =========================================================
 
-  const getDepartment = (course) => {
+  const getDepartment = (
+    course
+  ) => {
     if (course.department) {
       return course.department;
     }
 
     return departments.find(
       (department) =>
-        department.id === course.departmentId
+        department.id ===
+        course.departmentId
+    );
+  };
+
+  // =========================================================
+  // GET PROGRAM
+  // =========================================================
+
+  const getProgram = (
+    course
+  ) => {
+    if (course.program) {
+      return course.program;
+    }
+
+    return programs.find(
+      (program) =>
+        program.id ===
+        course.programId
     );
   };
 
@@ -267,7 +378,8 @@ function Courses() {
     return (
       <div className="container-fluid mt-4">
         <div className="alert alert-danger">
-          {error?.response?.data?.message ||
+          {error?.response?.data
+            ?.message ||
             "Unable to load courses."}
         </div>
       </div>
@@ -280,6 +392,7 @@ function Courses() {
 
   return (
     <div className="container-fluid mt-4">
+
       <div className="card shadow-sm">
 
         {/* =====================================================
@@ -294,8 +407,8 @@ function Courses() {
             </h4>
 
             <small className="text-muted">
-              Manage courses, departments, semesters
-              and credits
+              Manage courses, departments,
+              programs, semesters and credits
             </small>
           </div>
 
@@ -305,6 +418,7 @@ function Courses() {
             onClick={handleAddCourse}
           >
             <i className="bi bi-plus-lg me-2"></i>
+
             Add Course
           </button>
 
@@ -318,7 +432,8 @@ function Courses() {
 
           <div className="mb-3">
             <span className="badge bg-primary">
-              Total Courses: {courses.length}
+              Total Courses:{" "}
+              {courses.length}
             </span>
           </div>
 
@@ -330,7 +445,11 @@ function Courses() {
 
                 <tr>
 
-                  <th style={{ width: "130px" }}>
+                  <th
+                    style={{
+                      width: "130px",
+                    }}
+                  >
                     Code
                   </th>
 
@@ -340,6 +459,10 @@ function Courses() {
 
                   <th>
                     Department
+                  </th>
+
+                  <th>
+                    Program
                   </th>
 
                   <th>
@@ -354,7 +477,11 @@ function Courses() {
                     Status
                   </th>
 
-                  <th style={{ width: "130px" }}>
+                  <th
+                    style={{
+                      width: "130px",
+                    }}
+                  >
                     Actions
                   </th>
 
@@ -367,125 +494,176 @@ function Courses() {
                 {courses.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="7"
+                      colSpan="8"
                       className="text-center py-4 text-muted"
                     >
                       No courses found.
                     </td>
                   </tr>
                 ) : (
-                  courses.map((course) => {
+                  courses.map(
+                    (course) => {
 
-                    const department =
-                      getDepartment(course);
+                      const department =
+                        getDepartment(
+                          course
+                        );
 
-                    return (
-                      <tr key={course.id}>
+                      const program =
+                        getProgram(
+                          course
+                        );
 
-                        {/* CODE */}
+                      return (
+                        <tr
+                          key={
+                            course.id
+                          }
+                        >
 
-                        <td>
-                          <strong>
-                            {course.code}
-                          </strong>
-                        </td>
+                          {/* CODE */}
 
-                        {/* COURSE NAME */}
+                          <td>
+                            <strong>
+                              {
+                                course.code
+                              }
+                            </strong>
+                          </td>
 
-                        <td>
-                          {course.name}
-                        </td>
+                          {/* COURSE NAME */}
 
-                        {/* DEPARTMENT */}
+                          <td>
+                            {
+                              course.name
+                            }
+                          </td>
 
-                        <td>
-                          {department ? (
-                            <div>
-                              <strong>
-                                {department.code}
-                              </strong>
+                          {/* DEPARTMENT */}
 
-                              <div className="small text-muted">
-                                {department.name}
+                          <td>
+                            {department ? (
+                              <div>
+                                <strong>
+                                  {
+                                    department.code
+                                  }
+                                </strong>
+
+                                <div className="small text-muted">
+                                  {
+                                    department.name
+                                  }
+                                </div>
                               </div>
-                            </div>
-                          ) : (
-                            "-"
-                          )}
-                        </td>
-
-                        {/* SEMESTER */}
-
-                        <td>
-                          <span className="badge bg-info text-dark">
-                            Semester{" "}
-                            {course.semester}
-                          </span>
-                        </td>
-
-                        {/* CREDITS */}
-
-                        <td>
-                          <span className="badge bg-secondary">
-                            {course.credits}
-                          </span>
-                        </td>
-
-                        {/* STATUS */}
-
-                        <td>
-                          {course.status ? (
-                            <span className="badge bg-success">
-                              Active
-                            </span>
-                          ) : (
-                            <span className="badge bg-danger">
-                              Inactive
-                            </span>
-                          )}
-                        </td>
-
-                        {/* ACTIONS */}
-
-                        <td>
-
-                          <button
-                            type="button"
-                            className="btn btn-warning btn-sm me-2"
-                            title="Edit Course"
-                            onClick={() =>
-                              handleEditCourse(course)
-                            }
-                          >
-                            <i className="bi bi-pencil-square"></i>
-                          </button>
-
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-sm"
-                            title="Delete Course"
-                            disabled={
-                              deleteCourse.isPending
-                            }
-                            onClick={() =>
-                              handleDelete(course)
-                            }
-                          >
-                            {deleteCourse.isPending ? (
-                              <span
-                                className="spinner-border spinner-border-sm"
-                                role="status"
-                              ></span>
                             ) : (
-                              <i className="bi bi-trash"></i>
+                              "-"
                             )}
-                          </button>
+                          </td>
 
-                        </td>
+                          {/* PROGRAM */}
 
-                      </tr>
-                    );
-                  })
+                          <td>
+                            {program ? (
+                              <div>
+                                <strong>
+                                  {
+                                    program.code
+                                  }
+                                </strong>
+
+                                <div className="small text-muted">
+                                  {
+                                    program.name
+                                  }
+                                </div>
+                              </div>
+                            ) : (
+                              "-"
+                            )}
+                          </td>
+
+                          {/* SEMESTER */}
+
+                          <td>
+                            <span className="badge bg-info text-dark">
+                              Semester{" "}
+                              {
+                                course.semester
+                              }
+                            </span>
+                          </td>
+
+                          {/* CREDITS */}
+
+                          <td>
+                            <span className="badge bg-secondary">
+                              {
+                                course.credits
+                              }
+                            </span>
+                          </td>
+
+                          {/* STATUS */}
+
+                          <td>
+                            {course.status ? (
+                              <span className="badge bg-success">
+                                Active
+                              </span>
+                            ) : (
+                              <span className="badge bg-danger">
+                                Inactive
+                              </span>
+                            )}
+                          </td>
+
+                          {/* ACTIONS */}
+
+                          <td>
+
+                            <button
+                              type="button"
+                              className="btn btn-warning btn-sm me-2"
+                              title="Edit Course"
+                              onClick={() =>
+                                handleEditCourse(
+                                  course
+                                )
+                              }
+                            >
+                              <i className="bi bi-pencil-square"></i>
+                            </button>
+
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              title="Delete Course"
+                              disabled={
+                                deleteCourse.isPending
+                              }
+                              onClick={() =>
+                                handleDelete(
+                                  course
+                                )
+                              }
+                            >
+                              {deleteCourse.isPending ? (
+                                <span
+                                  className="spinner-border spinner-border-sm"
+                                  role="status"
+                                ></span>
+                              ) : (
+                                <i className="bi bi-trash"></i>
+                              )}
+                            </button>
+
+                          </td>
+
+                        </tr>
+                      );
+                    }
+                  )
                 )}
 
               </tbody>
@@ -539,7 +717,9 @@ function Courses() {
                 <button
                   type="button"
                   className="btn-close"
-                  onClick={handleCloseModal}
+                  onClick={
+                    handleCloseModal
+                  }
                   disabled={
                     createCourse.isPending ||
                     updateCourse.isPending
@@ -548,9 +728,13 @@ function Courses() {
 
               </div>
 
-              {/* MODAL BODY */}
+              {/* FORM */}
 
-              <form onSubmit={handleSubmit}>
+              <form
+                onSubmit={
+                  handleSubmit
+                }
+              >
 
                 <div className="modal-body">
 
@@ -571,8 +755,12 @@ function Courses() {
                         type="text"
                         className="form-control"
                         name="code"
-                        value={formData.code}
-                        onChange={handleChange}
+                        value={
+                          formData.code
+                        }
+                        onChange={
+                          handleChange
+                        }
                         placeholder="e.g. 21CS51"
                         required
                       />
@@ -594,8 +782,12 @@ function Courses() {
                         type="text"
                         className="form-control"
                         name="name"
-                        value={formData.name}
-                        onChange={handleChange}
+                        value={
+                          formData.name
+                        }
+                        onChange={
+                          handleChange
+                        }
                         placeholder="e.g. Database Management Systems"
                         required
                       />
@@ -619,7 +811,9 @@ function Courses() {
                         value={
                           formData.departmentId
                         }
-                        onChange={handleChange}
+                        onChange={
+                          handleChange
+                        }
                         required
                       >
 
@@ -628,18 +822,103 @@ function Courses() {
                         </option>
 
                         {departments.map(
-                          (department) => (
+                          (
+                            department
+                          ) => (
                             <option
-                              key={department.id}
-                              value={department.id}
+                              key={
+                                department.id
+                              }
+                              value={
+                                department.id
+                              }
                             >
-                              {department.code} -{" "}
-                              {department.name}
+                              {
+                                department.code
+                              }{" "}
+                              -{" "}
+                              {
+                                department.name
+                              }
                             </option>
                           )
                         )}
 
                       </select>
+
+                    </div>
+
+                    {/* PROGRAM */}
+
+                    <div className="col-md-6 mb-3">
+
+                      <label className="form-label">
+                        Program
+                        <span className="text-danger">
+                          {" "}*
+                        </span>
+                      </label>
+
+                      <select
+                        className="form-select"
+                        name="programId"
+                        value={
+                          formData.programId
+                        }
+                        onChange={
+                          handleChange
+                        }
+                        disabled={
+                          !formData.departmentId ||
+                          programsLoading
+                        }
+                        required
+                      >
+
+                        <option value="">
+                          {!formData.departmentId
+                            ? "Select Department First"
+                            : programsLoading
+                            ? "Loading Programs..."
+                            : filteredPrograms.length === 0
+                            ? "No Programs Available"
+                            : "Select Program"}
+                        </option>
+
+                        {filteredPrograms.map(
+                          (
+                            program
+                          ) => (
+                            <option
+                              key={
+                                program.id
+                              }
+                              value={
+                                program.id
+                              }
+                            >
+                              {
+                                program.code
+                              }{" "}
+                              -{" "}
+                              {
+                                program.name
+                              }
+                            </option>
+                          )
+                        )}
+
+                      </select>
+
+                      {formData.departmentId &&
+                        !programsLoading &&
+                        filteredPrograms.length ===
+                          0 && (
+                          <small className="text-danger">
+                            No programs are available
+                            for this department.
+                          </small>
+                        )}
 
                     </div>
 
@@ -657,8 +936,12 @@ function Courses() {
                       <select
                         className="form-select"
                         name="semester"
-                        value={formData.semester}
-                        onChange={handleChange}
+                        value={
+                          formData.semester
+                        }
+                        onChange={
+                          handleChange
+                        }
                         required
                       >
 
@@ -675,14 +958,25 @@ function Courses() {
                           6,
                           7,
                           8,
-                        ].map((semester) => (
-                          <option
-                            key={semester}
-                            value={semester}
-                          >
-                            Semester {semester}
-                          </option>
-                        ))}
+                        ].map(
+                          (
+                            semester
+                          ) => (
+                            <option
+                              key={
+                                semester
+                              }
+                              value={
+                                semester
+                              }
+                            >
+                              Semester{" "}
+                              {
+                                semester
+                              }
+                            </option>
+                          )
+                        )}
 
                       </select>
 
@@ -702,8 +996,12 @@ function Courses() {
                       <select
                         className="form-select"
                         name="credits"
-                        value={formData.credits}
-                        onChange={handleChange}
+                        value={
+                          formData.credits
+                        }
+                        onChange={
+                          handleChange
+                        }
                         required
                       >
 
@@ -720,17 +1018,26 @@ function Courses() {
                           6,
                           7,
                           8,
-                        ].map((credit) => (
-                          <option
-                            key={credit}
-                            value={credit}
-                          >
-                            {credit}{" "}
-                            {credit === 1
-                              ? "Credit"
-                              : "Credits"}
-                          </option>
-                        ))}
+                        ].map(
+                          (
+                            credit
+                          ) => (
+                            <option
+                              key={
+                                credit
+                              }
+                              value={
+                                credit
+                              }
+                            >
+                              {credit}{" "}
+                              {credit ===
+                              1
+                                ? "Credit"
+                                : "Credits"}
+                            </option>
+                          )
+                        )}
 
                       </select>
 
@@ -751,7 +1058,9 @@ function Courses() {
                           checked={
                             formData.status
                           }
-                          onChange={handleChange}
+                          onChange={
+                            handleChange
+                          }
                         />
 
                         <label
@@ -776,7 +1085,9 @@ function Courses() {
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={handleCloseModal}
+                    onClick={
+                      handleCloseModal
+                    }
                     disabled={
                       createCourse.isPending ||
                       updateCourse.isPending

@@ -1,0 +1,944 @@
+/**
+ * ------------------------------------------------------------------
+ * CO–PSO Mapping Styles
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * Module  : Faculty
+ * ------------------------------------------------------------------
+ */
+
+ .copsomap-page {
+    width: 100%;
+    max-width: 100%;
+    min-height: calc(100vh - var(--navbar-height, 70px));
+    padding: 24px 28px 40px;
+    box-sizing: border-box;
+  }
+  
+  /* ================================================================
+     HEADER
+  ================================================================ */
+  
+  .copsomap-header {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+  }
+  
+  .copsomap-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    color: #6c757d;
+    margin-bottom: 5px;
+  }
+  
+  .copsomap-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #212529;
+  }
+  
+  .copsomap-subtitle {
+    margin: 6px 0 0;
+    color: #6c757d;
+    font-size: 14px;
+  }
+  
+  .copsomap-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* ================================================================
+     COURSE SELECTOR
+  ================================================================ */
+  
+  .copsomap-course-card {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 22px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    margin-bottom: 18px;
+  }
+  
+  .copsomap-course-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+  }
+  
+  .copsomap-course-select {
+    width: 100%;
+    min-height: 44px;
+  }
+  
+  /* ================================================================
+     COURSE INFORMATION
+  ================================================================ */
+  
+  .copsomap-info-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  
+  .copsomap-info-card {
+    min-height: 82px;
+    padding: 15px 17px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.03);
+  }
+  
+  .copsomap-info-card span {
+    color: #6c757d;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  
+  .copsomap-info-card strong {
+    color: #212529;
+    font-size: 15px;
+    font-weight: 650;
+    word-break: break-word;
+  }
+  
+  /* ================================================================
+     MATRIX CARD
+  ================================================================ */
+  
+  .copsomap-matrix-card {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+  
+  .copsomap-matrix-header {
+    min-height: 86px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .copsomap-matrix-header h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+  }
+  
+  .copsomap-matrix-header p {
+    margin: 5px 0 0;
+    color: #6c757d;
+    font-size: 13px;
+  }
+  
+  /* ================================================================
+     LEGEND
+  ================================================================ */
+  
+  .copsomap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #495057;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  
+  .legend-box {
+    width: 27px;
+    height: 27px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #dee2e6;
+  }
+  
+  .level-1 {
+    background: #fff3cd;
+    color: #856404;
+    border-color: #ffe69c;
+  }
+  
+  .level-2 {
+    background: #cfe2ff;
+    color: #084298;
+    border-color: #9ec5fe;
+  }
+  
+  .level-3 {
+    background: #d1e7dd;
+    color: #0f5132;
+    border-color: #a3cfbb;
+  }
+  
+  .level-none {
+    background: #f8f9fa;
+    color: #6c757d;
+  }
+  
+  /* ================================================================
+     TABLE
+  ================================================================ */
+  
+  .copsomap-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+  
+  .copsomap-table {
+    width: 100%;
+    min-width: 650px;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  
+  .copsomap-table thead th {
+    height: 58px;
+    padding: 10px;
+    background: #f8f9fa;
+    color: #343a40;
+    border-bottom: 2px solid #dee2e6;
+    border-right: 1px solid #e9ecef;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: middle;
+  }
+  
+  .copsomap-table thead th:last-child {
+    border-right: none;
+  }
+  
+  .copsomap-table .co-column {
+    width: 46%;
+    text-align: left;
+    padding-left: 20px;
+  }
+  
+  .copsomap-table .pso-column {
+    width: 27%;
+    min-width: 100px;
+  }
+  
+  .copsomap-table tbody td {
+    border-bottom: 1px solid #e9ecef;
+    border-right: 1px solid #e9ecef;
+    vertical-align: middle;
+  }
+  
+  .copsomap-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .copsomap-table tbody td:last-child {
+    border-right: none;
+  }
+  
+  /* ================================================================
+     CO CELL
+  ================================================================ */
+  
+  .copsomap-table .co-cell {
+    padding: 15px 20px;
+    background: #ffffff;
+  }
+  
+  .copsomap-table .co-cell strong {
+    display: block;
+    color: #212529;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  
+  .copsomap-table .co-cell span {
+    display: -webkit-box;
+    color: #6c757d;
+    font-size: 12px;
+    line-height: 1.45;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+  /* ================================================================
+     MAPPING CELL
+  ================================================================ */
+  
+  .copsomap-table .mapping-cell {
+    width: auto;
+    height: 84px;
+    padding: 10px;
+    text-align: center;
+    background: #ffffff;
+  }
+  
+  .mapping-button {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease,
+      border-color 0.15s ease;
+  }
+  
+  .mapping-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  }
+  
+  .mapping-button:active {
+    transform: scale(0.96);
+  }
+  
+  .mapping-none {
+    background: #f8f9fa;
+    color: #adb5bd;
+    border-color: #dee2e6;
+  }
+  
+  .mapping-low {
+    background: #fff3cd;
+    color: #856404;
+    border-color: #ffe69c;
+  }
+  
+  .mapping-medium {
+    background: #cfe2ff;
+    color: #084298;
+    border-color: #9ec5fe;
+  }
+  
+  .mapping-high {
+    background: #d1e7dd;
+    color: #0f5132;
+    border-color: #a3cfbb;
+  }
+  
+  /* ================================================================
+     FOOTER
+  ================================================================ */
+  
+  .copsomap-matrix-footer {
+    min-height: 70px;
+    padding: 15px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border-top: 1px solid #e9ecef;
+    background: #fcfcfd;
+  }
+  
+  .copsomap-footer-note {
+    color: #6c757d;
+    font-size: 12px;
+  }
+  
+  .copsomap-footer-note strong {
+    color: #495057;
+  }
+  
+  .copsomap-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* ================================================================
+     EMPTY STATE
+  ================================================================ */
+  
+  .copsomap-empty {
+    width: 100%;
+    min-height: 280px;
+    margin-top: 20px;
+    background: #ffffff;
+    border: 1px dashed #ced4da;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+  }
+  
+  .copsomap-empty i {
+    font-size: 42px;
+    color: #adb5bd;
+    margin-bottom: 12px;
+  }
+  
+  .copsomap-empty h4 {
+    margin: 0 0 7px;
+    font-size: 18px;
+    color: #343a40;
+  }
+  
+  .copsomap-empty p {
+    max-width: 480px;
+    margin: 0;
+    color: #6c757d;
+    font-size: 13px;
+  }
+  
+  /* ================================================================
+     LOADING
+  ================================================================ */
+  
+  .copsomap-loading {
+    width: 100%;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 14px;
+  }
+  
+  .copsomap-loading-card {
+    width: 100%;
+    min-height: 260px;
+    margin-top: 20px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #6c757d;
+  }
+  
+  /* ================================================================
+     RESPONSIVE
+  ================================================================ */
+  
+  @media (max-width: 1100px) {
+    .copsomap-page {
+      padding: 20px;
+    }
+  
+    .copsomap-info-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  
+    .copsomap-matrix-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  
+    .copsomap-legend {
+      justify-content: flex-start;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .copsomap-page {
+      padding: 15px;
+    }
+  
+    .copsomap-header {
+      flex-direction: column;
+    }
+  
+    .copsomap-title {
+      font-size: 23px;
+    }
+  
+    .copsomap-header-actions {
+      width: 100%;
+    }
+  
+    .copsomap-header-actions button {
+      width: 100%;
+    }
+  
+    .copsomap-info-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .copsomap-matrix-header {
+      padding: 16px;
+    }
+  
+    .copsomap-legend {
+      gap: 8px;
+    }
+  
+    .copsomap-matrix-footer {
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 15px 16px;
+    }
+  
+    .copsomap-actions {
+      width: 100%;
+    }
+  
+    .copsomap-actions button {
+      flex: 1;
+    }
+  }
+  
+  /* ================================================================
+     PRINT
+     Professional A4 Landscape CO–PSO Matrix
+  ================================================================ */
+  
+  @media print {
+  
+    /* --------------------------------------------------------------
+       PAGE
+    -------------------------------------------------------------- */
+  
+    @page {
+      size: A4 landscape;
+      margin: 10mm;
+    }
+  
+    html,
+    body {
+      width: 100%;
+      height: auto;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #ffffff !important;
+    }
+  
+    body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  
+    /* --------------------------------------------------------------
+       MAIN PAGE
+    -------------------------------------------------------------- */
+  
+    .copsomap-page {
+      width: 100% !important;
+      max-width: none !important;
+      min-height: auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      background: #ffffff !important;
+    }
+  
+    /* --------------------------------------------------------------
+       SCREEN-ONLY ELEMENTS
+    -------------------------------------------------------------- */
+  
+    .copsomap-course-card,
+    .copsomap-header-actions,
+    .copsomap-matrix-footer,
+    .copsomap-eyebrow,
+    .copsomap-subtitle {
+      display: none !important;
+    }
+  
+    /* --------------------------------------------------------------
+       PRINT HEADER
+    -------------------------------------------------------------- */
+  
+    .copsomap-header {
+      width: 100% !important;
+      margin: 0 0 12px !important;
+      padding: 0 0 8px !important;
+      display: block !important;
+      border-bottom: 2px solid #000 !important;
+    }
+  
+    .copsomap-title {
+      margin: 0 !important;
+      padding: 0 !important;
+      color: #000 !important;
+      font-size: 21px !important;
+      font-weight: 700 !important;
+      text-align: center !important;
+    }
+  
+    /* --------------------------------------------------------------
+       COURSE INFORMATION
+       
+       Keep course information visible during printing.
+       -------------------------------------------------------------- */
+  
+    .copsomap-info-grid {
+      width: 100% !important;
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 0 !important;
+      margin: 0 0 12px !important;
+      padding: 0 !important;
+    }
+  
+    .copsomap-info-card {
+      min-height: 55px !important;
+      padding: 7px 10px !important;
+      background: #ffffff !important;
+      border: 1px solid #000 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      display: flex !important;
+      justify-content: center !important;
+    }
+  
+    .copsomap-info-card span {
+      display: block !important;
+      margin: 0 0 3px !important;
+      color: #000 !important;
+      font-size: 9px !important;
+      font-weight: 700 !important;
+      text-transform: uppercase;
+    }
+  
+    .copsomap-info-card strong {
+      display: block !important;
+      color: #000 !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      line-height: 1.25 !important;
+    }
+  
+    /* --------------------------------------------------------------
+       MATRIX CARD
+    -------------------------------------------------------------- */
+  
+    .copsomap-matrix-card {
+      width: 100% !important;
+      margin: 0 !important;
+      border: 1px solid #000 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+      page-break-inside: auto !important;
+    }
+  
+    /* --------------------------------------------------------------
+       MATRIX TITLE
+    -------------------------------------------------------------- */
+  
+    .copsomap-matrix-header {
+      display: block !important;
+      min-height: auto !important;
+      padding: 8px 10px !important;
+      background: #ffffff !important;
+      border-bottom: 1px solid #000 !important;
+    }
+  
+    .copsomap-matrix-header h4 {
+      margin: 0 !important;
+      color: #000 !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      text-align: center !important;
+    }
+  
+    .copsomap-matrix-header p {
+      display: none !important;
+    }
+  
+    /* --------------------------------------------------------------
+       TABLE
+    -------------------------------------------------------------- */
+  
+    .copsomap-table-wrapper {
+      width: 100% !important;
+      overflow: visible !important;
+    }
+  
+    .copsomap-table {
+      width: 100% !important;
+      min-width: 0 !important;
+      border-collapse: collapse !important;
+      table-layout: fixed !important;
+      page-break-inside: auto !important;
+    }
+  
+    .copsomap-table thead {
+      display: table-header-group;
+    }
+  
+    .copsomap-table tbody {
+      display: table-row-group;
+    }
+  
+    .copsomap-table tr {
+      page-break-inside: avoid !important;
+      page-break-after: auto !important;
+    }
+  
+    .copsomap-table thead th,
+    .copsomap-table tbody td {
+      border: 1px solid #000 !important;
+    }
+  
+    /* --------------------------------------------------------------
+       TABLE HEADER
+    -------------------------------------------------------------- */
+  
+    .copsomap-table thead th {
+      height: 38px !important;
+      padding: 6px !important;
+      background: #eeeeee !important;
+      color: #000 !important;
+      border: 1px solid #000 !important;
+      font-size: 10px !important;
+      font-weight: 700 !important;
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+  
+    .copsomap-table .co-column {
+      width: 55% !important;
+      min-width: 0 !important;
+      padding-left: 8px !important;
+      text-align: left !important;
+    }
+  
+    .copsomap-table .pso-column {
+      width: auto !important;
+      min-width: 0 !important;
+    }
+  
+    /* --------------------------------------------------------------
+       CO CELLS
+    -------------------------------------------------------------- */
+  
+    .copsomap-table .co-cell {
+      padding: 7px 9px !important;
+      background: #ffffff !important;
+      vertical-align: middle !important;
+    }
+  
+    .copsomap-table .co-cell strong {
+      display: block !important;
+      margin-bottom: 3px !important;
+      color: #000 !important;
+      font-size: 10px !important;
+      font-weight: 700 !important;
+    }
+  
+    .copsomap-table .co-cell span {
+      display: block !important;
+      color: #000 !important;
+      font-size: 8.5px !important;
+      line-height: 1.35 !important;
+      overflow: visible !important;
+      -webkit-line-clamp: unset !important;
+      -webkit-box-orient: initial !important;
+    }
+  
+    /* --------------------------------------------------------------
+       MAPPING CELLS
+    -------------------------------------------------------------- */
+  
+    .copsomap-table .mapping-cell {
+      height: 55px !important;
+      padding: 5px !important;
+      background: #ffffff !important;
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+  
+    .mapping-button {
+      width: 32px !important;
+      height: 32px !important;
+      min-width: 32px !important;
+      min-height: 32px !important;
+      padding: 0 !important;
+      border: 1px solid #000 !important;
+      border-radius: 4px !important;
+      box-shadow: none !important;
+      transform: none !important;
+      color: #000 !important;
+      background: #ffffff !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+    }
+  
+    .mapping-low,
+    .mapping-medium,
+    .mapping-high,
+    .mapping-none {
+      color: #000 !important;
+      background: #ffffff !important;
+      border-color: #000 !important;
+    }
+  
+    /* --------------------------------------------------------------
+       HIDE INTERACTIVE ELEMENTS
+    -------------------------------------------------------------- */
+  
+    button {
+      cursor: default !important;
+    }
+  
+    /* --------------------------------------------------------------
+       PREVENT UNNECESSARY PAGE BREAKS
+    -------------------------------------------------------------- */
+  
+    .copsomap-header,
+    .copsomap-info-grid,
+    .copsomap-matrix-card {
+      page-break-inside: avoid !important;
+    }
+  }
+  /* ================================================================
+   AI AUTOMATION
+================================================================ */
+
+/*
+ * AI Auto Generate button
+ */
+
+.copsomap-header-actions .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 38px;
+    padding: 8px 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease,
+      opacity 0.15s ease;
+  }
+  
+  .copsomap-header-actions .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  }
+  
+  .copsomap-header-actions .btn-primary:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  
+  .copsomap-header-actions .btn-primary:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  
+  
+  /* ================================================================
+     AI REVIEW NOTICE
+  ================================================================ */
+  
+  .copsomap-page > .alert-info {
+    border-radius: 10px;
+    border: 1px solid #b6d4fe;
+    background: #e7f1ff;
+    color: #084298;
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  
+  .copsomap-page > .alert-info strong {
+    font-weight: 700;
+  }
+  
+  
+  /* ================================================================
+     AI GENERATED MATRIX
+  ================================================================ */
+  
+  .copsomap-matrix-card.ai-generated {
+    border-color: #9ec5fe;
+  }
+  
+  
+  /* ================================================================
+     AI GENERATING STATE
+  ================================================================ */
+  
+  .copsomap-header-actions .spinner-border {
+    width: 15px;
+    height: 15px;
+    border-width: 2px;
+  }
+  
+  
+  /* ================================================================
+     RESPONSIVE AI BUTTON
+  ================================================================ */
+  
+  @media (max-width: 768px) {
+  
+    .copsomap-header-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+  
+    .copsomap-header-actions button {
+      width: 100%;
+    }
+  
+  }
+  
+  
+  /* ================================================================
+     PRINT
+  ================================================================ */
+  
+  @media print {
+  
+    /*
+     * AI notification should not appear
+     * in the official printed matrix.
+     */
+  
+    .copsomap-page > .alert-info {
+      display: none !important;
+    }
+  
+  }

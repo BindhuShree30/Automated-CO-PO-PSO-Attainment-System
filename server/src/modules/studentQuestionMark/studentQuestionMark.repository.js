@@ -1,19 +1,9 @@
-/**
- * ------------------------------------------------------------------
- * Student Question Mark Repository
- * Project : Automated CO–PO–PSO Attainment Analysis System
- * ------------------------------------------------------------------
- */
-
 import StudentQuestionMark from "../../database/models/StudentQuestionMark.js";
 import Student from "../../database/models/Student.js";
 import AssessmentQuestion from "../../database/models/AssessmentQuestion.js";
 import Assessment from "../../database/models/Assessment.js";
 import CourseOutcome from "../../database/models/CourseOutcome.js";
 
-/**
- * Common Includes
- */
 const studentQuestionMarkIncludes = [
   {
     model: Student,
@@ -70,25 +60,27 @@ const studentQuestionMarkIncludes = [
   },
 ];
 
-/**
- * Create Student Question Mark
- */
-const createStudentQuestionMark = async (data) => {
-  return await StudentQuestionMark.create(data);
+const createStudentQuestionMark = async (data, transaction = null) => {
+  return await StudentQuestionMark.create(data, {
+    transaction,
+  });
 };
 
-/**
- * Find Student Question Mark By ID
- */
+const bulkCreateStudentQuestionMarks = async (
+  data,
+  transaction = null
+) => {
+  return await StudentQuestionMark.bulkCreate(data, {
+    transaction,
+  });
+};
+
 const findStudentQuestionMarkById = async (id) => {
   return await StudentQuestionMark.findByPk(id, {
     include: studentQuestionMarkIncludes,
   });
 };
 
-/**
- * Find Existing Student Question Mark
- */
 const findByStudentAndQuestion = async (
   studentId,
   assessmentQuestionId
@@ -102,60 +94,168 @@ const findByStudentAndQuestion = async (
 };
 
 /**
- * Find All Student Question Marks
+ * Find Marks By Assessment ID
+ * Filters strictly by assessmentId for the Master Ledger & avoids column sort crashes
  */
-const findAllStudentQuestionMarks = async () => {
+const findMarksByAssessment = async (assessmentId) => {
   return await StudentQuestionMark.findAll({
-    include: studentQuestionMarkIncludes,
-    order: [["createdAt", "ASC"]],
+    include: [
+      {
+        model: Student,
+        as: "student",
+      },
+      {
+        model: AssessmentQuestion,
+        as: "assessmentQuestion",
+        where: assessmentId ? { assessmentId } : undefined,
+        required: true,
+        include: [
+          {
+            model: CourseOutcome,
+            as: "courseOutcome",
+          },
+          {
+            model: Assessment,
+            as: "assessment",
+          },
+        ],
+      },
+    ],
+    order: [["id", "ASC"]],
   });
 };
 
-/**
- * Find Marks By Student
- */
+const findAllStudentQuestionMarks = async (filter = {}) => {
+  const where = {};
+  if (filter.studentId) where.studentId = filter.studentId;
+  if (filter.assessmentQuestionId) where.assessmentQuestionId = filter.assessmentQuestionId;
+
+  return await StudentQuestionMark.findAll({
+    where,
+    include: [
+      {
+        model: Student,
+        as: "student",
+      },
+      {
+        model: AssessmentQuestion,
+        as: "assessmentQuestion",
+        where: filter.assessmentId ? { assessmentId: filter.assessmentId } : undefined,
+        required: Boolean(filter.assessmentId),
+        include: [
+          {
+            model: Assessment,
+            as: "assessment",
+          },
+          {
+            model: CourseOutcome,
+            as: "courseOutcome",
+          },
+        ],
+      },
+    ],
+    order: [["id", "ASC"]],
+  });
+};
+
 const findMarksByStudentId = async (studentId) => {
   return await StudentQuestionMark.findAll({
-    where: {
-      studentId,
-    },
+    where: { studentId },
     include: studentQuestionMarkIncludes,
-    order: [["createdAt", "ASC"]],
+    order: [["id", "ASC"]],
   });
 };
 
-/**
- * Find Marks By Assessment Question
- */
 const findMarksByAssessmentQuestionId = async (
   assessmentQuestionId
 ) => {
   return await StudentQuestionMark.findAll({
-    where: {
-      assessmentQuestionId,
-    },
+    where: { assessmentQuestionId },
     include: studentQuestionMarkIncludes,
-    order: [["createdAt", "ASC"]],
+    order: [["id", "ASC"]],
   });
 };
 
-/**
- * Update Student Question Mark
- */
+const findMarksByStudentAndAssessment = async (
+  studentId,
+  assessmentId
+) => {
+  return await StudentQuestionMark.findAll({
+    where: {
+      studentId,
+    },
+    include: [
+      {
+        model: AssessmentQuestion,
+        as: "assessmentQuestion",
+        required: true,
+        where: {
+          assessmentId,
+        },
+        attributes: [
+          "id",
+          "assessmentId",
+          "courseOutcomeId",
+          "questionNumber",
+          "description",
+          "maxMarks",
+          "status",
+        ],
+        include: [
+          {
+            model: Assessment,
+            as: "assessment",
+            attributes: [
+              "id",
+              "name",
+              "type",
+              "courseOfferingId",
+              "maxMarks",
+              "weightage",
+              "assessmentDate",
+              "status",
+            ],
+          },
+          {
+            model: CourseOutcome,
+            as: "courseOutcome",
+            attributes: [
+              "id",
+              "code",
+              "description",
+              "courseId",
+              "status",
+            ],
+          },
+        ],
+      },
+    ],
+    order: [["id", "ASC"]],
+  });
+};
+
+const deleteMarksByQuestionIds = async (
+  studentId,
+  assessmentQuestionIds,
+  transaction = null
+) => {
+  return await StudentQuestionMark.destroy({
+    where: {
+      studentId,
+      assessmentQuestionId: assessmentQuestionIds,
+    },
+    transaction,
+  });
+};
+
 const updateStudentQuestionMark = async (
   studentQuestionMark,
   data
 ) => {
   await studentQuestionMark.update(data);
-
-  return await findStudentQuestionMarkById(
-    studentQuestionMark.id
-  );
+  return await findStudentQuestionMarkById(studentQuestionMark.id);
 };
 
-/**
- * Delete Student Question Mark
- */
 const deleteStudentQuestionMark = async (
   studentQuestionMark
 ) => {
@@ -164,11 +264,15 @@ const deleteStudentQuestionMark = async (
 
 export default {
   createStudentQuestionMark,
+  bulkCreateStudentQuestionMarks,
   findStudentQuestionMarkById,
   findByStudentAndQuestion,
+  findMarksByAssessment,
   findAllStudentQuestionMarks,
   findMarksByStudentId,
   findMarksByAssessmentQuestionId,
+  findMarksByStudentAndAssessment,
+  deleteMarksByQuestionIds,
   updateStudentQuestionMark,
   deleteStudentQuestionMark,
 };

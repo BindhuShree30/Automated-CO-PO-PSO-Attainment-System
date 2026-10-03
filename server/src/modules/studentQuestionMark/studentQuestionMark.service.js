@@ -1,43 +1,113 @@
-/**
- * ------------------------------------------------------------------
- * Student Question Mark Service
- * Project : Automated CO–PO–PSO Attainment Analysis System
- * ------------------------------------------------------------------
- */
-
 import studentQuestionMarkRepository from "./studentQuestionMark.repository.js";
 import studentRepository from "../student/student.repository.js";
 import assessmentQuestionRepository from "../assessmentQuestion/assessmentQuestion.repository.js";
 import courseRegistrationRepository from "../courseRegistration/courseRegistration.repository.js";
+import Assessment from "../../database/models/Assessment.js";
 import ApiError from "../../shared/errors/ApiError.js";
 
+const QUESTION_GROUPS = {
+  part1: [1, 2],
+  part2: [3, 4],
+  part3: [5, 6],
+};
+
 /**
- * Create Student Question Mark
+ * Extract the main question number.
+ *
+ * Examples:
+ * Q1(a) -> 1
+ * Q1(b) -> 1
+ * Q1(c) -> 1
+ * Q5    -> 5
+ */
+const getMainQuestionNumber = (questionNumber) => {
+  const value = String(questionNumber ?? "").trim();
+
+  const match = value.match(/^Q?\s*(\d+)/i);
+
+  if (!match) {
+    return null;
+  }
+
+  return Number(match[1]);
+};
+
+/**
+ * Validate assessment and return it.
+ */
+const validateAssessment = async (assessmentId) => {
+  const assessment = await Assessment.findByPk(assessmentId);
+
+  if (!assessment) {
+    throw new ApiError(404, "Assessment not found.");
+  }
+
+  if (assessment.status === false) {
+    throw new ApiError(400, "Assessment is inactive.");
+  }
+
+  if (!assessment.courseOfferingId) {
+    throw new ApiError(
+      400,
+      "Course Offering could not be determined from Assessment."
+    );
+  }
+
+  return assessment;
+};
+
+/**
+ * Validate student and course registration.
+ */
+const validateStudentForAssessment = async (
+  studentId,
+  assessment
+) => {
+  const student =
+    await studentRepository.findStudentById(studentId);
+
+  if (!student) {
+    throw new ApiError(404, "Student not found.");
+  }
+
+  const courseRegistration =
+    await courseRegistrationRepository.findByStudentAndCourseOffering(
+      studentId,
+      assessment.courseOfferingId
+    );
+
+  if (!courseRegistration) {
+    throw new ApiError(
+      400,
+      "Student is not registered for this Course Offering."
+    );
+  }
+
+  return student;
+};
+
+/**
+ * Create one Student Question Mark.
  */
 const createStudentQuestionMark = async (data) => {
   const {
     studentId,
     assessmentQuestionId,
-    marksObtained,
-    isAbsent,
   } = data;
 
-  /**
-   * Check Student
-   */
+  let {
+    marksObtained,
+    isAbsent = false,
+    isAttempted = false,
+  } = data;
+
   const student =
     await studentRepository.findStudentById(studentId);
 
   if (!student) {
-    throw new ApiError(
-      404,
-      "Student not found."
-    );
+    throw new ApiError(404, "Student not found.");
   }
 
-  /**
-   * Check Assessment Question
-   */
   const assessmentQuestion =
     await assessmentQuestionRepository.findById(
       assessmentQuestionId
@@ -50,9 +120,6 @@ const createStudentQuestionMark = async (data) => {
     );
   }
 
-  /**
-   * Check Duplicate Mark Entry
-   */
   const existingMark =
     await studentQuestionMarkRepository.findByStudentAndQuestion(
       studentId,
@@ -66,15 +133,6 @@ const createStudentQuestionMark = async (data) => {
     );
   }
 
-  /**
-   * Get Course Offering ID
-   *
-   * Assessment Question
-   *        ↓
-   * Assessment
-   *        ↓
-   * Course Offering
-   */
   const courseOfferingId =
     assessmentQuestion.assessment?.courseOfferingId;
 
@@ -85,9 +143,6 @@ const createStudentQuestionMark = async (data) => {
     );
   }
 
-  /**
-   * Check Student Course Registration
-   */
   const courseRegistration =
     await courseRegistrationRepository.findByStudentAndCourseOffering(
       studentId,
@@ -102,64 +157,83 @@ const createStudentQuestionMark = async (data) => {
   }
 
   /**
-   * Validate Marks
+   * Absent student:
+   * marks = 0
+   * attempted = false
    */
   if (isAbsent === true) {
-    data.marksObtained = 0;
-  } else {
-    const obtainedMarks = Number(marksObtained);
-
-    const maximumMarks = Number(
-      assessmentQuestion.maxMarks
-    );
-
-    if (Number.isNaN(obtainedMarks)) {
-      throw new ApiError(
-        400,
-        "Marks obtained must be a valid number."
-      );
-    }
-
-    if (obtainedMarks < 0) {
-      throw new ApiError(
-        400,
-        "Marks obtained cannot be negative."
-      );
-    }
-
-    if (obtainedMarks > maximumMarks) {
-      throw new ApiError(
-        400,
-        `Marks obtained cannot exceed question maximum marks of ${maximumMarks}.`
-      );
-    }
+    marksObtained = 0;
+    isAttempted = false;
   }
 
   /**
-   * Create Student Question Mark
+   * Not attempted:
+   * marks must be 0.
    */
-  const createdMark =
-    await studentQuestionMarkRepository.createStudentQuestionMark(
-      data
-    );
+  if (isAttempted === false) {
+    marksObtained = 0;
+  }
 
-  /**
-   * Return Created Mark With Associations
-   */
+  if (isAttempted === true && isAbsent === true) {
+    throw new ApiError(
+      400,
+      "An absent student cannot have an attempted question."
+    );
+  }
+
+  const obtainedMarks = Number(marksObtained);
+  const maximumMarks = Number(
+    assessmentQuestion.maxMarks
+  );
+
+  if (Number.isNaN(obtainedMarks)) {
+    throw new ApiError(
+      400,
+      "Marks obtained must be a valid number."
+    );
+  }
+
+  if (obtainedMarks < 0) {
+    throw new ApiError(
+      400,
+      "Marks obtained cannot be negative."
+    );
+  }
+
+  if (obtainedMarks > maximumMarks) {
+    throw new ApiError(
+      400,
+      `Marks obtained cannot exceed question maximum marks of ${maximumMarks}.`
+    );
+  }
+
+  const createdMark =
+    await studentQuestionMarkRepository.createStudentQuestionMark({
+      studentId,
+      assessmentQuestionId,
+      marksObtained: obtainedMarks,
+      isAbsent,
+      isAttempted,
+      status:
+        data.status === undefined
+          ? true
+          : Boolean(data.status),
+    });
+
   return await studentQuestionMarkRepository.findStudentQuestionMarkById(
     createdMark.id
   );
 };
 
 /**
- * Get All Student Question Marks
+ * Get all marks.
  */
 const getStudentQuestionMarks = async () => {
   return await studentQuestionMarkRepository.findAllStudentQuestionMarks();
 };
 
 /**
- * Get Student Question Mark By ID
+ * Get mark by ID.
  */
 const getStudentQuestionMarkById = async (id) => {
   const studentQuestionMark =
@@ -178,17 +252,14 @@ const getStudentQuestionMarkById = async (id) => {
 };
 
 /**
- * Get Marks By Student
+ * Get marks by student.
  */
 const getMarksByStudentId = async (studentId) => {
   const student =
     await studentRepository.findStudentById(studentId);
 
   if (!student) {
-    throw new ApiError(
-      404,
-      "Student not found."
-    );
+    throw new ApiError(404, "Student not found.");
   }
 
   return await studentQuestionMarkRepository.findMarksByStudentId(
@@ -197,7 +268,7 @@ const getMarksByStudentId = async (studentId) => {
 };
 
 /**
- * Get Marks By Assessment Question
+ * Get marks by assessment question.
  */
 const getMarksByAssessmentQuestionId = async (
   assessmentQuestionId
@@ -220,7 +291,427 @@ const getMarksByAssessmentQuestionId = async (
 };
 
 /**
- * Update Student Question Mark
+ * Get all saved marks for one student in one assessment.
+ */
+const getMarksByAssessmentAndStudent = async (
+  assessmentId,
+  studentId
+) => {
+  const assessment =
+    await validateAssessment(assessmentId);
+
+  await validateStudentForAssessment(
+    studentId,
+    assessment
+  );
+
+  return await studentQuestionMarkRepository.findMarksByStudentAndAssessment(
+    studentId,
+    assessmentId
+  );
+};
+
+/**
+ * Save all marks for one student in one assessment.
+ *
+ * This is the main Marks Entry operation.
+ */
+const saveBulkStudentMarks = async (
+  assessmentId,
+  studentId,
+  data
+) => {
+  const assessment =
+    await validateAssessment(assessmentId);
+
+  await validateStudentForAssessment(
+    studentId,
+    assessment
+  );
+
+  const {
+    selectedQuestions,
+    marks,
+  } = data;
+
+  /**
+   * ------------------------------------------------------------
+   * Load all active questions for this assessment.
+   * ------------------------------------------------------------
+   */
+  const assessmentQuestions =
+    await assessmentQuestionRepository.findByAssessmentId(
+      assessmentId
+    );
+
+  const activeQuestions =
+    assessmentQuestions.filter(
+      (question) => question.status !== false
+    );
+
+  if (activeQuestions.length === 0) {
+    throw new ApiError(
+      400,
+      "No active assessment questions are available."
+    );
+  }
+
+  /**
+   * ------------------------------------------------------------
+   * Determine selected main questions.
+   * ------------------------------------------------------------
+   */
+  const selectedMainQuestions = [
+    selectedQuestions.part1,
+    selectedQuestions.part2,
+    selectedQuestions.part3,
+  ];
+
+  const selectedMainQuestionSet =
+    new Set(selectedMainQuestions);
+
+  /**
+   * ------------------------------------------------------------
+   * Build expected selected question list.
+   *
+   * Example:
+   * Part 1 = Q1
+   * Part 2 = Q4
+   * Part 3 = Q6
+   *
+   * Expected:
+   * Q1(a), Q1(b), Q1(c),
+   * Q4(a), Q4(b), Q4(c),
+   * Q6
+   * ------------------------------------------------------------
+   */
+  const expectedQuestions =
+    activeQuestions.filter((question) => {
+      const mainNumber =
+        getMainQuestionNumber(
+          question.questionNumber
+        );
+
+      return selectedMainQuestionSet.has(
+        mainNumber
+      );
+    });
+
+  /**
+   * Verify every selected main question actually exists.
+   */
+  for (const mainQuestion of selectedMainQuestions) {
+    const matchingQuestions =
+      activeQuestions.filter(
+        (question) =>
+          getMainQuestionNumber(
+            question.questionNumber
+          ) === mainQuestion
+      );
+
+    if (matchingQuestions.length === 0) {
+      throw new ApiError(
+        400,
+        `Selected question Q${mainQuestion} does not exist in this Assessment.`
+      );
+    }
+  }
+
+  /**
+   * ------------------------------------------------------------
+   * Candidate paper maximum check.
+   *
+   * Selected groups for this IA should total:
+   * Part 1 = 20
+   * Part 2 = 20
+   * Part 3 = 10
+   * Total  = 50
+   *
+   * The backend does NOT require the student's obtained marks
+   * to equal 50. Only the selected question maximum must equal
+   * the assessment maximum.
+   * ------------------------------------------------------------
+   */
+  const selectedMaximumMarks =
+    expectedQuestions.reduce(
+      (total, question) =>
+        total + Number(question.maxMarks),
+      0
+    );
+
+  if (
+    selectedMaximumMarks !==
+    Number(assessment.maxMarks)
+  ) {
+    throw new ApiError(
+      400,
+      `Selected questions total ${selectedMaximumMarks} marks, but this assessment is ${assessment.maxMarks} marks.`
+    );
+  }
+
+  /**
+   * ------------------------------------------------------------
+   * Validate marks array.
+   * ------------------------------------------------------------
+   */
+
+  const expectedQuestionIds =
+    expectedQuestions.map(
+      (question) => question.id
+    );
+
+  const expectedQuestionIdSet =
+    new Set(expectedQuestionIds);
+
+  const suppliedQuestionIds =
+    marks.map(
+      (mark) => mark.assessmentQuestionId
+    );
+
+  const suppliedQuestionIdSet =
+    new Set(suppliedQuestionIds);
+
+  /**
+   * Duplicate question IDs are not allowed.
+   */
+  if (
+    suppliedQuestionIds.length !==
+    suppliedQuestionIdSet.size
+  ) {
+    throw new ApiError(
+      400,
+      "Duplicate assessment questions were supplied in the marks entry."
+    );
+  }
+
+  /**
+   * Every selected question must have a marks entry.
+   */
+  for (const questionId of expectedQuestionIds) {
+    if (
+      !suppliedQuestionIdSet.has(questionId)
+    ) {
+      const question =
+        expectedQuestions.find(
+          (item) => item.id === questionId
+        );
+
+      throw new ApiError(
+        400,
+        `Marks are missing for ${question.questionNumber}.`
+      );
+    }
+  }
+
+  /**
+   * No alternative question may be supplied.
+   *
+   * This is what prevents:
+   *
+   * Q1(a) + Q1(b) + Q2(c)
+   *
+   * when Q1 was selected.
+   */
+  for (const suppliedId of suppliedQuestionIds) {
+    if (
+      !expectedQuestionIdSet.has(
+        suppliedId
+      )
+    ) {
+      const suppliedQuestion =
+        activeQuestions.find(
+          (question) =>
+            question.id === suppliedId
+        );
+
+      if (!suppliedQuestion) {
+        throw new ApiError(
+          400,
+          "One or more supplied assessment questions do not belong to this Assessment."
+        );
+      }
+
+      throw new ApiError(
+        400,
+        `${suppliedQuestion.questionNumber} is not part of the selected OR questions.`
+      );
+    }
+  }
+
+  /**
+   * ------------------------------------------------------------
+   * Validate each mark.
+   * ------------------------------------------------------------
+   */
+  const records = [];
+
+  let totalObtainedMarks = 0;
+
+  for (const mark of marks) {
+    const question =
+      activeQuestions.find(
+        (item) =>
+          item.id ===
+          mark.assessmentQuestionId
+      );
+
+    if (!question) {
+      throw new ApiError(
+        400,
+        "Assessment Question does not belong to this Assessment."
+      );
+    }
+
+    let marksObtained =
+      Number(mark.marksObtained);
+
+    let isAbsent =
+      Boolean(mark.isAbsent);
+
+    let isAttempted =
+      Boolean(mark.isAttempted);
+
+    /**
+     * Absent:
+     * marks = 0
+     * attempted = false
+     */
+    if (isAbsent) {
+      marksObtained = 0;
+      isAttempted = false;
+    }
+
+    /**
+     * Not attempted:
+     * marks = 0
+     */
+    if (!isAttempted) {
+      marksObtained = 0;
+    }
+
+    /**
+     * Absent + attempted is invalid.
+     */
+    if (
+      isAbsent &&
+      isAttempted
+    ) {
+      throw new ApiError(
+        400,
+        `${question.questionNumber}: an absent question cannot be attempted.`
+      );
+    }
+
+    if (Number.isNaN(marksObtained)) {
+      throw new ApiError(
+        400,
+        `${question.questionNumber}: marks obtained must be a valid number.`
+      );
+    }
+
+    if (marksObtained < 0) {
+      throw new ApiError(
+        400,
+        `${question.questionNumber}: marks cannot be negative.`
+      );
+    }
+
+    const questionMaximum =
+      Number(question.maxMarks);
+
+    if (
+      marksObtained >
+      questionMaximum
+    ) {
+      throw new ApiError(
+        400,
+        `${question.questionNumber}: marks cannot exceed ${questionMaximum}.`
+      );
+    }
+
+    totalObtainedMarks +=
+      marksObtained;
+
+    records.push({
+      studentId,
+      assessmentQuestionId:
+        question.id,
+      marksObtained,
+      isAbsent,
+      isAttempted,
+      status: true,
+    });
+  }
+
+  /**
+   * Student's obtained marks can never exceed
+   * the assessment maximum.
+   */
+  if (
+    totalObtainedMarks >
+    Number(assessment.maxMarks)
+  ) {
+    throw new ApiError(
+      400,
+      `Total obtained marks (${totalObtainedMarks}) cannot exceed assessment maximum marks (${assessment.maxMarks}).`
+    );
+  }
+
+  /**
+   * ------------------------------------------------------------
+   * Transaction
+   *
+   * Existing marks for this student + assessment are replaced
+   * atomically.
+   * ------------------------------------------------------------
+   */
+  const transaction =
+    await Assessment.sequelize.transaction();
+
+  try {
+    await studentQuestionMarkRepository.deleteMarksByQuestionIds(
+      studentId,
+      expectedQuestionIds,
+      transaction
+    );
+
+    const createdMarks =
+      await studentQuestionMarkRepository.bulkCreateStudentQuestionMarks(
+        records,
+        transaction
+      );
+
+    await transaction.commit();
+
+    const savedMarks =
+      await studentQuestionMarkRepository.findMarksByStudentAndAssessment(
+        studentId,
+        assessmentId
+      );
+
+    return {
+      assessmentId,
+      assessmentName:
+        assessment.name,
+      assessmentMaxMarks:
+        Number(assessment.maxMarks),
+      studentId,
+      selectedQuestions,
+      selectedQuestionMaximum:
+        selectedMaximumMarks,
+      totalObtainedMarks,
+      totalQuestions:
+        createdMarks.length,
+      marks: savedMarks,
+    };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+};
+
+/**
+ * Update one Student Question Mark.
  */
 const updateStudentQuestionMark = async (
   id,
@@ -248,57 +739,90 @@ const updateStudentQuestionMark = async (
     );
   }
 
-  /**
-   * Validate Updated Marks
-   */
-  if (data.isAbsent === true) {
-    data.marksObtained = 0;
-  } else if (
+  let marksObtained =
     data.marksObtained !== undefined
-  ) {
-    const obtainedMarks = Number(
-      data.marksObtained
-    );
+      ? Number(data.marksObtained)
+      : Number(
+          studentQuestionMark.marksObtained
+        );
 
-    const maximumMarks = Number(
-      assessmentQuestion.maxMarks
-    );
+  let isAbsent =
+    data.isAbsent !== undefined
+      ? Boolean(data.isAbsent)
+      : Boolean(
+          studentQuestionMark.isAbsent
+        );
 
-    if (Number.isNaN(obtainedMarks)) {
-      throw new ApiError(
-        400,
-        "Marks obtained must be a valid number."
-      );
-    }
+  let isAttempted =
+    data.isAttempted !== undefined
+      ? Boolean(data.isAttempted)
+      : Boolean(
+          studentQuestionMark.isAttempted
+        );
 
-    if (obtainedMarks < 0) {
-      throw new ApiError(
-        400,
-        "Marks obtained cannot be negative."
-      );
-    }
-
-    if (obtainedMarks > maximumMarks) {
-      throw new ApiError(
-        400,
-        `Marks obtained cannot exceed question maximum marks of ${maximumMarks}.`
-      );
-    }
+  if (isAbsent) {
+    marksObtained = 0;
+    isAttempted = false;
   }
 
-  /**
-   * Update Student Question Mark
-   */
+  if (!isAttempted) {
+    marksObtained = 0;
+  }
+
+  if (
+    isAbsent &&
+    isAttempted
+  ) {
+    throw new ApiError(
+      400,
+      "An absent question cannot be attempted."
+    );
+  }
+
+  const maximumMarks =
+    Number(assessmentQuestion.maxMarks);
+
+  if (Number.isNaN(marksObtained)) {
+    throw new ApiError(
+      400,
+      "Marks obtained must be a valid number."
+    );
+  }
+
+  if (marksObtained < 0) {
+    throw new ApiError(
+      400,
+      "Marks obtained cannot be negative."
+    );
+  }
+
+  if (
+    marksObtained >
+    maximumMarks
+  ) {
+    throw new ApiError(
+      400,
+      `Marks obtained cannot exceed question maximum marks of ${maximumMarks}.`
+    );
+  }
+
   return await studentQuestionMarkRepository.updateStudentQuestionMark(
     studentQuestionMark,
-    data
+    {
+      ...data,
+      marksObtained,
+      isAbsent,
+      isAttempted,
+    }
   );
 };
 
 /**
- * Delete Student Question Mark
+ * Delete one Student Question Mark.
  */
-const deleteStudentQuestionMark = async (id) => {
+const deleteStudentQuestionMark = async (
+  id
+) => {
   const studentQuestionMark =
     await studentQuestionMarkRepository.findStudentQuestionMarkById(
       id
@@ -322,6 +846,8 @@ export default {
   getStudentQuestionMarkById,
   getMarksByStudentId,
   getMarksByAssessmentQuestionId,
+  getMarksByAssessmentAndStudent,
+  saveBulkStudentMarks,
   updateStudentQuestionMark,
   deleteStudentQuestionMark,
 };

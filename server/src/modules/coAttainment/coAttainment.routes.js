@@ -15,19 +15,17 @@ import validate from "../../middleware/validate.middleware.js";
 
 import ROLES from "../../shared/constants/roles.js";
 
-import {
-  calculateCOAttainmentSchema,
-} from "./coAttainment.schema.js";
+import { calculateCOAttainmentSchema } from "./coAttainment.schema.js";
 
 const router = Router();
 
 /**
- * Calculate CO Attainment
+ * Calculate CO Attainment (Accessible by Faculty and Admin)
  */
 router.post(
   "/calculate",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.ADMIN, ROLES.FACULTY),
   validate(calculateCOAttainmentSchema),
   coAttainmentController.calculateCOAttainment
 );
@@ -69,7 +67,7 @@ router.get(
 );
 
 /**
- * Delete CO Attainment
+ * Delete CO Attainment (Admin only)
  */
 router.delete(
   "/:id",

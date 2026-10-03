@@ -184,6 +184,19 @@ function Students() {
     };
 
     // =====================================================
+    // PRINT STUDENT LIST
+    // =====================================================
+
+    const handlePrintStudents = () => {
+        if (!students.length) {
+            toast.error("There are no students available to print.");
+            return;
+        }
+
+        window.print();
+    };
+
+    // =====================================================
     // FORM CHANGE
     // =====================================================
 
@@ -812,7 +825,125 @@ function Students() {
     // =====================================================
 
     return (
-        <div className="container-fluid py-4">
+        <>
+            <style>{`
+                .print-report-header {
+                    display: none;
+                }
+
+                @media print {
+                    @page {
+                        size: A4 landscape;
+                        margin: 12mm;
+                    }
+
+                    html,
+                    body {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        background: #fff !important;
+                    }
+
+                    body * {
+                        visibility: hidden !important;
+                    }
+
+                    .student-list-card,
+                    .student-list-card * {
+                        visibility: visible !important;
+                    }
+
+                    .print-report-header,
+                    .print-report-header * {
+                        visibility: visible !important;
+                    }
+
+                    .print-report-header {
+                        display: block !important;
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                        text-align: center !important;
+                    }
+
+                    .print-report-title {
+                        font-size: 20px !important;
+                        font-weight: 700 !important;
+                        color: #17233c !important;
+                        margin-bottom: 3px !important;
+                    }
+
+                    .print-report-header h1 {
+                        font-size: 22px !important;
+                        font-weight: 700 !important;
+                        color: #17233c !important;
+                        margin: 0 0 3px !important;
+                    }
+
+                    .print-report-header p {
+                        font-size: 11px !important;
+                        color: #555 !important;
+                        margin: 0 0 8px !important;
+                    }
+
+                    .print-report-meta {
+                        display: flex !important;
+                        justify-content: space-between !important;
+                        border-top: 1px solid #999 !important;
+                        border-bottom: 1px solid #999 !important;
+                        padding: 5px 0 !important;
+                        margin-bottom: 8px !important;
+                        font-size: 10px !important;
+                        color: #333 !important;
+                    }
+
+                    .student-list-card {
+                        position: absolute !important;
+                        top: 42mm !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        border: 0 !important;
+                        box-shadow: none !important;
+                    }
+
+                    .student-list-card .table-responsive {
+                        overflow: visible !important;
+                    }
+
+                    .student-list-card table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        font-size: 9px !important;
+                    }
+
+                    .student-list-card th,
+                    .student-list-card td {
+                        border: 1px solid #999 !important;
+                        padding: 6px 7px !important;
+                        color: #000 !important;
+                        background: #fff !important;
+                    }
+
+                    .student-list-card thead th {
+                        background: #eef2f7 !important;
+                        color: #17233c !important;
+                        font-weight: 700 !important;
+                    }
+
+                    .student-list-card tbody tr {
+                        page-break-inside: avoid !important;
+                    }
+
+                    .no-print {
+                        display: none !important;
+                    }
+                }
+            `}</style>
+
+            <div className="container-fluid py-4">
 
             {/* =================================================
                 PAGE HEADER
@@ -853,6 +984,18 @@ function Students() {
                         <i className="bi bi-file-earmark-spreadsheet me-2"></i>
 
                         Upload Excel
+
+                    </button>
+
+                    <button
+                        type="button"
+                        className="btn btn-outline-dark"
+                        onClick={handlePrintStudents}
+                        disabled={students.length === 0}
+                    >
+                        <i className="bi bi-printer me-2"></i>
+
+                        Print Student List
 
                     </button>
 
@@ -903,7 +1046,29 @@ function Students() {
                 STUDENT TABLE
             ================================================= */}
 
-            <div className="card border-0 shadow-sm">
+            <div className="print-report-header">
+                <div className="print-report-title">OBE Insight</div>
+                <h1>Student List</h1>
+                <p>Student Management Report</p>
+
+                <div className="print-report-meta">
+                    <span>
+                        Total Students: <strong>{students.length}</strong>
+                    </span>
+                    <span>
+                        Generated On:{" "}
+                        <strong>
+                            {new Date().toLocaleDateString("en-IN", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                            })}
+                        </strong>
+                    </span>
+                </div>
+            </div>
+
+            <div className="card border-0 shadow-sm student-list-card">
 
                 <div className="card-body p-0">
 
@@ -963,7 +1128,7 @@ function Students() {
                                             Semester
                                         </th>
 
-                                        <th className="text-end px-4">
+                                        <th className="text-end px-4 no-print">
                                             Actions
                                         </th>
 
@@ -1104,7 +1269,7 @@ function Students() {
 
                                                     {/* ACTIONS */}
 
-                                                    <td className="text-end px-4">
+                                                    <td className="text-end px-4 no-print">
 
                                                         <div className="d-flex justify-content-end gap-2">
 
@@ -2119,8 +2284,8 @@ function Students() {
 
             )}
 
-        </div>
+         </div>
+        </>
     );
 }
-
 export default Students;

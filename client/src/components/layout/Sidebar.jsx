@@ -7,16 +7,18 @@ import {
   People,
   Book,
   JournalCheck,
-  PersonCheck,
   BarChart,
   FileEarmarkBarGraph,
+  FileEarmarkExcel,
   Person,
   QuestionCircle,
   ClipboardCheck,
   Link45deg,
   Diagram3,
-  Upload,
   Collection,
+  PersonPlus,
+  PencilSquare,
+  Award,
 } from "react-bootstrap-icons";
 
 function Sidebar() {
@@ -24,9 +26,9 @@ function Sidebar() {
 
   let menuItems = [];
 
-  // ===========================
+  // =========================================================
   // HOD MENU
-  // ===========================
+  // =========================================================
 
   if (user?.role === "HOD") {
     menuItems = [
@@ -54,9 +56,9 @@ function Sidebar() {
         path: "/hod/courses",
       },
 
-      // ===========================
+      // =======================================================
       // BATCH MANAGEMENT
-      // ===========================
+      // =======================================================
 
       {
         name: "Batches",
@@ -64,11 +66,39 @@ function Sidebar() {
         path: "/hod/batches",
       },
 
+      // =======================================================
+      // CURRICULUM IMPORT
+      // =======================================================
+
+      {
+        name: "Curriculum Import",
+        icon: <FileEarmarkExcel />,
+        path: "/hod/curriculum-import/2df81bee-bc19-11f1-8dc0-22968cf93f4b",
+      },
+
+      // =======================================================
+      // PROGRAM OUTCOMES
+      // =======================================================
+
       {
         name: "Program Outcomes",
         icon: <JournalCheck />,
         path: "/hod/program-outcomes",
       },
+
+      // =======================================================
+      // PROGRAM SPECIFIC OUTCOMES
+      // =======================================================
+
+      {
+        name: "Program Specific Outcomes",
+        icon: <Diagram3 />,
+        path: "/hod/program-specific-outcomes",
+      },
+
+      // =======================================================
+      // COURSE OFFERINGS
+      // =======================================================
 
       {
         name: "Course Offerings",
@@ -76,7 +106,9 @@ function Sidebar() {
         path: "/hod/course-offerings",
       },
 
-      
+      // =======================================================
+      // REPORTS
+      // =======================================================
 
       {
         name: "Reports",
@@ -84,11 +116,19 @@ function Sidebar() {
         path: "/hod/reports",
       },
 
+      // =======================================================
+      // CURRICULUM GAP
+      // =======================================================
+
       {
         name: "Curriculum Gap",
         icon: <FileEarmarkBarGraph />,
         path: "/hod/curriculum-gap",
       },
+
+      // =======================================================
+      // PROFILE
+      // =======================================================
 
       {
         name: "Profile",
@@ -98,9 +138,9 @@ function Sidebar() {
     ];
   }
 
-  // ===========================
+  // =========================================================
   // FACULTY MENU
-  // ===========================
+  // =========================================================
 
   if (user?.role === "FACULTY") {
     menuItems = [
@@ -110,11 +150,39 @@ function Sidebar() {
         path: "/faculty/dashboard",
       },
 
+      // =======================================================
+      // MY COURSES
+      // =======================================================
+
       {
         name: "My Courses",
         icon: <Book />,
         path: "/faculty/courses",
       },
+
+      // =======================================================
+      // COURSE REGISTRATION
+      // =======================================================
+
+      {
+        name: "Course Registration",
+        icon: <PersonPlus />,
+        path: "/faculty/course-registration",
+      },
+
+      // =======================================================
+      // STUDENTS
+      // =======================================================
+
+      {
+        name: "Students",
+        icon: <People />,
+        path: "/faculty/students",
+      },
+
+      // =======================================================
+      // COURSE OUTCOMES
+      // =======================================================
 
       {
         name: "Course Outcomes",
@@ -122,11 +190,19 @@ function Sidebar() {
         path: "/faculty/course-outcomes",
       },
 
+      // =======================================================
+      // QUESTION MAPPING
+      // =======================================================
+
       {
         name: "Question Mapping",
         icon: <QuestionCircle />,
         path: "/faculty/question-mapping",
       },
+
+      // =======================================================
+      // ASSESSMENTS
+      // =======================================================
 
       {
         name: "Assessments",
@@ -134,11 +210,29 @@ function Sidebar() {
         path: "/faculty/assessments",
       },
 
+      // =======================================================
+      // MARKS ENTRY
+      // =======================================================
+
       {
         name: "Marks Entry",
-        icon: <Upload />,
-        path: "/faculty/marks",
+        icon: <PencilSquare />,
+        path: "/faculty/marks-entry",
       },
+
+      // =======================================================
+      // CO ATTAINMENT
+      // =======================================================
+
+      {
+        name: "CO Attainment",
+        icon: <Award />,
+        path: "/faculty/attainment",
+      },
+
+      // =======================================================
+      // CO–PO MAPPING
+      // =======================================================
 
       {
         name: "CO–PO Mapping",
@@ -146,17 +240,19 @@ function Sidebar() {
         path: "/faculty/co-po-mapping",
       },
 
+      // =======================================================
+      // CO–PSO MAPPING
+      // =======================================================
+
       {
         name: "CO–PSO Mapping",
         icon: <Diagram3 />,
         path: "/faculty/co-pso-mapping",
       },
 
-      {
-        name: "Attainment",
-        icon: <BarChart />,
-        path: "/faculty/attainment",
-      },
+      // =======================================================
+      // REPORTS
+      // =======================================================
 
       {
         name: "Reports",
@@ -164,11 +260,19 @@ function Sidebar() {
         path: "/faculty/reports",
       },
 
+      // =======================================================
+      // CURRICULUM GAP
+      // =======================================================
+
       {
         name: "Curriculum Gap",
         icon: <FileEarmarkBarGraph />,
         path: "/faculty/curriculum-gap",
       },
+
+      // =======================================================
+      // PROFILE
+      // =======================================================
 
       {
         name: "Profile",
@@ -177,6 +281,10 @@ function Sidebar() {
       },
     ];
   }
+
+  // =========================================================
+  // SIDEBAR RENDER
+  // =========================================================
 
   return (
     <aside
@@ -192,27 +300,15 @@ function Sidebar() {
         zIndex: 1000,
       }}
     >
-      {/* =====================================================
-          LOGO
-      ===================================================== */}
-
+      {/* LOGO */}
       <div className="text-center py-4 border-bottom border-secondary">
-        <h4 className="mb-0 fw-bold">
-          OBE Insight
-        </h4>
+        <h4 className="mb-0 fw-bold">OBE Insight</h4>
       </div>
 
-      {/* =====================================================
-          MENU
-      ===================================================== */}
-
+      {/* MENU LIST */}
       <ul className="nav flex-column mt-3">
-
         {menuItems.map((item) => (
-          <li
-            key={item.path}
-            className="nav-item"
-          >
+          <li key={item.path} className="nav-item">
             <NavLink
               to={item.path}
               className={({ isActive }) =>
@@ -229,21 +325,11 @@ function Sidebar() {
                 transition: "0.3s",
               })}
             >
-              <span
-                style={{
-                  fontSize: "18px",
-                }}
-              >
-                {item.icon}
-              </span>
-
-              <span>
-                {item.name}
-              </span>
+              <span style={{ fontSize: "18px" }}>{item.icon}</span>
+              <span>{item.name}</span>
             </NavLink>
           </li>
         ))}
-
       </ul>
     </aside>
   );

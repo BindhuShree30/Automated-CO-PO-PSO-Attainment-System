@@ -1,171 +1,302 @@
+/**
+ * ------------------------------------------------------------------
+ * CO–PO Mapping Controller
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ */
+
 import coPOMappingService from "./coPOMapping.service.js";
+
 
 /**
  * ------------------------------------------------------------------
- * Create CO-PO Mapping
+ * Create CO–PO Mapping
  * ------------------------------------------------------------------
  */
-const createMapping = async (req, res, next) => {
+const createMapping = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const mapping = await coPOMappingService.createMapping(
-      req.validatedData.body
-    );
 
-    res.status(201).json({
+    const mapping =
+      await coPOMappingService.createMapping(
+        req.validatedData.body
+      );
+
+    return res.status(201).json({
       success: true,
-      message: "CO-PO Mapping created successfully.",
+      message:
+        "CO-PO Mapping created successfully.",
       data: mapping,
       error: null,
     });
+
   } catch (error) {
     next(error);
   }
 };
+
 
 /**
  * ------------------------------------------------------------------
- * Get All CO-PO Mappings
+ * Get All CO–PO Mappings
  * ------------------------------------------------------------------
  */
-const getMappings = async (req, res, next) => {
+const getMappings = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const mappings = await coPOMappingService.getMappings();
 
-    res.status(200).json({
+    const mappings =
+      await coPOMappingService.getMappings();
+
+    return res.status(200).json({
       success: true,
-      message: "CO-PO Mappings fetched successfully.",
+      message:
+        "CO-PO Mappings fetched successfully.",
       data: mappings,
       error: null,
     });
+
   } catch (error) {
     next(error);
   }
 };
+
 
 /**
  * ------------------------------------------------------------------
  * Get Mapping By ID
  * ------------------------------------------------------------------
  */
-const getMappingById = async (req, res, next) => {
+const getMappingById = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const { id } = req.validatedData.params;
 
-    const mapping = await coPOMappingService.getMappingById(id);
+    const { id } =
+      req.validatedData.params;
 
-    res.status(200).json({
+    const mapping =
+      await coPOMappingService.getMappingById(
+        id
+      );
+
+    return res.status(200).json({
       success: true,
-      message: "CO-PO Mapping fetched successfully.",
+      message:
+        "CO-PO Mapping fetched successfully.",
       data: mapping,
       error: null,
     });
+
   } catch (error) {
     next(error);
   }
 };
+
 
 /**
  * ------------------------------------------------------------------
  * Get Mappings By Course Outcome
  * ------------------------------------------------------------------
  */
-const getMappingsByCourseOutcome = async (req, res, next) => {
+const getMappingsByCourseOutcome = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const { courseOutcomeId } = req.validatedData.params;
+
+    const { courseOutcomeId } =
+      req.validatedData.params;
 
     const mappings =
-      await coPOMappingService.getMappingsByCourseOutcome(
-        courseOutcomeId
-      );
+      await coPOMappingService
+        .getMappingsByCourseOutcome(
+          courseOutcomeId
+        );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "CO-PO Mappings fetched successfully.",
+      message:
+        "CO-PO Mappings fetched successfully.",
       data: mappings,
       error: null,
     });
+
   } catch (error) {
     next(error);
   }
 };
+
 
 /**
  * ------------------------------------------------------------------
  * Get Mappings By Program Outcome
  * ------------------------------------------------------------------
  */
-const getMappingsByProgramOutcome = async (req, res, next) => {
+const getMappingsByProgramOutcome = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const { programOutcomeId } = req.validatedData.params;
+
+    const { programOutcomeId } =
+      req.validatedData.params;
 
     const mappings =
-      await coPOMappingService.getMappingsByProgramOutcome(
-        programOutcomeId
-      );
+      await coPOMappingService
+        .getMappingsByProgramOutcome(
+          programOutcomeId
+        );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "CO-PO Mappings fetched successfully.",
+      message:
+        "CO-PO Mappings fetched successfully.",
       data: mappings,
       error: null,
     });
+
   } catch (error) {
     next(error);
   }
 };
 
+
 /**
  * ------------------------------------------------------------------
- * Get NBA Matrix
+ * Get CO–PO Matrix
  * ------------------------------------------------------------------
  */
-const getMatrix = async (req, res, next) => {
+const getMatrix = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const { courseId } = req.validatedData.params;
 
-    const matrix = await coPOMappingService.getMatrix(courseId);
+    const { courseId } =
+      req.validatedData.params;
 
-    res.status(200).json({
+    const matrix =
+      await coPOMappingService.getMatrix(
+        courseId
+      );
+
+    return res.status(200).json({
       success: true,
-      message: "CO-PO Matrix fetched successfully.",
+      message:
+        "CO-PO Matrix fetched successfully.",
       data: matrix,
       error: null,
     });
+
   } catch (error) {
     next(error);
   }
 };
 
+
 /**
  * ------------------------------------------------------------------
- * Save NBA Matrix
+ * Save CO–PO Matrix
  * ------------------------------------------------------------------
  */
-const saveMatrix = async (req, res, next) => {
+const saveMatrix = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const result = await coPOMappingService.saveMatrix(
-      req.validatedData.body.matrix
-    );
 
-    res.status(200).json({
+    const result =
+      await coPOMappingService.saveMatrix(
+        req.validatedData.body.matrix
+      );
+
+    return res.status(200).json({
       success: true,
-      message: result.message,
+      message:
+        result.message,
       data: null,
       error: null,
     });
+
   } catch (error) {
     next(error);
   }
 };
 
+
 /**
  * ------------------------------------------------------------------
- * Update CO-PO Mapping
+ * AUTOMATED CO–PO MAPPING
+ * ------------------------------------------------------------------
+ *
+ * POST /api/v1/co-po-mappings/automate
+ *
+ * Generates AI-based CO–PO mapping suggestions.
+ *
+ * IMPORTANT:
+ *
+ * Suggestions are NOT saved automatically.
+ *
+ * Faculty reviews them first.
  * ------------------------------------------------------------------
  */
-const updateMapping = async (req, res, next) => {
+const automateMapping = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const { id } = req.validatedData.params;
+
+    const { courseId } =
+      req.validatedData.body;
+
+    const result =
+      await coPOMappingService
+        .automateMapping(
+          courseId
+        );
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Automated CO-PO mapping generated successfully.",
+      data: result,
+      error: null,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+/**
+ * ------------------------------------------------------------------
+ * Update CO–PO Mapping
+ * ------------------------------------------------------------------
+ */
+const updateMapping = async (
+  req,
+  res,
+  next
+) => {
+  try {
+
+    const { id } =
+      req.validatedData.params;
 
     const mapping =
       await coPOMappingService.updateMapping(
@@ -173,48 +304,79 @@ const updateMapping = async (req, res, next) => {
         req.validatedData.body
       );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "CO-PO Mapping updated successfully.",
+      message:
+        "CO-PO Mapping updated successfully.",
       data: mapping,
       error: null,
     });
+
   } catch (error) {
     next(error);
   }
 };
+
 
 /**
  * ------------------------------------------------------------------
- * Delete CO-PO Mapping
+ * Delete CO–PO Mapping
  * ------------------------------------------------------------------
  */
-const deleteMapping = async (req, res, next) => {
+const deleteMapping = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const { id } = req.validatedData.params;
+
+    const { id } =
+      req.validatedData.params;
 
     const result =
-      await coPOMappingService.deleteMapping(id);
+      await coPOMappingService.deleteMapping(
+        id
+      );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: result.message,
+      message:
+        result.message,
       data: null,
       error: null,
     });
+
   } catch (error) {
     next(error);
   }
 };
 
+
+/**
+ * ------------------------------------------------------------------
+ * Export Controller
+ * ------------------------------------------------------------------
+ */
 export default {
+
   createMapping,
+
   getMappings,
+
   getMappingById,
+
   getMappingsByCourseOutcome,
+
   getMappingsByProgramOutcome,
+
   getMatrix,
+
   saveMatrix,
+
+  automateMapping,
+
   updateMapping,
+
   deleteMapping,
+
 };

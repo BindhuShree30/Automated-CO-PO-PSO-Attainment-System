@@ -80,7 +80,7 @@ function EditCourseOutcome() {
         "Course Outcome updated successfully."
       );
 
-      navigate("/admin/course-outcomes");
+      navigate("/faculty/course-outcomes");
     } catch (error) {
       toast.error(
         error.response?.data?.message ||

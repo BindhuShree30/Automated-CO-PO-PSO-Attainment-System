@@ -6,8 +6,17 @@
  *
  * Validates Course create, update, and ID requests.
  *
- * Program is intentionally not part of the Course API.
- * Department is the active academic association.
+ * Course belongs to:
+ *
+ * Department
+ * Program
+ *
+ * Program is required for:
+ *
+ * - Program Outcomes
+ * - CO–PO Mapping
+ * - CO–PSO Mapping
+ * - Attainment Analysis
  *
  * ------------------------------------------------------------------
  */
@@ -69,8 +78,21 @@ export const createCourseSchema = z.object({
         "Semester cannot exceed 8."
       ),
 
+    /**
+     * Department
+     */
     departmentId: z.uuid(
       "Invalid Department ID."
+    ),
+
+    /**
+     * Program
+     *
+     * Required because every course must belong
+     * to a Program for OBE analysis.
+     */
+    programId: z.uuid(
+      "Invalid Program ID."
     ),
 
     status: z
@@ -145,7 +167,18 @@ export const updateCourseSchema = z.object({
       .optional(),
 
     departmentId: z
-      .uuid("Invalid Department ID.")
+      .uuid(
+        "Invalid Department ID."
+      )
+      .optional(),
+
+    /**
+     * Program
+     */
+    programId: z
+      .uuid(
+        "Invalid Program ID."
+      )
       .optional(),
 
     status: z

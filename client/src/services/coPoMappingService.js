@@ -1,51 +1,93 @@
 import api from "../api/axios";
 
-/**
- * ---------------------------------------------------------
- * Courses
- * ---------------------------------------------------------
- */
-export const getCourses = () =>
-  api.get("/courses");
+// =========================================================
+// COURSES
+// =========================================================
 
-/**
- * ---------------------------------------------------------
- * Course Outcomes
- * ---------------------------------------------------------
- */
-export const getCourseOutcomes = (courseId) =>
-  api.get(`/co/course/${courseId}`);
+export const getCourses = () => {
+  return api.get("/courses");
+};
 
-/**
- * ---------------------------------------------------------
- * Program Outcomes
- * ---------------------------------------------------------
- */
-export const getProgramOutcomes = (programId) =>
-  api.get(`/program-outcomes/program/${programId}`);
+// =========================================================
+// COURSE BY ID
+// =========================================================
 
-/**
- * ---------------------------------------------------------
- * Get Matrix
- * ---------------------------------------------------------
- */
-export const getMatrix = (courseId) =>
-  api.get(`/co-po-mappings/matrix/${courseId}`);
+export const getCourse = (courseId) => {
+  return api.get(
+    `/courses/${courseId}`
+  );
+};
 
-/**
- * ---------------------------------------------------------
- * Save Matrix
- * ---------------------------------------------------------
- */
-export const saveMatrix = (matrix) =>
-  api.post("/co-po-mappings/matrix", {
-    matrix,
-  });
+// =========================================================
+// COURSE OUTCOMES
+// =========================================================
 
-/**
- * ---------------------------------------------------------
- * Course Details
- * ---------------------------------------------------------
- */
-export const getCourse = (courseId) =>
-  api.get(`/courses/${courseId}`);
+export const getCourseOutcomes = (
+  courseId
+) => {
+  return api.get(
+    `/co/course/${courseId}`
+  );
+};
+
+// =========================================================
+// PROGRAM OUTCOMES
+// =========================================================
+
+export const getProgramOutcomes = (
+  programId
+) => {
+  return api.get(
+    `/program-outcomes/program/${programId}`
+  );
+};
+
+// =========================================================
+// GET CO-PO MATRIX
+// =========================================================
+
+export const getMatrix = (
+  courseId
+) => {
+  return api.get(
+    `/co-po-mappings/matrix/${courseId}`
+  );
+};
+
+// =========================================================
+// SAVE CO-PO MATRIX
+// =========================================================
+
+export const saveMatrix = (
+  matrix
+) => {
+  return api.post(
+    "/co-po-mappings/matrix",
+    {
+      matrix,
+    }
+  );
+};
+
+// =========================================================
+// AUTOMATIC CO-PO MAPPING
+// =========================================================
+//
+// Sends the selected course to the backend.
+// Backend → Gemini AI → CO-PO suggestions.
+//
+// IMPORTANT:
+// AI suggestions are returned for faculty review.
+// They are NOT automatically saved.
+//
+
+export const generateAutomaticMapping = (
+  courseId
+) => {
+  return api.post(
+    "/co-po-mappings/automate",
+    {
+      courseId,
+    }
+  );
+};

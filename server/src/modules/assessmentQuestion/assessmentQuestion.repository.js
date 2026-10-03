@@ -1,14 +1,14 @@
-
+/**
+ * ------------------------------------------------------------------
+ * Assessment Question Repository
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ */
 
 import AssessmentQuestion from "../../database/models/AssessmentQuestion.js";
 import Assessment from "../../database/models/Assessment.js";
 import CourseOutcome from "../../database/models/CourseOutcome.js";
-import CourseOffering from "../../database/models/CourseOffering.js";
-import Course from "../../database/models/Course.js";
 
-/**
- * Common Assessment Question associations
- */
 const assessmentQuestionIncludes = [
   {
     model: Assessment,
@@ -23,36 +23,6 @@ const assessmentQuestionIncludes = [
       "assessmentDate",
       "status",
     ],
-    include: [
-      {
-        model: CourseOffering,
-        as: "courseOffering",
-        attributes: [
-          "id",
-          "courseId",
-          "batchId",
-          "semesterId",
-          "facultyId",
-          "section",
-          "status",
-        ],
-        include: [
-          {
-            model: Course,
-            as: "course",
-            attributes: [
-              "id",
-              "name",
-              "code",
-              "credits",
-              "semester",
-              "programId",
-              "status",
-            ],
-          },
-        ],
-      },
-    ],
   },
   {
     model: CourseOutcome,
@@ -61,7 +31,6 @@ const assessmentQuestionIncludes = [
       "id",
       "code",
       "description",
-      "courseId",
       "status",
     ],
   },
@@ -69,27 +38,26 @@ const assessmentQuestionIncludes = [
 
 class AssessmentQuestionRepository {
   /**
-   * Create Assessment Question
+   * Create Question
    */
   async create(data) {
     return AssessmentQuestion.create(data);
   }
 
   /**
-   * Get All Assessment Questions
+   * Get All Questions
    */
   async findAll() {
     return AssessmentQuestion.findAll({
       include: assessmentQuestionIncludes,
       order: [
-        ["assessmentId", "ASC"],
-        ["questionNumber", "ASC"],
+        ["createdAt", "ASC"],
       ],
     });
   }
 
   /**
-   * Get Assessment Question By ID
+   * Get Question By ID
    */
   async findById(id) {
     return AssessmentQuestion.findByPk(id, {
@@ -98,7 +66,33 @@ class AssessmentQuestionRepository {
   }
 
   /**
-   * Find Question By Assessment and Question Number
+   * Get Questions By Assessment
+   */
+  async findByAssessmentId(assessmentId) {
+    return AssessmentQuestion.findAll({
+      where: {
+        assessmentId,
+      },
+      include: [
+        {
+          model: CourseOutcome,
+          as: "courseOutcome",
+          attributes: [
+            "id",
+            "code",
+            "description",
+            "status",
+          ],
+        },
+      ],
+      order: [
+        ["questionNumber", "ASC"],
+      ],
+    });
+  }
+
+  /**
+   * Find Duplicate Question Number
    */
   async findByAssessmentAndQuestionNumber(
     assessmentId,
@@ -113,59 +107,33 @@ class AssessmentQuestionRepository {
   }
 
   /**
-   * Find Questions By Assessment
-   */
-  async findByAssessmentId(assessmentId) {
-    return AssessmentQuestion.findAll({
-      where: {
-        assessmentId,
-      },
-      include: assessmentQuestionIncludes,
-      order: [["questionNumber", "ASC"]],
-    });
-  }
-
-  /**
-   * Find Questions By Course Outcome
-   */
-  async findByCourseOutcomeId(courseOutcomeId) {
-    return AssessmentQuestion.findAll({
-      where: {
-        courseOutcomeId,
-      },
-      include: assessmentQuestionIncludes,
-      order: [["createdAt", "ASC"]],
-    });
-  }
-
-  /**
-   * Update Assessment Question
+   * Update Question
    */
   async update(id, data) {
-    const assessmentQuestion =
+    const question =
       await AssessmentQuestion.findByPk(id);
 
-    if (!assessmentQuestion) {
+    if (!question) {
       return null;
     }
 
-    await assessmentQuestion.update(data);
+    await question.update(data);
 
     return this.findById(id);
   }
 
   /**
-   * Delete Assessment Question
+   * Delete Question
    */
   async delete(id) {
-    const assessmentQuestion =
+    const question =
       await AssessmentQuestion.findByPk(id);
 
-    if (!assessmentQuestion) {
+    if (!question) {
       return false;
     }
 
-    await assessmentQuestion.destroy();
+    await question.destroy();
 
     return true;
   }

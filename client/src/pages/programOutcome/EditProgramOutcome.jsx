@@ -77,7 +77,7 @@ function EditProgramOutcome() {
         "Program Outcome updated successfully."
       );
 
-      navigate("/admin/program-outcomes");
+      navigate("/hod/program-outcomes");
 
     } catch (error) {
 

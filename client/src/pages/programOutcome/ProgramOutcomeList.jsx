@@ -60,7 +60,7 @@ function ProgramOutcomeList() {
           </h4>
 
           <Link
-            to="/admin/program-outcomes/add"
+            to="/hod/program-outcomes/add"
             className="btn btn-primary"
           >
             <i className="bi bi-plus-lg me-2"></i>
@@ -137,7 +137,7 @@ function ProgramOutcomeList() {
                       <td>
 
                         <Link
-                          to={`/admin/program-outcomes/edit/${po.id}`}
+                          to={`/hod/program-outcomes/edit/${po.id}`}
                           className="btn btn-warning btn-sm me-2"
                         >
                           <i className="bi bi-pencil-square"></i>

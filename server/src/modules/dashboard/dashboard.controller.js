@@ -1,34 +1,126 @@
-import asyncHandler from "../../shared/helpers/asyncHandler.js";
-import { successResponse } from "../../shared/helpers/ApiResponse.js";
-import dashboardService from "./dashboard.service.js";
+/**
+ * ------------------------------------------------------------------
+ * Dashboard Controller
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ */
+
+import DashboardService from "./dashboard.service.js";
 
 class DashboardController {
-  getAdminDashboard = asyncHandler(async (req, res) => {
-    console.log("===== Dashboard API Called =====");
-    console.log("req.user:", req.user);
 
-    const data = await dashboardService.getAdminDashboard();
+  /**
+   * ----------------------------------------------------------------
+   * Get HOD Dashboard
+   * ----------------------------------------------------------------
+   */
 
-    console.log("Dashboard Data:", data);
+  async getHodDashboard(
+    req,
+    res,
+    next
+  ) {
 
-    return successResponse(
-      res,
-      "Admin dashboard data fetched successfully.",
-      data
-    );
-  });
+    try {
 
-  getFacultyDashboard = asyncHandler(async (req, res) => {
-    const facultyId = req.user.id;
+      const dashboardData =
+        await DashboardService.getHodDashboard();
 
-    const data = await dashboardService.getFacultyDashboard(facultyId);
+      return res.status(200).json({
 
-    return successResponse(
-      res,
-      "Faculty dashboard data fetched successfully.",
-      data
-    );
-  });
+        success: true,
+
+        message:
+          "HOD dashboard data fetched successfully.",
+
+        data: dashboardData,
+
+        error: null,
+
+      });
+
+    } catch (error) {
+
+      next(error);
+
+    }
+  }
+
+
+  /**
+   * ----------------------------------------------------------------
+   * Get Faculty Dashboard
+   * ----------------------------------------------------------------
+   */
+
+  async getFacultyDashboard(
+    req,
+    res,
+    next
+  ) {
+
+    try {
+
+      /**
+       * ------------------------------------------------------------
+       * Authentication middleware places the decoded JWT
+       * payload inside req.user.
+       *
+       * JWT payload:
+       * {
+       *   id,
+       *   email,
+       *   role
+       * }
+       * ------------------------------------------------------------
+       */
+
+      const facultyEmail =
+        req.user?.email;
+
+
+      if (!facultyEmail) {
+
+        return res.status(401).json({
+
+          success: false,
+
+          message:
+            "Authenticated user email is required.",
+
+          data: null,
+
+          error: null,
+
+        });
+      }
+
+
+      const dashboardData =
+        await DashboardService.getFacultyDashboard(
+          facultyEmail
+        );
+
+
+      return res.status(200).json({
+
+        success: true,
+
+        message:
+          "Faculty dashboard data fetched successfully.",
+
+        data: dashboardData,
+
+        error: null,
+
+      });
+
+    } catch (error) {
+
+      next(error);
+
+    }
+  }
 }
 
 export default new DashboardController();

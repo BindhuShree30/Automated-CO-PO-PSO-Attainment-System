@@ -46,6 +46,8 @@ const createCourseOffering = asyncHandler(
  * ------------------------------------------------------------------
  *
  * GET /api/v1/course-offerings
+ *
+ * Used for HOD/Admin course offering management.
  * ------------------------------------------------------------------
  */
 const getAllCourseOfferings = asyncHandler(
@@ -56,6 +58,50 @@ const getAllCourseOfferings = asyncHandler(
     return successResponse(
       res,
       "Course Offerings fetched successfully.",
+      courseOfferings
+    );
+  }
+);
+
+/**
+ * ------------------------------------------------------------------
+ * Get My Course Offerings
+ * ------------------------------------------------------------------
+ *
+ * GET /api/v1/course-offerings/my-courses
+ *
+ * Used by Faculty.
+ *
+ * Returns ONLY the Course Offerings assigned to
+ * the currently authenticated Faculty.
+ *
+ * Authentication information comes from:
+ *
+ * req.user
+ *
+ * The service resolves:
+ *
+ * req.user.email
+ *       ↓
+ * Faculty record
+ *       ↓
+ * Faculty.id
+ *       ↓
+ * FacultyAssignment.facultyId
+ *       ↓
+ * CourseOffering
+ * ------------------------------------------------------------------
+ */
+const getMyCourseOfferings = asyncHandler(
+  async (req, res) => {
+    const courseOfferings =
+      await courseOfferingService.getMyCourseOfferings(
+        req.user
+      );
+
+    return successResponse(
+      res,
+      "My Course Offerings fetched successfully.",
       courseOfferings
     );
   }
@@ -138,6 +184,7 @@ const deleteCourseOffering = asyncHandler(
 export default {
   createCourseOffering,
   getAllCourseOfferings,
+  getMyCourseOfferings,
   getCourseOfferingById,
   updateCourseOffering,
   deleteCourseOffering,

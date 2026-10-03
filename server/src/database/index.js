@@ -49,31 +49,31 @@ import Program from "./models/Program.js";
 import Course from "./models/Course.js";
 import Faculty from "./models/Faculty.js";
 import Student from "./models/Student.js";
-
 import CourseOutcome from "./models/CourseOutcome.js";
-
 import AcademicYear from "./models/AcademicYear.js";
 import Batch from "./models/Batch.js";
 import Semester from "./models/Semester.js";
-
 import CourseOffering from "./models/CourseOffering.js";
-
+import FacultyAssignment from "./models/FacultyAssignment.js";
+import Syllabus from "./models/Syllabus.js";
 import Assessment from "./models/Assessment.js";
 import AssessmentQuestion from "./models/AssessmentQuestion.js";
 import StudentQuestionMark from "./models/StudentQuestionMark.js";
-
 import COAttainment from "./models/COAttainment.js";
-
 import ProgramOutcome from "./models/ProgramOutcome.js";
 import COPOMapping from "./models/COPOMapping.js";
 import POAttainment from "./models/POAttainment.js";
-
 import ProgramSpecificOutcome from "./models/ProgramSpecificOutcome.js";
 import CoPsoMapping from "./models/CoPsoMapping.js";
-
 import Enrollment from "./models/Enrollment.js";
 import CourseRegistration from "./models/CourseRegistration.js";
+import IndustryDomain from "./models/IndustryDomain.js";
+import IndustrySkill from "./models/IndustrySkill.js";
+import SkillSource from "./models/SkillSource.js";
 
+import Curriculum from "./models/Curriculum.js";
+import CurriculumImport from "./models/CurriculumImport.js";
+import CurriculumImportRow from "./models/CurriculumImportRow.js";
 
 /**
  * ==================================================================
@@ -101,7 +101,6 @@ Batch.belongsTo(Program, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * ==================================================================
  * DEPARTMENT AND STUDENT ASSOCIATIONS
@@ -127,7 +126,6 @@ Student.belongsTo(Department, {
   onDelete: "SET NULL",
   onUpdate: "CASCADE",
 });
-
 
 /**
  * ==================================================================
@@ -155,6 +153,131 @@ Student.belongsTo(Semester, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * ==================================================================
+ * CURRICULUM ASSOCIATIONS
+ * ==================================================================
+ */
+
+/**
+ * Program → Curriculums
+ */
+Program.hasMany(Curriculum, {
+  foreignKey: "programId",
+  as: "curriculums",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Curriculum → Program
+ */
+Curriculum.belongsTo(Program, {
+  foreignKey: "programId",
+  as: "program",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Batch → Curriculum
+ */
+Batch.belongsTo(Curriculum, {
+  foreignKey: "curriculumId",
+  as: "curriculum",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Curriculum → Batches
+ */
+Curriculum.hasMany(Batch, {
+  foreignKey: "curriculumId",
+  as: "batches",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Curriculum → Curriculum Imports
+ */
+Curriculum.hasMany(CurriculumImport, {
+  foreignKey: "curriculumId",
+  as: "imports",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Curriculum Import → Curriculum
+ */
+CurriculumImport.belongsTo(Curriculum, {
+  foreignKey: "curriculumId",
+  as: "curriculum",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Curriculum Import → Uploaded By User
+ */
+CurriculumImport.belongsTo(User, {
+  foreignKey: "uploadedBy",
+  as: "uploadedByUser",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * User → Curriculum Imports
+ */
+User.hasMany(CurriculumImport, {
+  foreignKey: "uploadedBy",
+  as: "curriculumImports",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Curriculum Import → Import Rows
+ */
+CurriculumImport.hasMany(CurriculumImportRow, {
+  foreignKey: "importId",
+  as: "rows",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Import Row → Curriculum Import
+ */
+CurriculumImportRow.belongsTo(CurriculumImport, {
+  foreignKey: "importId",
+  as: "import",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Course → Curriculum Import Rows
+ */
+Course.hasMany(CurriculumImportRow, {
+  foreignKey: "matchedCourseId",
+  as: "curriculumImportRows",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Import Row → Matched Course
+ */
+CurriculumImportRow.belongsTo(Course, {
+  foreignKey: "matchedCourseId",
+  as: "matchedCourse",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
 
 /**
  * ==================================================================
@@ -182,7 +305,6 @@ CourseOutcome.belongsTo(Course, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * ==================================================================
  * BATCH → SEMESTER ASSOCIATIONS
@@ -209,7 +331,6 @@ Semester.belongsTo(Batch, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * ==================================================================
  * ACADEMIC YEAR → SEMESTER ASSOCIATIONS
@@ -235,7 +356,6 @@ Semester.belongsTo(AcademicYear, {
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
-
 
 /**
  * ==================================================================
@@ -280,6 +400,37 @@ CourseOffering.belongsTo(Course, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * ------------------------------------------------------------------
+ * SYLLABUS ASSOCIATIONS
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * Course Offering → Syllabi
+ */
+CourseOffering.hasMany(Syllabus, {
+  foreignKey: "courseOfferingId",
+  as: "syllabi",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Syllabus → Course Offering
+ */
+Syllabus.belongsTo(CourseOffering, {
+  foreignKey: "courseOfferingId",
+  as: "courseOffering",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * ------------------------------------------------------------------
+ * Batch → Course Offerings
+ * ------------------------------------------------------------------
+ */
 
 /**
  * Batch → Course Offerings
@@ -301,6 +452,11 @@ CourseOffering.belongsTo(Batch, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * ------------------------------------------------------------------
+ * Semester → Course Offerings
+ * ------------------------------------------------------------------
+ */
 
 /**
  * Semester → Course Offerings
@@ -322,27 +478,51 @@ CourseOffering.belongsTo(Semester, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * ------------------------------------------------------------------
+ * FACULTY ASSIGNMENT ASSOCIATIONS
+ * ------------------------------------------------------------------
+ */
 
 /**
- * Faculty → Course Offerings
+ * Faculty → Faculty Assignments
  */
-Faculty.hasMany(CourseOffering, {
+Faculty.hasMany(FacultyAssignment, {
   foreignKey: "facultyId",
-  as: "courseOfferings",
+  as: "facultyAssignments",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
 
 /**
- * Course Offering → Faculty
+ * Faculty Assignment → Faculty
  */
-CourseOffering.belongsTo(Faculty, {
+FacultyAssignment.belongsTo(Faculty, {
   foreignKey: "facultyId",
   as: "faculty",
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
 
+/**
+ * Course Offering → Faculty Assignments
+ */
+CourseOffering.hasMany(FacultyAssignment, {
+  foreignKey: "courseOfferingId",
+  as: "facultyAssignments",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Faculty Assignment → Course Offering
+ */
+FacultyAssignment.belongsTo(CourseOffering, {
+  foreignKey: "courseOfferingId",
+  as: "courseOffering",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
 
 /**
  * ==================================================================
@@ -370,7 +550,6 @@ Assessment.belongsTo(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * ==================================================================
  * ASSESSMENT QUESTION ASSOCIATIONS
@@ -397,7 +576,6 @@ AssessmentQuestion.belongsTo(Assessment, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * Course Outcome → Assessment Questions
  */
@@ -417,7 +595,6 @@ AssessmentQuestion.belongsTo(CourseOutcome, {
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
-
 
 /**
  * ==================================================================
@@ -445,7 +622,6 @@ COAttainment.belongsTo(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * Course Outcome → CO Attainments
  */
@@ -465,7 +641,6 @@ COAttainment.belongsTo(CourseOutcome, {
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
-
 
 /**
  * ==================================================================
@@ -488,7 +663,6 @@ ProgramOutcome.belongsTo(Program, {
   foreignKey: "programId",
   as: "program",
 });
-
 
 /**
  * ==================================================================
@@ -516,7 +690,6 @@ COPOMapping.belongsTo(CourseOutcome, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * Program Outcome → CO-PO Mappings
  */
@@ -536,7 +709,6 @@ COPOMapping.belongsTo(ProgramOutcome, {
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
-
 
 /**
  * ==================================================================
@@ -564,7 +736,6 @@ POAttainment.belongsTo(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * Program Outcome → PO Attainments
  */
@@ -584,7 +755,6 @@ POAttainment.belongsTo(ProgramOutcome, {
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
-
 
 /**
  * ==================================================================
@@ -608,7 +778,6 @@ CoPsoMapping.belongsTo(CourseOutcome, {
   as: "courseOutcome",
 });
 
-
 /**
  * Program Specific Outcome → CO-PSO Mappings
  */
@@ -624,7 +793,6 @@ CoPsoMapping.belongsTo(ProgramSpecificOutcome, {
   foreignKey: "programSpecificOutcomeId",
   as: "programSpecificOutcome",
 });
-
 
 /**
  * ==================================================================
@@ -652,7 +820,6 @@ StudentQuestionMark.belongsTo(Student, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * Assessment Question → Student Question Marks
  */
@@ -672,7 +839,6 @@ StudentQuestionMark.belongsTo(AssessmentQuestion, {
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
-
 
 /**
  * ==================================================================
@@ -700,7 +866,6 @@ Enrollment.belongsTo(Student, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * Batch → Enrollments
  */
@@ -720,7 +885,6 @@ Enrollment.belongsTo(Batch, {
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
-
 
 /**
  * ==================================================================
@@ -748,7 +912,6 @@ CourseRegistration.belongsTo(Student, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * Course Offering → Course Registrations
  */
@@ -769,6 +932,31 @@ CourseRegistration.belongsTo(CourseOffering, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * ------------------------------------------------------------------
+ * Faculty → Course Offerings
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * Faculty → Course Offerings
+ */
+Faculty.hasMany(CourseOffering, {
+  foreignKey: "facultyId",
+  as: "courseOfferings",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Course Offering → Faculty
+ */
+CourseOffering.belongsTo(Faculty, {
+  foreignKey: "facultyId",
+  as: "faculty",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
 
 /**
  * ==================================================================
@@ -795,7 +983,6 @@ ProgramSpecificOutcome.belongsTo(Program, {
   onDelete: "RESTRICT",
   onUpdate: "CASCADE",
 });
-
 
 /**
  * ==================================================================
@@ -830,7 +1017,6 @@ Course.belongsTo(Program, {
   onUpdate: "CASCADE",
 });
 
-
 /**
  * ==================================================================
  * DEPARTMENT ↔ COURSE ASSOCIATIONS
@@ -862,6 +1048,51 @@ Course.belongsTo(Department, {
   onUpdate: "CASCADE",
 });
 
+/**
+ * ==================================================================
+ * INDUSTRY INTELLIGENCE ASSOCIATIONS
+ * ==================================================================
+ */
+
+/**
+ * Industry Domain → Industry Skills
+ */
+IndustryDomain.hasMany(IndustrySkill, {
+  foreignKey: "domainId",
+  as: "industrySkills",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Industry Skill → Industry Domain
+ */
+IndustrySkill.belongsTo(IndustryDomain, {
+  foreignKey: "domainId",
+  as: "industryDomain",
+  onDelete: "RESTRICT",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Industry Skill → Skill Sources
+ */
+IndustrySkill.hasMany(SkillSource, {
+  foreignKey: "industrySkillId",
+  as: "sources",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+/**
+ * Skill Source → Industry Skill
+ */
+SkillSource.belongsTo(IndustrySkill, {
+  foreignKey: "industrySkillId",
+  as: "industrySkill",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
 
 /**
  * ==================================================================
@@ -876,9 +1107,7 @@ const connectDatabase = async () => {
      */
     await sequelize.authenticate();
 
-    console.log(
-      "✅ Database connected successfully."
-    );
+    console.log("✅ Database connected successfully.");
 
     /**
      * --------------------------------------------------------------
@@ -895,20 +1124,13 @@ const connectDatabase = async () => {
 
     await sequelize.sync();
 
-    console.log(
-      "✅ Database synchronized successfully."
-    );
+    console.log("✅ Database synchronized successfully.");
   } catch (error) {
-    console.error(
-      "❌ Failed to connect to database."
-    );
-
+    console.error("❌ Failed to connect to database.");
     console.error(error);
-
     process.exit(1);
   }
 };
-
 
 /**
  * ==================================================================
@@ -920,48 +1142,45 @@ export {
   sequelize,
 
   User,
-
   Department,
-
   Program,
-
   Course,
-
   Faculty,
-
   Student,
 
+  FacultyAssignment,
+  Syllabus,
   CourseOutcome,
 
   AcademicYear,
-
   Batch,
-
   Semester,
-
   CourseOffering,
 
   Assessment,
-
   AssessmentQuestion,
-
   COAttainment,
 
   ProgramOutcome,
-
   COPOMapping,
 
   StudentQuestionMark,
 
   Enrollment,
-
   CourseRegistration,
 
   POAttainment,
 
   ProgramSpecificOutcome,
-
   CoPsoMapping,
+
+  IndustryDomain,
+  IndustrySkill,
+  SkillSource,
+
+  Curriculum,
+  CurriculumImport,
+  CurriculumImportRow,
 
   connectDatabase,
 };

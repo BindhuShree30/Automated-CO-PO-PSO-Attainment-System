@@ -1,8 +1,25 @@
+/**
+ * ------------------------------------------------------------------
+ * CO–PO Mapping Validation Schema
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ *
+ * Mapping Level:
+ *
+ * 1 = Low
+ * 2 = Medium
+ * 3 = High
+ *
+ * IMPORTANT:
+ * Level 0 is NOT allowed.
+ * ------------------------------------------------------------------
+ */
+
 import { z } from "zod";
 
 /**
  * ------------------------------------------------------------------
- * Create CO-PO Mapping Schema
+ * Create CO–PO Mapping Schema
  * ------------------------------------------------------------------
  */
 export const createCOPOMappingSchema = z.object({
@@ -18,25 +35,40 @@ export const createCOPOMappingSchema = z.object({
     mappingLevel: z
       .number()
       .int("Mapping level must be an integer.")
-      .min(1, "Mapping level must be between 1 and 3.")
-      .max(3, "Mapping level must be between 1 and 3."),
+      .min(
+        1,
+        "Mapping level must be between 1 and 3."
+      )
+      .max(
+        3,
+        "Mapping level must be between 1 and 3."
+      ),
 
-    status: z.boolean().optional().default(true),
+    status: z
+      .boolean()
+      .optional()
+      .default(true),
   }),
 });
 
 /**
  * ------------------------------------------------------------------
- * Update CO-PO Mapping Schema
+ * Update CO–PO Mapping Schema
  * ------------------------------------------------------------------
  */
 export const updateCOPOMappingSchema = z.object({
   body: z.object({
     mappingLevel: z
       .number()
-      .int()
-      .min(1)
-      .max(3)
+      .int("Mapping level must be an integer.")
+      .min(
+        1,
+        "Mapping level must be between 1 and 3."
+      )
+      .max(
+        3,
+        "Mapping level must be between 1 and 3."
+      )
       .optional(),
 
     status: z.boolean().optional(),
@@ -45,12 +77,14 @@ export const updateCOPOMappingSchema = z.object({
 
 /**
  * ------------------------------------------------------------------
- * ID Parameter Schema
+ * Mapping ID Schema
  * ------------------------------------------------------------------
  */
 export const mappingIdSchema = z.object({
   params: z.object({
-    id: z.string().uuid("Invalid Mapping ID."),
+    id: z
+      .string()
+      .uuid("Invalid Mapping ID."),
   }),
 });
 
@@ -79,6 +113,7 @@ export const programOutcomeIdSchema = z.object({
       .uuid("Invalid Program Outcome ID."),
   }),
 });
+
 /**
  * ------------------------------------------------------------------
  * Matrix Course Schema
@@ -86,13 +121,15 @@ export const programOutcomeIdSchema = z.object({
  */
 export const matrixCourseSchema = z.object({
   params: z.object({
-    courseId: z.string().uuid("Invalid Course ID."),
+    courseId: z
+      .string()
+      .uuid("Invalid Course ID."),
   }),
 });
 
 /**
  * ------------------------------------------------------------------
- * Save NBA Matrix Schema
+ * Save CO–PO Matrix Schema
  * ------------------------------------------------------------------
  */
 export const saveMatrixSchema = z.object({
@@ -110,11 +147,35 @@ export const saveMatrixSchema = z.object({
 
           mappingLevel: z
             .number()
-            .int("Mapping level must be an integer.")
-            .min(0, "Mapping level must be between 0 and 3.")
-            .max(3, "Mapping level must be between 0 and 3."),
+            .int(
+              "Mapping level must be an integer."
+            )
+            .min(
+              1,
+              "Mapping level must be between 1 and 3."
+            )
+            .max(
+              3,
+              "Mapping level must be between 1 and 3."
+            ),
         })
       )
-      .min(1, "Matrix cannot be empty."),
+      .min(
+        1,
+        "Matrix cannot be empty."
+      ),
+  }),
+});
+
+/**
+ * ------------------------------------------------------------------
+ * Automated CO–PO Mapping Schema
+ * ------------------------------------------------------------------
+ */
+export const automateCOPOMappingSchema = z.object({
+  body: z.object({
+    courseId: z
+      .string()
+      .uuid("Invalid Course ID."),
   }),
 });

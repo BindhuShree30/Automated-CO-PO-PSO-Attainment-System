@@ -1,6 +1,14 @@
+/**
+ * ------------------------------------------------------------------
+ * CO–PSO Mapping Routes
+ * Project : Automated CO–PO–PSO Attainment Analysis System
+ * ------------------------------------------------------------------
+ */
+
 import express from "express";
 
 import controller from "./coPsoMapping.controller.js";
+
 import validate from "../../middleware/validate.middleware.js";
 
 import {
@@ -9,49 +17,116 @@ import {
   coPsoMappingIdSchema,
   courseOutcomeIdSchema,
   programSpecificOutcomeIdSchema,
+  matrixCourseIdSchema,
+  saveMatrixSchema,
 } from "./coPsoMapping.schema.js";
 
 const router = express.Router();
 
-// Create
+// ================================================================
+// CREATE
+// ================================================================
+
 router.post(
   "/",
   validate(createCoPsoMappingSchema),
   controller.create
 );
 
-// Get All
-router.get("/", controller.getAll);
+// ================================================================
+// GET ALL
+// ================================================================
 
-// Get By Course Outcome
+router.get(
+  "/",
+  controller.getAll
+);
+
+// ================================================================
+// GET CO–PSO MATRIX
+// ================================================================
+
+router.get(
+  "/matrix/:courseId",
+  validate(matrixCourseIdSchema),
+  controller.getMatrix
+);
+
+// ================================================================
+// AUTOMATED CO–PSO MAPPING
+// ================================================================
+//
+// IMPORTANT:
+// This route MUST appear before "/:id".
+//
+// Gemini generates AI recommendations.
+// Nothing is automatically saved.
+//
+// Faculty reviews the suggestions and then
+// uses the SAVE MATRIX endpoint.
+//
+// ================================================================
+
+router.get(
+  "/automate/:courseId",
+  validate(matrixCourseIdSchema),
+  controller.automateMapping
+);
+
+// ================================================================
+// SAVE CO–PSO MATRIX
+// ================================================================
+
+router.post(
+  "/matrix",
+  validate(saveMatrixSchema),
+  controller.saveMatrix
+);
+
+// ================================================================
+// GET BY COURSE OUTCOME
+// ================================================================
+
 router.get(
   "/course-outcome/:courseOutcomeId",
   validate(courseOutcomeIdSchema),
   controller.getByCourseOutcome
 );
 
-// Get By Program Specific Outcome
+// ================================================================
+// GET BY PROGRAM SPECIFIC OUTCOME
+// ================================================================
+
 router.get(
   "/program-specific-outcome/:programSpecificOutcomeId",
   validate(programSpecificOutcomeIdSchema),
   controller.getByProgramSpecificOutcome
 );
 
-// Get By Id
+// ================================================================
+// GET BY ID
+// ================================================================
+
 router.get(
   "/:id",
   validate(coPsoMappingIdSchema),
   controller.getById
 );
 
-// Update
+// ================================================================
+// UPDATE
+// ================================================================
+
 router.put(
   "/:id",
   validate(updateCoPsoMappingSchema),
   controller.update
 );
 
-// Delete
+// ================================================================
+// DELETE
+// ================================================================
+
 router.delete(
   "/:id",
   validate(coPsoMappingIdSchema),

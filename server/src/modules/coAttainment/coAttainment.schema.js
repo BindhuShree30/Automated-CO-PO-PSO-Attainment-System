@@ -13,11 +13,12 @@ import { z } from "zod";
 export const calculateCOAttainmentSchema = z.object({
   body: z.object({
     courseOfferingId: z
-      .string()
+      .string({ required_error: "Course Offering ID is required" })
       .uuid("Invalid Course Offering ID"),
 
     courseOutcomeId: z
       .string()
-      .uuid("Invalid Course Outcome ID"),
+      .uuid("Invalid Course Outcome ID")
+      .optional(),
   }),
 });

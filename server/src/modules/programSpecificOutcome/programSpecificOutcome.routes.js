@@ -33,7 +33,7 @@ const router = Router();
 router.post(
   "/",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD),
   validate(createProgramSpecificOutcomeSchema),
   programSpecificOutcomeController.createProgramSpecificOutcome
 );
@@ -85,7 +85,7 @@ router.get(
 router.put(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(ROLES.HOD),
   validate(updateProgramSpecificOutcomeSchema),
   programSpecificOutcomeController.updateProgramSpecificOutcome
 );

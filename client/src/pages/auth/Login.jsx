@@ -1,17 +1,25 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+
 import {
   Eye,
   EyeSlash,
   MortarboardFill,
+  BarChartLineFill,
+  Diagram3Fill,
+  JournalCheck,
 } from "react-bootstrap-icons";
+
 import {
   Link,
   useNavigate,
 } from "react-router-dom";
+
 import toast from "react-hot-toast";
 
 import { useAuth } from "../../context/AuthContext";
+
+import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
@@ -35,11 +43,10 @@ function Login() {
     },
   });
 
-  /**
-   * ---------------------------------------------------------
-   * Login
-   * ---------------------------------------------------------
-   */
+  /* =========================================================
+     LOGIN
+  ========================================================= */
+
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
@@ -64,15 +71,13 @@ function Login() {
           break;
 
         default:
-          toast.error(
-            "Unauthorized role."
-          );
+          toast.error("Unauthorized role.");
           navigate("/login");
           break;
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message ||
+        error?.response?.data?.message ||
           "Invalid email, password, or role."
       );
     } finally {
@@ -81,225 +86,338 @@ function Login() {
   };
 
   return (
-    <div
-      className="container-fluid vh-100 d-flex align-items-center justify-content-center"
-      style={{
-        background: "var(--background)",
-      }}
-    >
-      <div
-        className="card shadow-lg p-4"
-        style={{
-          width: "430px",
-          borderRadius: "18px",
-        }}
-      >
+    <div className="login-page">
 
-        {/* ==================================================
-            HEADER
-        ================================================== */}
+      {/* =====================================================
+          LEFT SIDE
+      ===================================================== */}
 
-        <div className="text-center mb-4">
+      <section className="login-brand-section">
 
-          <MortarboardFill
-            size={55}
-            className="text-primary"
-          />
+        <div className="login-brand-content">
 
-          <h2 className="mt-3 fw-bold">
+          {/* LOGO */}
+
+          <div className="login-brand-logo">
+            <MortarboardFill />
+          </div>
+
+          <h1>
             OBE Insight
-          </h2>
+          </h1>
 
-          <p className="text-muted">
-            Automated CO–PO–PSO Attainment &
-            Curriculum Gap Analysis System
+          <p className="login-brand-subtitle">
+            Automated CO–PO–PSO Attainment
+            & Curriculum Gap Analysis System
           </p>
+
+
+          {/* =================================================
+              OBE VISUAL
+          ================================================= */}
+
+          <div className="obe-visual">
+
+            <div className="obe-circle obe-circle-one">
+              <BarChartLineFill />
+            </div>
+
+            <div className="obe-circle obe-circle-two">
+              <JournalCheck />
+            </div>
+
+            <div className="obe-circle obe-circle-three">
+              <Diagram3Fill />
+            </div>
+
+            <div className="obe-main-icon">
+              <MortarboardFill />
+            </div>
+
+            <div className="obe-line obe-line-one" />
+
+            <div className="obe-line obe-line-two" />
+
+            <div className="obe-line obe-line-three" />
+
+          </div>
+
+
+          {/* DESCRIPTION */}
+
+          <div className="login-brand-description">
+
+            <h3>
+              Outcome-Based Education
+            </h3>
+
+            <p>
+              Simplify course outcomes, mapping,
+              assessments and attainment analysis
+              through one integrated platform.
+            </p>
+
+          </div>
+
+
+          {/* FEATURES */}
+
+          <div className="login-features">
+
+            <span>
+              ✓ CO–PO Mapping
+            </span>
+
+            <span>
+              ✓ CO–PSO Mapping
+            </span>
+
+            <span>
+              ✓ Attainment Analysis
+            </span>
+
+          </div>
 
         </div>
 
-        {/* ==================================================
-            LOGIN FORM
-        ================================================== */}
+      </section>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-        >
 
-          {/* ==================================================
-              ROLE
-          ================================================== */}
+      {/* =====================================================
+          RIGHT SIDE
+      ===================================================== */}
 
-          <div className="mb-3">
+      <section className="login-form-section">
 
-            <label
-              htmlFor="selectedRole"
-              className="form-label"
-            >
-              Login As
-            </label>
+        <div className="login-form-card">
 
-            <select
-              id="selectedRole"
-              className="form-select"
-              {...register("selectedRole", {
-                required:
-                  "Please select your role",
-              })}
-            >
+          {/* HEADER */}
 
-              <option value="">
-                Select Role
-              </option>
+          <div className="login-form-header">
 
-              <option value="HOD">
-                HOD
-              </option>
+            <div className="mobile-login-logo">
+              <MortarboardFill />
+            </div>
 
-              <option value="FACULTY">
-                Faculty
-              </option>
+            <h2>
+              Welcome Back
+            </h2>
 
-            </select>
-
-            {errors.selectedRole && (
-              <small className="text-danger">
-                {errors.selectedRole.message}
-              </small>
-            )}
+            <p>
+              Sign in to continue to OBE Insight
+            </p>
 
           </div>
 
-          {/* ==================================================
-              EMAIL
-          ================================================== */}
 
-          <div className="mb-3">
+          {/* =================================================
+              FORM
+          ================================================= */}
 
-            <label
-              htmlFor="email"
-              className="form-label"
-            >
-              Email
-            </label>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            noValidate
+          >
 
-            <input
-              id="email"
-              type="email"
-              className="form-control"
-              placeholder="Enter your email"
-              autoComplete="email"
-              {...register("email", {
-                required:
-                  "Email is required",
-              })}
-            />
+            {/* ROLE */}
 
-            {errors.email && (
-              <small className="text-danger">
-                {errors.email.message}
-              </small>
-            )}
+            <div className="login-field">
 
-          </div>
+              <label htmlFor="selectedRole">
+                Login As
+              </label>
 
-          {/* ==================================================
-              PASSWORD
-          ================================================== */}
-
-          <div className="mb-4">
-
-            <label
-              htmlFor="password"
-              className="form-label"
-            >
-              Password
-            </label>
-
-            <div className="input-group">
-
-              <input
-                id="password"
-                type={
-                  showPassword
-                    ? "text"
-                    : "password"
+              <select
+                id="selectedRole"
+                className={
+                  errors.selectedRole
+                    ? "login-input login-input-error"
+                    : "login-input"
                 }
-                className="form-control"
-                placeholder="Enter your password"
-                autoComplete="current-password"
-                {...register("password", {
+                {...register("selectedRole", {
                   required:
-                    "Password is required",
+                    "Please select your role",
                 })}
-              />
-
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={() =>
-                  setShowPassword(
-                    (previous) =>
-                      !previous
-                  )
-                }
-                aria-label={
-                  showPassword
-                    ? "Hide password"
-                    : "Show password"
-                }
               >
-                {showPassword ? (
-                  <EyeSlash />
-                ) : (
-                  <Eye />
-                )}
-              </button>
+
+                <option value="">
+                  Select Role
+                </option>
+
+                <option value="HOD">
+                  HOD
+                </option>
+
+                <option value="FACULTY">
+                  Faculty
+                </option>
+
+              </select>
+
+              {errors.selectedRole && (
+                <span className="login-error">
+                  {errors.selectedRole.message}
+                </span>
+              )}
 
             </div>
 
-            {errors.password && (
-              <small className="text-danger">
-                {errors.password.message}
-              </small>
-            )}
 
-          </div>
+            {/* EMAIL */}
 
-          {/* ==================================================
-              LOGIN BUTTON
-          ================================================== */}
+            <div className="login-field">
 
-          <button
-            type="submit"
-            className="btn btn-primary w-100"
-            disabled={isSubmitting}
-          >
-            {isSubmitting
-              ? "Signing In..."
-              : "Login"}
-          </button>
+              <label htmlFor="email">
+                Email Address
+              </label>
 
-          {/* ==================================================
-              REGISTER
-          ================================================== */}
+              <input
+                id="email"
+                type="email"
+                className={
+                  errors.email
+                    ? "login-input login-input-error"
+                    : "login-input"
+                }
+                placeholder="Enter your email"
+                autoComplete="email"
+                {...register("email", {
+                  required:
+                    "Email is required",
+                })}
+              />
 
-          <div className="text-center mt-3">
+              {errors.email && (
+                <span className="login-error">
+                  {errors.email.message}
+                </span>
+              )}
 
-            <span className="text-muted">
-              Don't have an account?{" "}
+            </div>
+
+
+            {/* PASSWORD */}
+
+            <div className="login-field">
+
+              <label htmlFor="password">
+                Password
+              </label>
+
+              <div className="password-wrapper">
+
+                <input
+                  id="password"
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
+                  className={
+                    errors.password
+                      ? "login-input login-password-input login-input-error"
+                      : "login-input login-password-input"
+                  }
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  {...register("password", {
+                    required:
+                      "Password is required",
+                  })}
+                />
+
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() =>
+                    setShowPassword(
+                      (previous) =>
+                        !previous
+                    )
+                  }
+                  aria-label={
+                    showPassword
+                      ? "Hide password"
+                      : "Show password"
+                  }
+                >
+                  {showPassword ? (
+                    <EyeSlash />
+                  ) : (
+                    <Eye />
+                  )}
+                </button>
+
+              </div>
+
+              {errors.password && (
+                <span className="login-error">
+                  {errors.password.message}
+                </span>
+              )}
+
+            </div>
+
+
+            {/* LOGIN BUTTON */}
+
+            <button
+              type="submit"
+              className="login-submit-button"
+              disabled={isSubmitting}
+            >
+
+              {isSubmitting ? (
+                <>
+                  <span className="login-spinner" />
+                  Signing In...
+                </>
+              ) : (
+                "Sign In"
+              )}
+
+            </button>
+
+
+            {/* REGISTER */}
+
+            <div className="login-register">
+
+              <span>
+                Don't have an account?
+              </span>
+
+              <Link to="/register">
+                Register
+              </Link>
+
+            </div>
+
+          </form>
+
+
+          {/* FOOTER */}
+
+          <div className="login-footer">
+
+            <span>
+              OBE Insight
             </span>
 
-            <Link
-              to="/register"
-              className="fw-semibold text-decoration-none"
-            >
-              Register
-            </Link>
+            <span>
+              •
+            </span>
+
+            <span>
+              Outcome-Based Education
+            </span>
 
           </div>
 
-        </form>
-      </div>
+        </div>
+
+      </section>
+
     </div>
   );
 }

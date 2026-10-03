@@ -13,94 +13,112 @@ import {
   saveMatrix,
 } from "../services/coPoMappingService";
 
-/**
- * ---------------------------------------------------------
- * Courses
- * ---------------------------------------------------------
- */
-export const useCourses = () =>
-  useQuery({
+// =========================================================
+// COURSES
+// =========================================================
+
+export const useCourses = () => {
+  return useQuery({
     queryKey: ["courses"],
     queryFn: async () => {
-      const { data } = await getCourses();
-      return data.data;
+      const response = await getCourses();
+
+      return response.data?.data ?? [];
     },
   });
+};
 
-/**
- * ---------------------------------------------------------
- * Course
- * ---------------------------------------------------------
- */
-export const useCourse = (courseId) =>
-  useQuery({
+// =========================================================
+// COURSE
+// =========================================================
+
+export const useCourse = (courseId) => {
+  return useQuery({
     queryKey: ["course", courseId],
-    enabled: !!courseId,
+    enabled: Boolean(courseId),
+
     queryFn: async () => {
-      const { data } = await getCourse(courseId);
-      return data.data;
+      const response =
+        await getCourse(courseId);
+
+      return response.data?.data ?? null;
     },
   });
+};
 
-/**
- * ---------------------------------------------------------
- * COs
- * ---------------------------------------------------------
- */
-export const useCOs = (courseId) =>
-  useQuery({
-    queryKey: ["cos", courseId],
-    enabled: !!courseId,
+// =========================================================
+// COURSE OUTCOMES
+// =========================================================
+
+export const useCOs = (courseId) => {
+  return useQuery({
+    queryKey: ["course-outcomes", courseId],
+    enabled: Boolean(courseId),
+
     queryFn: async () => {
-      const { data } = await getCourseOutcomes(courseId);
-      return data.data;
+      const response =
+        await getCourseOutcomes(courseId);
+
+      return response.data?.data ?? [];
     },
   });
+};
 
-/**
- * ---------------------------------------------------------
- * POs
- * ---------------------------------------------------------
- */
-export const usePOs = (programId) =>
-  useQuery({
-    queryKey: ["pos", programId],
-    enabled: !!programId,
+// =========================================================
+// PROGRAM OUTCOMES
+// =========================================================
+
+export const usePOs = (programId) => {
+  return useQuery({
+    queryKey: ["program-outcomes", programId],
+    enabled: Boolean(programId),
+
     queryFn: async () => {
-      const { data } = await getProgramOutcomes(programId);
-      return data.data;
+      const response =
+        await getProgramOutcomes(programId);
+
+      return response.data?.data ?? [];
     },
   });
+};
 
-/**
- * ---------------------------------------------------------
- * Matrix
- * ---------------------------------------------------------
- */
-export const useMatrix = (courseId) =>
-  useQuery({
-    queryKey: ["matrix", courseId],
-    enabled: !!courseId,
+// =========================================================
+// MATRIX
+// =========================================================
+
+export const useMatrix = (courseId) => {
+  return useQuery({
+    queryKey: ["co-po-matrix", courseId],
+    enabled: Boolean(courseId),
+
     queryFn: async () => {
-      const { data } = await getMatrix(courseId);
-      return data.data.mappings ?? [];
+      const response =
+        await getMatrix(courseId);
+
+      return (
+        response.data?.data?.mappings ??
+        []
+      );
     },
   });
+};
 
-/**
- * ---------------------------------------------------------
- * Save
- * ---------------------------------------------------------
- */
+// =========================================================
+// SAVE MATRIX
+// =========================================================
+
 export const useSaveMatrix = () => {
-  const queryClient = useQueryClient();
+  const queryClient =
+    useQueryClient();
 
   return useMutation({
-    mutationFn: saveMatrix,
+    mutationFn: async (matrix) => {
+      return await saveMatrix(matrix);
+    },
 
-    onSuccess: () => {
+    onSuccess: (_, __, context) => {
       queryClient.invalidateQueries({
-        queryKey: ["matrix"],
+        queryKey: ["co-po-matrix"],
       });
     },
   });

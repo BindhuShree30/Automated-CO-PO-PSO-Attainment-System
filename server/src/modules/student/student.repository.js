@@ -3,10 +3,6 @@
  * Student Repository
  * Project : Automated CO–PO–PSO Attainment Analysis System
  * ------------------------------------------------------------------
- *
- * Handles all database operations related to Students.
- *
- * ------------------------------------------------------------------
  */
 
 import Student from "../../database/models/Student.js";
@@ -25,6 +21,10 @@ class StudentRepository {
         return Student.create(studentData);
     }
 
+    async create(studentData) {
+        return this.createStudent(studentData);
+    }
+
     /**
      * ------------------------------------------------------------------
      * Find Student By ID
@@ -40,11 +40,7 @@ class StudentRepository {
                 {
                     model: Department,
                     as: "department",
-                    attributes: [
-                        "id",
-                        "name",
-                        "code",
-                    ],
+                    attributes: ["id", "name", "code"],
                 },
 
                 {
@@ -89,6 +85,13 @@ class StudentRepository {
                 },
             ],
         });
+    }
+
+    /**
+     * Alias for findStudentById to support findById(id)
+     */
+    async findById(id) {
+        return this.findStudentById(id);
     }
 
     /**
@@ -104,6 +107,10 @@ class StudentRepository {
         });
     }
 
+    async findByUSN(usn) {
+        return this.findStudentByUSN(usn);
+    }
+
     /**
      * ------------------------------------------------------------------
      * Find Student By Email
@@ -117,6 +124,10 @@ class StudentRepository {
         });
     }
 
+    async findByEmail(email) {
+        return this.findStudentByEmail(email);
+    }
+
     /**
      * ------------------------------------------------------------------
      * Find All Students
@@ -128,11 +139,7 @@ class StudentRepository {
                 {
                     model: Department,
                     as: "department",
-                    attributes: [
-                        "id",
-                        "name",
-                        "code",
-                    ],
+                    attributes: ["id", "name", "code"],
                 },
 
                 {
@@ -177,10 +184,12 @@ class StudentRepository {
                 },
             ],
 
-            order: [
-                ["usn", "ASC"],
-            ],
+            order: [["usn", "ASC"]],
         });
+    }
+
+    async findAll() {
+        return this.findAllStudents();
     }
 
     /**
@@ -194,6 +203,10 @@ class StudentRepository {
         return this.findStudentById(student.id);
     }
 
+    async update(student, studentData) {
+        return this.updateStudent(student, studentData);
+    }
+
     /**
      * ------------------------------------------------------------------
      * Delete Student
@@ -201,6 +214,10 @@ class StudentRepository {
      */
     async deleteStudent(student) {
         return student.destroy();
+    }
+
+    async delete(student) {
+        return this.deleteStudent(student);
     }
 }
 

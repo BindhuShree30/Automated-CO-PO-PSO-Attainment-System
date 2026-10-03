@@ -6,8 +6,17 @@
  *
  * Handles all database operations related to Courses.
  *
- * Program is retained only for backward compatibility.
- * Department is the active relationship used by the application.
+ * Course belongs to:
+ *
+ * - Department
+ * - Program
+ *
+ * Program is required for:
+ *
+ * - Program Outcomes
+ * - CO–PO Mapping
+ * - CO–PSO Mapping
+ * - Attainment Analysis
  *
  * ------------------------------------------------------------------
  */
@@ -15,6 +24,7 @@
 import {
   Course,
   Department,
+  Program,
 } from "../../database/index.js";
 
 /**
@@ -41,6 +51,18 @@ const findCourseById = async (id) => {
           "id",
           "code",
           "name",
+        ],
+      },
+
+      {
+        model: Program,
+        as: "program",
+        attributes: [
+          "id",
+          "code",
+          "name",
+          "departmentId",
+          "status",
         ],
       },
     ],
@@ -86,6 +108,18 @@ const findAllCourses = async () => {
           "name",
         ],
       },
+
+      {
+        model: Program,
+        as: "program",
+        attributes: [
+          "id",
+          "code",
+          "name",
+          "departmentId",
+          "status",
+        ],
+      },
     ],
 
     order: [
@@ -99,10 +133,15 @@ const findAllCourses = async () => {
  * Update Course
  * ------------------------------------------------------------------
  */
-const updateCourse = async (course, data) => {
+const updateCourse = async (
+  course,
+  data
+) => {
   await course.update(data);
 
-  return await findCourseById(course.id);
+  return await findCourseById(
+    course.id
+  );
 };
 
 /**
@@ -110,10 +149,17 @@ const updateCourse = async (course, data) => {
  * Delete Course
  * ------------------------------------------------------------------
  */
-const deleteCourse = async (course) => {
+const deleteCourse = async (
+  course
+) => {
   return await course.destroy();
 };
 
+/**
+ * ------------------------------------------------------------------
+ * Export
+ * ------------------------------------------------------------------
+ */
 export default {
   createCourse,
   findCourseById,

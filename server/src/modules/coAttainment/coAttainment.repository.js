@@ -12,46 +12,22 @@ import Course from "../../database/models/Course.js";
 
 /**
  * Common CO Attainment Includes
+ * (Without restrictive attribute lists to prevent column-mismatch 500 errors)
  */
 const coAttainmentIncludes = [
   {
     model: CourseOffering,
     as: "courseOffering",
-    attributes: [
-      "id",
-      "courseId",
-      "batchId",
-      "semesterId",
-      "facultyId",
-      "section",
-      "status",
-    ],
     include: [
       {
         model: Course,
         as: "course",
-        attributes: [
-          "id",
-          "name",
-          "code",
-          "credits",
-          "semester",
-          "programId",
-          "status",
-        ],
       },
     ],
   },
   {
     model: CourseOutcome,
     as: "courseOutcome",
-    attributes: [
-      "id",
-      "code",
-      "description",
-      "courseId",
-      "status",
-    ],
   },
 ];
 
@@ -126,12 +102,8 @@ const findByCourseOutcomeId = async (courseOutcomeId) => {
 /**
  * Update CO Attainment
  */
-const updateCOAttainment = async (
-  coAttainment,
-  data
-) => {
+const updateCOAttainment = async (coAttainment, data) => {
   await coAttainment.update(data);
-
   return await findCOAttainmentById(coAttainment.id);
 };
 

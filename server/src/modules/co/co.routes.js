@@ -25,18 +25,32 @@ import {
 const router = Router();
 
 /**
+ * ------------------------------------------------------------------
  * Create Course Outcome
+ * ------------------------------------------------------------------
+ *
+ * ADMIN / HOD / FACULTY
+ *
+ * FACULTY access is further restricted in the service layer
+ * to courses assigned to the logged-in faculty.
+ * ------------------------------------------------------------------
  */
 router.post(
   "/",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(
+  
+    ROLES.HOD,
+    ROLES.FACULTY
+  ),
   validate(createCOSchema),
   coController.createCO
 );
 
 /**
+ * ------------------------------------------------------------------
  * Get All Course Outcomes
+ * ------------------------------------------------------------------
  */
 router.get(
   "/",
@@ -45,7 +59,9 @@ router.get(
 );
 
 /**
+ * ------------------------------------------------------------------
  * Get Course Outcomes By Course
+ * ------------------------------------------------------------------
  */
 router.get(
   "/course/:courseId",
@@ -55,7 +71,9 @@ router.get(
 );
 
 /**
+ * ------------------------------------------------------------------
  * Get Course Outcome By ID
+ * ------------------------------------------------------------------
  */
 router.get(
   "/:id",
@@ -65,23 +83,45 @@ router.get(
 );
 
 /**
+ * ------------------------------------------------------------------
  * Update Course Outcome
+ * ------------------------------------------------------------------
+ *
+ * ADMIN / HOD / FACULTY
+ *
+ * FACULTY access is further restricted in the service layer.
+ * ------------------------------------------------------------------
  */
 router.put(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(
+    
+    ROLES.HOD,
+    ROLES.FACULTY
+  ),
   validate(updateCOSchema),
   coController.updateCO
 );
 
 /**
+ * ------------------------------------------------------------------
  * Delete Course Outcome
+ * ------------------------------------------------------------------
+ *
+ * ADMIN / HOD / FACULTY
+ *
+ * FACULTY access is further restricted in the service layer.
+ * ------------------------------------------------------------------
  */
 router.delete(
   "/:id",
   authMiddleware,
-  roleMiddleware(ROLES.ADMIN),
+  roleMiddleware(
+    
+    ROLES.HOD,
+    ROLES.FACULTY
+  ),
   validate(coIdSchema),
   coController.deleteCO
 );

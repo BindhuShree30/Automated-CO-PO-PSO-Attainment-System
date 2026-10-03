@@ -18,7 +18,7 @@ class AssessmentService {
    */
   async validateCourseOffering(courseOfferingId) {
     const courseOffering =
-      await courseOfferingRepository.findById(
+      await courseOfferingRepository.findCourseOfferingById(
         courseOfferingId
       );
 
@@ -125,6 +125,17 @@ class AssessmentService {
   async getAssessments() {
     return assessmentRepository.findAll();
   }
+  /**
+ * Get Assessments By Course Offering
+ */
+async getAssessmentsByCourseOffering(courseOfferingId) {
+  await this.validateCourseOffering(courseOfferingId);
+
+  return assessmentRepository.findByCourseOfferingId(
+    courseOfferingId
+  );
+}
+
 
   /**
    * Get Assessment By ID

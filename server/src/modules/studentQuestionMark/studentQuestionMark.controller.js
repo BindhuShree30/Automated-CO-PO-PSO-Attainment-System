@@ -1,18 +1,9 @@
-/**
- * ------------------------------------------------------------------
- * Student Question Mark Controller
- * Project : Automated CO–PO–PSO Attainment Analysis System
- * ------------------------------------------------------------------
- */
-
 import studentQuestionMarkService from "./studentQuestionMark.service.js";
 import asyncHandler from "../../shared/helpers/asyncHandler.js";
-import {
-  successResponse,
-} from "../../shared/helpers/apiResponse.js";
+import { successResponse } from "../../shared/helpers/apiResponse.js";
 
 /**
- * Create Student Question Mark
+ * Create one Student Question Mark
  */
 const createStudentQuestionMark = asyncHandler(
   async (req, res) => {
@@ -31,7 +22,7 @@ const createStudentQuestionMark = asyncHandler(
 );
 
 /**
- * Get All Student Question Marks
+ * Get all Student Question Marks
  */
 const getStudentQuestionMarks = asyncHandler(
   async (req, res) => {
@@ -47,7 +38,7 @@ const getStudentQuestionMarks = asyncHandler(
 );
 
 /**
- * Get Student Question Mark By ID
+ * Get Student Question Mark by ID
  */
 const getStudentQuestionMarkById = asyncHandler(
   async (req, res) => {
@@ -65,7 +56,7 @@ const getStudentQuestionMarkById = asyncHandler(
 );
 
 /**
- * Get Marks By Student
+ * Get all marks by Student ID
  */
 const getMarksByStudentId = asyncHandler(
   async (req, res) => {
@@ -83,7 +74,7 @@ const getMarksByStudentId = asyncHandler(
 );
 
 /**
- * Get Marks By Assessment Question
+ * Get all marks by Assessment Question ID
  */
 const getMarksByAssessmentQuestionId = asyncHandler(
   async (req, res) => {
@@ -96,6 +87,51 @@ const getMarksByAssessmentQuestionId = asyncHandler(
       res,
       "Assessment Question Marks fetched successfully.",
       studentQuestionMarks
+    );
+  }
+);
+
+/**
+ * Get marks for one Student in one Assessment
+ *
+ * GET
+ * /assessment/:assessmentId/student/:studentId
+ */
+const getMarksByAssessmentAndStudent = asyncHandler(
+  async (req, res) => {
+    const marks =
+      await studentQuestionMarkService.getMarksByAssessmentAndStudent(
+        req.params.assessmentId,
+        req.params.studentId
+      );
+
+    return successResponse(
+      res,
+      "Student assessment marks fetched successfully.",
+      marks
+    );
+  }
+);
+
+/**
+ * Save marks for one Student in one Assessment
+ *
+ * POST
+ * /assessment/:assessmentId/student/:studentId/bulk
+ */
+const saveBulkStudentMarks = asyncHandler(
+  async (req, res) => {
+    const result =
+      await studentQuestionMarkService.saveBulkStudentMarks(
+        req.params.assessmentId,
+        req.params.studentId,
+        req.validatedData.body
+      );
+
+    return successResponse(
+      res,
+      "Student assessment marks saved successfully.",
+      result
     );
   }
 );
@@ -142,6 +178,8 @@ export default {
   getStudentQuestionMarkById,
   getMarksByStudentId,
   getMarksByAssessmentQuestionId,
+  getMarksByAssessmentAndStudent,
+  saveBulkStudentMarks,
   updateStudentQuestionMark,
   deleteStudentQuestionMark,
 };

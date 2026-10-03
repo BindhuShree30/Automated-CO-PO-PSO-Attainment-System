@@ -7,7 +7,13 @@
  * ------------------------------------------------------------------
  */
 
+import { Op } from "sequelize";
+import sequelize from "../../database/connection.js";
+
 import Assessment from "../../database/models/Assessment.js";
+import AssessmentQuestion from "../../database/models/AssessmentQuestion.js";
+import StudentQuestionMark from "../../database/models/StudentQuestionMark.js";
+
 import CourseOffering from "../../database/models/CourseOffering.js";
 import Course from "../../database/models/Course.js";
 import Batch from "../../database/models/Batch.js";
@@ -16,7 +22,9 @@ import AcademicYear from "../../database/models/AcademicYear.js";
 import Faculty from "../../database/models/Faculty.js";
 
 /**
- * Common Assessment associations
+ * ------------------------------------------------------------------
+ * Assessment Includes
+ * ------------------------------------------------------------------
  */
 const assessmentIncludes = [
   {
@@ -99,89 +107,130 @@ const assessmentIncludes = [
   },
 ];
 
+/**
+ * ------------------------------------------------------------------
+ * Assessment Repository
+ * ------------------------------------------------------------------
+ */
 class AssessmentRepository {
   /**
    * Create Assessment
    */
-  async create(data) {
-    return Assessment.create(data);
+  async create(data, options = {}) {
+    return Assessment.create(data, options);
   }
 
   /**
    * Get All Assessments
    */
-  async findAll() {
+  async findAll(options = {}) {
     return Assessment.findAll({
       include: assessmentIncludes,
       order: [["assessmentDate", "DESC"]],
+      ...options,
     });
   }
 
   /**
    * Get Assessment By ID
    */
-  async findById(id) {
+  async findById(id, options = {}) {
     return Assessment.findByPk(id, {
       include: assessmentIncludes,
+      ...options,
     });
   }
 
   /**
-   * Find Assessment By Name and Course Offering
+   * Find Assessment By Name And Course Offering
    */
-  async findByNameAndCourseOffering(
-    name,
-    courseOfferingId
-  ) {
+  async findByNameAndCourseOffering(name, courseOfferingId, options = {}) {
     return Assessment.findOne({
       where: {
         name,
         courseOfferingId,
       },
+      ...options,
     });
   }
 
   /**
    * Find Assessments By Course Offering
    */
-  async findByCourseOfferingId(courseOfferingId) {
+  async findByCourseOfferingId(courseOfferingId, options = {}) {
     return Assessment.findAll({
       where: {
         courseOfferingId,
       },
       include: assessmentIncludes,
       order: [["assessmentDate", "ASC"]],
+      ...options,
     });
   }
 
   /**
    * Update Assessment
    */
-  async update(id, data) {
-    const assessment = await Assessment.findByPk(id);
+  async update(id, data, options = {}) {
+    const assessment = await Assessment.findByPk(id, options);
 
     if (!assessment) {
       return null;
     }
 
-    await assessment.update(data);
-
-    return this.findById(id);
+    await assessment.update(data, options);
+    return this.findById(id, options);
   }
 
   /**
-   * Delete Assessment
+   * Cascading Delete for Assessment, Questions, and Marks
    */
   async delete(id) {
-    const assessment = await Assessment.findByPk(id);
+    const transaction = await sequelize.transaction();
 
-    if (!assessment) {
-      return false;
+    try {
+      const assessment = await Assessment.findByPk(id, { transaction });
+      if (!assessment) {
+        await transaction.rollback();
+        return false;
+      }
+
+      // 1. Fetch related question IDs
+      const questions = await AssessmentQuestion.findAll({
+        where: { assessmentId: id },
+        attributes: ["id"],
+        transaction,
+      });
+
+      const questionIds = questions.map((q) => q.id);
+
+      // 2. Delete Student Question Marks if any questions exist
+      if (questionIds.length > 0) {
+        await StudentQuestionMark.destroy({
+          where: {
+            assessmentQuestionId: {
+              [Op.in]: questionIds,
+            },
+          },
+          transaction,
+        });
+      }
+
+      // 3. Delete Assessment Questions
+      await AssessmentQuestion.destroy({
+        where: { assessmentId: id },
+        transaction,
+      });
+
+      // 4. Delete Assessment
+      await assessment.destroy({ transaction });
+
+      await transaction.commit();
+      return true;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
-
-    await assessment.destroy();
-
-    return true;
   }
 }
 

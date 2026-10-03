@@ -2,9 +2,6 @@ import axios from "axios";
 
 const api = axios.create({
     baseURL: "http://localhost:5000/api/v1",
-    headers: {
-        "Content-Type": "application/json",
-    },
     withCredentials: true,
 });
 
@@ -13,14 +10,33 @@ const api = axios.create({
  * Request Interceptor
  * ---------------------------------------------------------
  *
- * Attaches the access token to every authenticated request.
+ * Attaches the access token to authenticated requests.
+ *
+ * For normal JSON requests:
+ *   Content-Type = application/json
+ *
+ * For FormData uploads:
+ *   Do NOT set Content-Type manually.
+ *   The browser/Axios will automatically add:
+ *   multipart/form-data; boundary=...
  */
 api.interceptors.request.use(
     (config) => {
         const accessToken = localStorage.getItem("access");
 
         if (accessToken) {
-            config.headers.Authorization = `Bearer ${accessToken}`;
+            config.headers.Authorization =
+                `Bearer ${accessToken}`;
+        }
+
+        /**
+         * Do not force application/json for file uploads.
+         */
+        if (config.data instanceof FormData) {
+            delete config.headers["Content-Type"];
+        } else {
+            config.headers["Content-Type"] =
+                "application/json";
         }
 
         console.log(
@@ -35,6 +51,7 @@ api.interceptors.request.use(
         return Promise.reject(error);
     }
 );
+
 
 /**
  * ---------------------------------------------------------
